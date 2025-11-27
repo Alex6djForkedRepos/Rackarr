@@ -60,16 +60,16 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 1.2 — Rack Utilities
 
-- [ ] Write tests for createRack()
-- [ ] Write tests for validateRack()
-- [ ] Write tests for getOccupiedUs()
-- [ ] Write tests for isUAvailable()
-- [ ] Implement createRack()
-- [ ] Implement validateRack()
-- [ ] Implement getOccupiedUs()
-- [ ] Implement isUAvailable()
-- [ ] All tests pass
-- [ ] **Commit:** `feat(rack): add rack utility functions with validation`
+- [x] Write tests for createRack()
+- [x] Write tests for validateRack()
+- [x] Write tests for getOccupiedUs()
+- [x] Write tests for isUAvailable()
+- [x] Implement createRack()
+- [x] Implement validateRack()
+- [x] Implement getOccupiedUs()
+- [x] Implement isUAvailable()
+- [x] All tests pass
+- [x] **Commit:** `feat(rack): add rack utility functions with validation`
 
 ### Prompt 1.3 — Collision Detection System
 
