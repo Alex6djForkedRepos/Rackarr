@@ -31,3 +31,6 @@ vite.config.ts.timestamp-*
 # IDE
 *.swp
 *.swo
+
+# Private planning docs (symlinked from Obsidian vault)
+.claude/context/
