@@ -24,6 +24,9 @@
 		ondevicedrop?: (
 			event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
 		) => void;
+		ondevicemove?: (
+			event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
+		) => void;
 	}
 
 	let {
@@ -34,8 +37,12 @@
 		selectedDeviceId = null,
 		onselect,
 		ondeviceselect,
-		ondevicedrop
+		ondevicedrop,
+		ondevicemove
 	}: Props = $props();
+
+	// Track which device is being dragged (for internal moves)
+	let draggingDeviceIndex = $state<number | null>(null);
 
 	// Look up device by libraryId
 	function getDeviceById(libraryId: string): Device | undefined {
@@ -96,14 +103,20 @@
 		const data = event.dataTransfer.getData('application/json');
 		if (!data) {
 			// Data not available during dragover in some browsers, allow drop anyway
-			event.dataTransfer.dropEffect = 'copy';
+			event.dataTransfer.dropEffect = draggingDeviceIndex !== null ? 'move' : 'copy';
 			return;
 		}
 
 		const dragData = parseDragData(data);
 		if (!dragData) return;
 
-		event.dataTransfer.dropEffect = 'copy';
+		// Determine if this is an internal move (same rack)
+		const isInternalMove =
+			dragData.type === 'rack-device' &&
+			dragData.sourceRackId === rack.id &&
+			dragData.sourceIndex !== undefined;
+
+		event.dataTransfer.dropEffect = isInternalMove ? 'move' : 'copy';
 
 		// Calculate target position from mouse Y
 		const svg = event.currentTarget as SVGElement;
@@ -111,7 +124,16 @@
 		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
 
 		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
-		const feedback = getDropFeedback(rack, deviceLibrary, dragData.device.height, targetU);
+
+		// For internal moves, exclude the source device from collision checks
+		const excludeIndex = isInternalMove ? dragData.sourceIndex : undefined;
+		const feedback = getDropFeedback(
+			rack,
+			deviceLibrary,
+			dragData.device.height,
+			targetU,
+			excludeIndex
+		);
 
 		dropPreview = {
 			position: targetU,
@@ -133,9 +155,18 @@
 		}
 	}
 
+	function handleDeviceDragStart(deviceIndex: number) {
+		draggingDeviceIndex = deviceIndex;
+	}
+
+	function handleDeviceDragEnd() {
+		draggingDeviceIndex = null;
+	}
+
 	function handleDrop(event: DragEvent) {
 		event.preventDefault();
 		dropPreview = null;
+		draggingDeviceIndex = null;
 
 		if (!event.dataTransfer) return;
 
@@ -143,24 +174,53 @@
 		const dragData = parseDragData(data);
 		if (!dragData) return;
 
+		// Determine if this is an internal move (same rack)
+		const isInternalMove =
+			dragData.type === 'rack-device' &&
+			dragData.sourceRackId === rack.id &&
+			dragData.sourceIndex !== undefined;
+
 		// Calculate target position
 		const svg = event.currentTarget as SVGElement;
 		const rect = svg.getBoundingClientRect();
 		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
 
 		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
-		const feedback = getDropFeedback(rack, deviceLibrary, dragData.device.height, targetU);
+
+		// For internal moves, exclude the source device from collision checks
+		const excludeIndex = isInternalMove ? dragData.sourceIndex : undefined;
+		const feedback = getDropFeedback(
+			rack,
+			deviceLibrary,
+			dragData.device.height,
+			targetU,
+			excludeIndex
+		);
 
 		if (feedback === 'valid') {
-			ondevicedrop?.(
-				new CustomEvent('devicedrop', {
-					detail: {
-						rackId: rack.id,
-						libraryId: dragData.device.id,
-						position: targetU
-					}
-				})
-			);
+			if (isInternalMove && dragData.sourceIndex !== undefined) {
+				// Internal move within same rack
+				ondevicemove?.(
+					new CustomEvent('devicemove', {
+						detail: {
+							rackId: rack.id,
+							deviceIndex: dragData.sourceIndex,
+							newPosition: targetU
+						}
+					})
+				);
+			} else {
+				// External drop from palette or different rack
+				ondevicedrop?.(
+					new CustomEvent('devicedrop', {
+						detail: {
+							rackId: rack.id,
+							libraryId: dragData.device.id,
+							position: targetU
+						}
+					})
+				);
+			}
 		}
 	}
 </script>
@@ -246,17 +306,21 @@
 
 		<!-- Devices -->
 		<g transform="translate(0, {RACK_PADDING})">
-			{#each rack.devices as placedDevice (placedDevice.libraryId + '-' + placedDevice.position)}
+			{#each rack.devices as placedDevice, deviceIndex (placedDevice.libraryId + '-' + placedDevice.position)}
 				{@const device = getDeviceById(placedDevice.libraryId)}
 				{#if device}
 					<RackDevice
 						{device}
 						position={placedDevice.position}
 						rackHeight={rack.height}
+						rackId={rack.id}
+						{deviceIndex}
 						selected={selectedDeviceId === placedDevice.libraryId}
 						uHeight={U_HEIGHT}
 						rackWidth={RACK_WIDTH}
 						onselect={ondeviceselect}
+						ondragstart={() => handleDeviceDragStart(deviceIndex)}
+						ondragend={handleDeviceDragEnd}
 					/>
 				{/if}
 			{/each}

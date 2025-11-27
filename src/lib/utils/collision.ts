@@ -44,13 +44,15 @@ export function doRangesOverlap(rangeA: URange, rangeB: URange): boolean {
  * @param deviceLibrary - The device library
  * @param deviceHeight - Height of device to place
  * @param targetPosition - Target bottom U position
+ * @param excludeIndex - Optional index in rack.devices to exclude (for move operations)
  * @returns true if placement is valid
  */
 export function canPlaceDevice(
 	rack: Rack,
 	deviceLibrary: Device[],
 	deviceHeight: number,
-	targetPosition: number
+	targetPosition: number,
+	excludeIndex?: number
 ): boolean {
 	// Position must be >= 1
 	if (targetPosition < 1) {
@@ -66,7 +68,13 @@ export function canPlaceDevice(
 	// Check for collisions with existing devices
 	const newRange = getDeviceURange(targetPosition, deviceHeight);
 
-	for (const placedDevice of rack.devices) {
+	for (let i = 0; i < rack.devices.length; i++) {
+		// Skip the excluded device (for move operations)
+		if (excludeIndex !== undefined && i === excludeIndex) {
+			continue;
+		}
+
+		const placedDevice = rack.devices[i]!;
 		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
 		if (device) {
 			const existingRange = getDeviceURange(placedDevice.position, device.height);

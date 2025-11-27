@@ -4,18 +4,38 @@
 -->
 <script lang="ts">
 	import type { Device } from '$lib/types';
+	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
 
 	interface Props {
 		device: Device;
 		position: number;
 		rackHeight: number;
+		rackId: string;
+		deviceIndex: number;
 		selected: boolean;
 		uHeight: number;
 		rackWidth: number;
 		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
+		ondragend?: () => void;
 	}
 
-	let { device, position, rackHeight, selected, uHeight, rackWidth, onselect }: Props = $props();
+	let {
+		device,
+		position,
+		rackHeight,
+		rackId,
+		deviceIndex,
+		selected,
+		uHeight,
+		rackWidth,
+		onselect,
+		ondragstart: ondragstartProp,
+		ondragend: ondragendProp
+	}: Props = $props();
+
+	// Track dragging state for visual feedback
+	let isDragging = $state(false);
 
 	// Rail width (matches Rack.svelte)
 	const RAIL_WIDTH = 24;
@@ -43,6 +63,22 @@
 			onselect?.(new CustomEvent('select', { detail: { libraryId: device.id, position } }));
 		}
 	}
+
+	function handleDragStart(event: DragEvent) {
+		if (!event.dataTransfer) return;
+
+		const dragData = createRackDeviceDragData(device, rackId, deviceIndex);
+		event.dataTransfer.setData('application/json', serializeDragData(dragData));
+		event.dataTransfer.effectAllowed = 'move';
+
+		isDragging = true;
+		ondragstartProp?.(new CustomEvent('dragstart', { detail: { rackId, deviceIndex } }));
+	}
+
+	function handleDragEnd() {
+		isDragging = false;
+		ondragendProp?.();
+	}
 </script>
 
 <g
@@ -50,9 +86,13 @@
 	role="button"
 	aria-label={ariaLabel}
 	tabindex="0"
+	draggable="true"
 	onclick={handleClick}
 	onkeydown={handleKeyDown}
+	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
 	class="rack-device"
+	class:dragging={isDragging}
 >
 	<!-- Device rectangle -->
 	<rect
@@ -93,7 +133,15 @@
 
 <style>
 	.rack-device {
-		cursor: pointer;
+		cursor: grab;
+	}
+
+	.rack-device:active {
+		cursor: grabbing;
+	}
+
+	.rack-device.dragging {
+		opacity: 0.5;
 	}
 
 	.rack-device:focus {

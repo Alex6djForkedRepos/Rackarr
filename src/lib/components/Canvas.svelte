@@ -6,6 +6,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { getDropFeedback } from '$lib/utils/dragdrop';
 	import Rack from './Rack.svelte';
 	import EmptyState from './EmptyState.svelte';
 
@@ -16,9 +17,12 @@
 		ondevicedrop?: (
 			event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
 		) => void;
+		ondevicemove?: (
+			event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
+		) => void;
 	}
 
-	let { onnewrack, onrackselect, ondeviceselect, ondevicedrop }: Props = $props();
+	let { onnewrack, onrackselect, ondeviceselect, ondevicedrop, ondevicemove }: Props = $props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -68,7 +72,57 @@
 		layoutStore.placeDevice(rackId, libraryId, position);
 		ondevicedrop?.(event);
 	}
+
+	function handleDeviceMove(
+		event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
+	) {
+		const { rackId, deviceIndex, newPosition } = event.detail;
+		layoutStore.moveDevice(rackId, deviceIndex, newPosition);
+		ondevicemove?.(event);
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		// Only handle arrow keys when a device is selected
+		if (selectionStore.selectedType !== 'device') return;
+		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+
+		// Don't handle if we're in an input field
+		const target = event.target as HTMLElement;
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+		event.preventDefault();
+
+		const rackId = selectionStore.selectedRackId;
+		const deviceIndex = selectionStore.selectedDeviceIndex;
+		if (!rackId || deviceIndex === null) return;
+
+		const rack = layoutStore.racks.find((r) => r.id === rackId);
+		if (!rack || !rack.devices[deviceIndex]) return;
+
+		const placedDevice = rack.devices[deviceIndex];
+		const device = layoutStore.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		if (!device) return;
+
+		const currentPosition = placedDevice.position;
+		const direction = event.key === 'ArrowUp' ? 1 : -1;
+		const newPosition = currentPosition + direction;
+
+		// Check if move is valid
+		const feedback = getDropFeedback(
+			rack,
+			layoutStore.deviceLibrary,
+			device.height,
+			newPosition,
+			deviceIndex
+		);
+
+		if (feedback === 'valid') {
+			layoutStore.moveDevice(rackId, deviceIndex, newPosition);
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div class="canvas" onclick={handleCanvasClick}>
@@ -86,6 +140,7 @@
 					onselect={(e) => handleRackSelect(e)}
 					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
 					ondevicedrop={(e) => handleDeviceDrop(e)}
+					ondevicemove={(e) => handleDeviceMove(e)}
 				/>
 			{/each}
 		</div>
