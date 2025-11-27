@@ -47,16 +47,16 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 1.1 — Device Utilities
 
-- [ ] Write tests for generateId()
-- [ ] Write tests for getDefaultColour()
-- [ ] Write tests for createDevice()
-- [ ] Write tests for validateDevice()
-- [ ] Implement generateId() using crypto.randomUUID()
-- [ ] Implement getDefaultColour()
-- [ ] Implement createDevice()
-- [ ] Implement validateDevice()
-- [ ] All tests pass
-- [ ] **Commit:** `feat(device): add device utility functions with validation`
+- [x] Write tests for generateId()
+- [x] Write tests for getDefaultColour()
+- [x] Write tests for createDevice()
+- [x] Write tests for validateDevice()
+- [x] Implement generateId() using crypto.randomUUID()
+- [x] Implement getDefaultColour()
+- [x] Implement createDevice()
+- [x] Implement validateDevice()
+- [x] All tests pass
+- [x] **Commit:** `feat(device): add device utility functions with validation`
 
 ### Prompt 1.2 — Rack Utilities
 

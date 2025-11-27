@@ -173,7 +173,7 @@ Commit: "feat(types): add core TypeScript type definitions"
 
 ### Prompt 1.1 — Device Utilities
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 0.2
 
 ```text
