@@ -105,7 +105,7 @@ Commit: "chore: project scaffolding with Svelte 5, Vite, and testing infrastruct
 
 ### Prompt 0.2 — TypeScript Types Foundation
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 0.1
 
 ```text
@@ -2326,7 +2326,7 @@ Commit: "chore: v0.1.0 release"
 
 | Phase                 | Prompts            | Status |
 | --------------------- | ------------------ | ------ |
-| 0. Bootstrap          | 0.1, 0.2           | ⬜     |
+| 0. Bootstrap          | 0.1, 0.2           | ✅     |
 | 1. Business Logic     | 1.1, 1.2, 1.3, 1.4 | ⬜     |
 | 2. State Management   | 2.1, 2.2, 2.3, 2.4 | ⬜     |
 | 3. Core Components    | 3.1, 3.2, 3.3, 3.4 | ⬜     |

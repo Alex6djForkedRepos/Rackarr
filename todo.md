@@ -31,15 +31,15 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 0.2 — TypeScript Types Foundation
 
-- [ ] Create DeviceCategory type (10 categories)
-- [ ] Create Device interface
-- [ ] Create PlacedDevice interface
-- [ ] Create Rack interface
-- [ ] Create LayoutSettings interface
-- [ ] Create Layout interface (matches JSON schema)
-- [ ] Create constants.ts (CATEGORY_COLOURS, limits, version)
-- [ ] Write type validation tests
-- [ ] **Commit:** `feat(types): add core TypeScript type definitions`
+- [x] Create DeviceCategory type (10 categories)
+- [x] Create Device interface
+- [x] Create PlacedDevice interface
+- [x] Create Rack interface
+- [x] Create LayoutSettings interface
+- [x] Create Layout interface (matches JSON schema)
+- [x] Create constants.ts (CATEGORY_COLOURS, limits, version)
+- [x] Write type validation tests
+- [x] **Commit:** `feat(types): add core TypeScript type definitions`
 
 ---
 
