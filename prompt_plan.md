@@ -969,7 +969,7 @@ Commit: "feat(dnd): add device movement within rack"
 
 ### Prompt 4.3 — DnD: Move Between Racks
 
-**Status:** ⬜ Not started  
+**Status:** 🔄 In progress (tests + Rack done, Canvas pending)
 **Dependencies:** 4.2
 
 ```text
@@ -2329,8 +2329,8 @@ Commit: "chore: v0.1.0 release"
 | 0. Bootstrap          | 0.1, 0.2           | ✅     |
 | 1. Business Logic     | 1.1, 1.2, 1.3, 1.4 | ✅     |
 | 2. State Management   | 2.1, 2.2, 2.3, 2.4 | ✅     |
-| 3. Core Components    | 3.1, 3.2, 3.3, 3.4 | ⬜     |
-| 4. Drag-and-Drop      | 4.1, 4.2, 4.3      | ⬜     |
+| 3. Core Components    | 3.1, 3.2, 3.3, 3.4 | ✅     |
+| 4. Drag-and-Drop      | 4.1, 4.2, 4.3      | 🔄     |
 | 5. App Shell          | 5.1, 5.2, 5.3, 5.4 | ⬜     |
 | 6. Forms & Dialogs    | 6.1, 6.2, 6.3, 6.4 | ⬜     |
 | 7. Save/Load          | 7.1, 7.2           | ⬜     |

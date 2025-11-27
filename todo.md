@@ -239,15 +239,15 @@ Progress tracker for prompt_plan.md execution.
 - [x] All tests pass
 - [x] **Commit:** `feat(dnd): add device movement within rack`
 
-### Prompt 4.3 — DnD: Move Between Racks
+### Prompt 4.3 — DnD: Move Between Racks (IN PROGRESS)
 
-- [ ] Detect cross-rack drag source
-- [ ] Full collision checking against target rack
-- [ ] Validate device height fits target rack
-- [ ] Show drop preview with validation feedback
-- [ ] Call moveDeviceToRack on valid drop
-- [ ] Handle edge cases (same rack, too tall, blocked)
-- [ ] Write integration tests
+- [x] Write integration tests (20 tests in dnd-between-racks.test.ts)
+- [x] Detect cross-rack drag source (Rack.svelte)
+- [x] Full collision checking against target rack
+- [x] Validate device height fits target rack
+- [x] Show drop preview with validation feedback
+- [x] Add ondevicemoverack callback to Rack.svelte
+- [ ] Wire Canvas.svelte to handle ondevicemoverack (calls layoutStore.moveDeviceToRack)
 - [ ] All tests pass
 - [ ] **Commit:** `feat(dnd): add device movement between racks`
 
