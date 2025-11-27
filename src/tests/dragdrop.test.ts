@@ -1,0 +1,191 @@
+import { describe, it, expect } from 'vitest';
+import { calculateDropPosition, getDropFeedback, type DragData } from '$lib/utils/dragdrop';
+import type { Rack, Device } from '$lib/types';
+
+describe('Drag and Drop Utilities', () => {
+	// Constants matching component implementation
+	const U_HEIGHT = 22;
+	const RACK_PADDING = 4;
+
+	describe('calculateDropPosition', () => {
+		// 12U rack: totalHeight = 12 * 22 = 264
+		// SVG coordinate system: y=0 at top, y=264 at bottom
+		// U12 is at top (y=0-22), U1 is at bottom (y=242-264)
+
+		it('returns U1 for mouse near bottom of rack', () => {
+			// Mouse at y=250 (near bottom, within U1 range)
+			const position = calculateDropPosition(250, 12, U_HEIGHT, RACK_PADDING);
+			expect(position).toBe(1);
+		});
+
+		it('returns correct U for mouse near top', () => {
+			// Mouse at y=10 (near top, within U12 range)
+			const position = calculateDropPosition(10, 12, U_HEIGHT, RACK_PADDING);
+			expect(position).toBe(12);
+		});
+
+		it('returns correct U for mouse in middle', () => {
+			// Mouse at y=132 (middle of rack, around U6-U7)
+			const position = calculateDropPosition(132, 12, U_HEIGHT, RACK_PADDING);
+			// Middle of 12U rack, y=132 should be around U6
+			expect(position).toBeGreaterThanOrEqual(5);
+			expect(position).toBeLessThanOrEqual(7);
+		});
+
+		it('snaps to nearest U boundary', () => {
+			// Any Y position within a U range should snap to that U
+			const position1 = calculateDropPosition(245, 12, U_HEIGHT, RACK_PADDING);
+			const position2 = calculateDropPosition(255, 12, U_HEIGHT, RACK_PADDING);
+			// Both should be U1 (bottom)
+			expect(position1).toBe(1);
+			expect(position2).toBe(1);
+		});
+
+		it('clamps to minimum U (1) for y beyond rack bottom', () => {
+			const position = calculateDropPosition(500, 12, U_HEIGHT, RACK_PADDING);
+			expect(position).toBe(1);
+		});
+
+		it('clamps to maximum U for y above rack top', () => {
+			const position = calculateDropPosition(-50, 12, U_HEIGHT, RACK_PADDING);
+			expect(position).toBe(12);
+		});
+
+		it('handles 42U rack correctly', () => {
+			// 42U rack: totalHeight = 42 * 22 = 924
+			const bottomPosition = calculateDropPosition(920, 42, U_HEIGHT, RACK_PADDING);
+			const topPosition = calculateDropPosition(10, 42, U_HEIGHT, RACK_PADDING);
+
+			expect(bottomPosition).toBe(1);
+			expect(topPosition).toBe(42);
+		});
+	});
+
+	describe('getDropFeedback', () => {
+		const mockDevice: Device = {
+			id: 'device-1',
+			name: 'Test Server',
+			height: 2,
+			colour: '#4A90D9',
+			category: 'server'
+		};
+
+		const emptyRack: Rack = {
+			id: 'rack-1',
+			name: 'Test Rack',
+			height: 12,
+			width: 19,
+			position: 0,
+			devices: []
+		};
+
+		const deviceLibrary: Device[] = [mockDevice];
+
+		it('returns "valid" for empty position in empty rack', () => {
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, 5);
+			expect(feedback).toBe('valid');
+		});
+
+		it('returns "valid" for position 1 (bottom)', () => {
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, 1);
+			expect(feedback).toBe('valid');
+		});
+
+		it('returns "invalid" for position exceeding rack height', () => {
+			// 2U device at position 12 would occupy U12-U13 (out of bounds)
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, 12);
+			expect(feedback).toBe('invalid');
+		});
+
+		it('returns "invalid" for position 0', () => {
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, 0);
+			expect(feedback).toBe('invalid');
+		});
+
+		it('returns "invalid" for negative position', () => {
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, -1);
+			expect(feedback).toBe('invalid');
+		});
+
+		it('returns "blocked" for collision with existing device', () => {
+			const rackWithDevice: Rack = {
+				...emptyRack,
+				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+			};
+
+			// Trying to place at U5 (would collide)
+			const feedback = getDropFeedback(rackWithDevice, deviceLibrary, 2, 5);
+			expect(feedback).toBe('blocked');
+		});
+
+		it('returns "blocked" for partial collision', () => {
+			const rackWithDevice: Rack = {
+				...emptyRack,
+				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+			};
+
+			// 2U device at position 4 would occupy U4-U5 (collides with U5)
+			const feedback = getDropFeedback(rackWithDevice, deviceLibrary, 2, 4);
+			expect(feedback).toBe('blocked');
+		});
+
+		it('returns "valid" for position adjacent to existing device', () => {
+			const rackWithDevice: Rack = {
+				...emptyRack,
+				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+			};
+
+			// 2U device at position 7 would occupy U7-U8 (no collision)
+			const feedback = getDropFeedback(rackWithDevice, deviceLibrary, 2, 7);
+			expect(feedback).toBe('valid');
+
+			// 1U device at position 4 would only occupy U4 (no collision)
+			const feedback2 = getDropFeedback(rackWithDevice, deviceLibrary, 1, 4);
+			expect(feedback2).toBe('valid');
+		});
+
+		it('returns "valid" for 1U device at top of 12U rack', () => {
+			const feedback = getDropFeedback(emptyRack, deviceLibrary, 1, 12);
+			expect(feedback).toBe('valid');
+		});
+	});
+
+	describe('DragData interface', () => {
+		it('palette drag data has correct shape', () => {
+			const dragData: DragData = {
+				type: 'palette',
+				device: {
+					id: 'device-1',
+					name: 'Test',
+					height: 1,
+					colour: '#000',
+					category: 'server'
+				}
+			};
+
+			expect(dragData.type).toBe('palette');
+			expect(dragData.device).toBeDefined();
+			expect(dragData.sourceRackId).toBeUndefined();
+			expect(dragData.sourceIndex).toBeUndefined();
+		});
+
+		it('rack-device drag data has correct shape', () => {
+			const dragData: DragData = {
+				type: 'rack-device',
+				device: {
+					id: 'device-1',
+					name: 'Test',
+					height: 1,
+					colour: '#000',
+					category: 'server'
+				},
+				sourceRackId: 'rack-1',
+				sourceIndex: 0
+			};
+
+			expect(dragData.type).toBe('rack-device');
+			expect(dragData.sourceRackId).toBe('rack-1');
+			expect(dragData.sourceIndex).toBe(0);
+		});
+	});
+});

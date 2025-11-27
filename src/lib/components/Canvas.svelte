@@ -13,9 +13,12 @@
 		onnewrack?: () => void;
 		onrackselect?: (event: CustomEvent<{ rackId: string }>) => void;
 		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		ondevicedrop?: (
+			event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
+		) => void;
 	}
 
-	let { onnewrack, onrackselect, ondeviceselect }: Props = $props();
+	let { onnewrack, onrackselect, ondeviceselect, ondevicedrop }: Props = $props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -57,6 +60,14 @@
 	function handleNewRack() {
 		onnewrack?.();
 	}
+
+	function handleDeviceDrop(
+		event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
+	) {
+		const { rackId, libraryId, position } = event.detail;
+		layoutStore.placeDevice(rackId, libraryId, position);
+		ondevicedrop?.(event);
+	}
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
@@ -74,6 +85,7 @@
 						: null}
 					onselect={(e) => handleRackSelect(e)}
 					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
+					ondevicedrop={(e) => handleDeviceDrop(e)}
 				/>
 			{/each}
 		</div>

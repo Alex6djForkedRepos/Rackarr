@@ -1,10 +1,17 @@
 <!--
   Rack SVG Component
   Renders a rack visualization with U labels, grid lines, and selection state
+  Accepts device drops for placement
 -->
 <script lang="ts">
 	import type { Rack as RackType, Device } from '$lib/types';
 	import RackDevice from './RackDevice.svelte';
+	import {
+		parseDragData,
+		calculateDropPosition,
+		getDropFeedback,
+		type DropFeedback
+	} from '$lib/utils/dragdrop';
 
 	interface Props {
 		rack: RackType;
@@ -14,6 +21,9 @@
 		selectedDeviceId?: string | null;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
 		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		ondevicedrop?: (
+			event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
+		) => void;
 	}
 
 	let {
@@ -23,7 +33,8 @@
 		zoom,
 		selectedDeviceId = null,
 		onselect,
-		ondeviceselect
+		ondeviceselect,
+		ondevicedrop
 	}: Props = $props();
 
 	// Look up device by libraryId
@@ -44,6 +55,13 @@
 	const interiorWidth = $derived(RACK_WIDTH - RAIL_WIDTH * 2);
 	const zoomScale = $derived(zoom / 100);
 
+	// Drop preview state
+	let dropPreview = $state<{
+		position: number;
+		height: number;
+		feedback: DropFeedback;
+	} | null>(null);
+
 	// Generate U labels (1 at bottom, rack.height at top)
 	const uLabels = $derived(
 		Array.from({ length: rack.height }, (_, i) => {
@@ -51,6 +69,13 @@
 			const yPosition = i * U_HEIGHT + U_HEIGHT / 2 + RACK_PADDING;
 			return { uNumber, yPosition };
 		})
+	);
+
+	// Calculate drop preview Y position (SVG coordinate)
+	const dropPreviewY = $derived(
+		dropPreview
+			? (rack.height - dropPreview.position - dropPreview.height + 1) * U_HEIGHT + RACK_PADDING
+			: 0
 	);
 
 	function handleClick() {
@@ -61,6 +86,81 @@
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
+		}
+	}
+
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		if (!event.dataTransfer) return;
+
+		const data = event.dataTransfer.getData('application/json');
+		if (!data) {
+			// Data not available during dragover in some browsers, allow drop anyway
+			event.dataTransfer.dropEffect = 'copy';
+			return;
+		}
+
+		const dragData = parseDragData(data);
+		if (!dragData) return;
+
+		event.dataTransfer.dropEffect = 'copy';
+
+		// Calculate target position from mouse Y
+		const svg = event.currentTarget as SVGElement;
+		const rect = svg.getBoundingClientRect();
+		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
+
+		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
+		const feedback = getDropFeedback(rack, deviceLibrary, dragData.device.height, targetU);
+
+		dropPreview = {
+			position: targetU,
+			height: dragData.device.height,
+			feedback
+		};
+	}
+
+	function handleDragEnter(event: DragEvent) {
+		event.preventDefault();
+	}
+
+	function handleDragLeave(event: DragEvent) {
+		// Only clear if leaving the SVG entirely
+		const svg = event.currentTarget as SVGElement;
+		const relatedTarget = event.relatedTarget as Node | null;
+		if (!relatedTarget || !svg.contains(relatedTarget)) {
+			dropPreview = null;
+		}
+	}
+
+	function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		dropPreview = null;
+
+		if (!event.dataTransfer) return;
+
+		const data = event.dataTransfer.getData('application/json');
+		const dragData = parseDragData(data);
+		if (!dragData) return;
+
+		// Calculate target position
+		const svg = event.currentTarget as SVGElement;
+		const rect = svg.getBoundingClientRect();
+		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
+
+		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
+		const feedback = getDropFeedback(rack, deviceLibrary, dragData.device.height, targetU);
+
+		if (feedback === 'valid') {
+			ondevicedrop?.(
+				new CustomEvent('devicedrop', {
+					detail: {
+						rackId: rack.id,
+						libraryId: dragData.device.id,
+						position: targetU
+					}
+				})
+			);
 		}
 	}
 </script>
@@ -76,6 +176,10 @@
 		tabindex="0"
 		onclick={handleClick}
 		onkeydown={handleKeyDown}
+		ondragover={handleDragOver}
+		ondragenter={handleDragEnter}
+		ondragleave={handleDragLeave}
+		ondrop={handleDrop}
 	>
 		<!-- Rack background (interior) -->
 		<rect
@@ -158,6 +262,22 @@
 			{/each}
 		</g>
 
+		<!-- Drop preview -->
+		{#if dropPreview}
+			<rect
+				x={RAIL_WIDTH + 2}
+				y={dropPreviewY}
+				width={interiorWidth - 4}
+				height={dropPreview.height * U_HEIGHT - 2}
+				class="drop-preview"
+				class:drop-valid={dropPreview.feedback === 'valid'}
+				class:drop-invalid={dropPreview.feedback === 'invalid'}
+				class:drop-blocked={dropPreview.feedback === 'blocked'}
+				rx="2"
+				ry="2"
+			/>
+		{/if}
+
 		<!-- Rack name below -->
 		<text x={RACK_WIDTH / 2} y={totalHeight + RACK_PADDING + NAME_HEIGHT / 2 + 4} class="rack-name">
 			{rack.name}
@@ -215,5 +335,27 @@
 		font-size: var(--font-size-device, 13px);
 		text-anchor: middle;
 		font-family: var(--font-family, system-ui, sans-serif);
+	}
+
+	.drop-preview {
+		pointer-events: none;
+	}
+
+	.drop-valid {
+		fill: rgba(0, 200, 0, 0.3);
+		stroke: #00c800;
+		stroke-width: 2;
+	}
+
+	.drop-invalid {
+		fill: rgba(200, 0, 0, 0.3);
+		stroke: #c80000;
+		stroke-width: 2;
+	}
+
+	.drop-blocked {
+		fill: rgba(200, 100, 0, 0.3);
+		stroke: #c86400;
+		stroke-width: 2;
 	}
 </style>

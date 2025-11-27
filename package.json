@@ -50,5 +50,8 @@
 		"*.{json,md,css,html}": [
 			"prettier --write"
 		]
+	},
+	"dependencies": {
+		"svelte-dnd-action": "^0.9.67"
 	}
 }

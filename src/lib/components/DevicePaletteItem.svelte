@@ -1,10 +1,12 @@
 <!--
   DevicePaletteItem Component
   Displays a single device in the device palette
+  Draggable for placement into racks
 -->
 <script lang="ts">
 	import type { Device } from '$lib/types';
 	import CategoryIcon from './CategoryIcon.svelte';
+	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
 
 	interface Props {
 		device: Device;
@@ -12,6 +14,9 @@
 	}
 
 	let { device, onselect }: Props = $props();
+
+	// Track dragging state for visual feedback
+	let isDragging = $state(false);
 
 	function handleClick() {
 		onselect?.(new CustomEvent('select', { detail: { device } }));
@@ -23,14 +28,32 @@
 			onselect?.(new CustomEvent('select', { detail: { device } }));
 		}
 	}
+
+	function handleDragStart(event: DragEvent) {
+		if (!event.dataTransfer) return;
+
+		const dragData = createPaletteDragData(device);
+		event.dataTransfer.setData('application/json', serializeDragData(dragData));
+		event.dataTransfer.effectAllowed = 'copy';
+
+		isDragging = true;
+	}
+
+	function handleDragEnd() {
+		isDragging = false;
+	}
 </script>
 
 <div
 	class="device-palette-item"
+	class:dragging={isDragging}
 	role="button"
 	tabindex="0"
+	draggable="true"
 	onclick={handleClick}
 	onkeydown={handleKeyDown}
+	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
 	aria-label="{device.name}, {device.height}U {device.category}"
 >
 	<div class="item-content">
@@ -57,6 +80,10 @@
 
 	.device-palette-item:hover {
 		background-color: var(--colour-hover, rgba(255, 255, 255, 0.05));
+	}
+
+	.device-palette-item.dragging {
+		opacity: 0.5;
 	}
 
 	.device-palette-item:focus {
