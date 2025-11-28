@@ -15,6 +15,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { downloadLayout, openFilePicker, readLayoutFile } from '$lib/utils/file';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -45,13 +46,27 @@
 	}
 
 	function handleSave() {
-		// TODO: Implement in Phase 7
-		console.log('Save clicked');
+		downloadLayout(layoutStore.layout);
+		layoutStore.markClean();
 	}
 
-	function handleLoad() {
-		// TODO: Implement in Phase 7
-		console.log('Load clicked');
+	async function handleLoad() {
+		try {
+			const file = await openFilePicker();
+			if (!file) {
+				// User cancelled
+				return;
+			}
+
+			const loadedLayout = await readLayoutFile(file);
+			layoutStore.loadLayout(loadedLayout);
+			layoutStore.markClean();
+			selectionStore.clearSelection();
+		} catch (error) {
+			// TODO: Show toast notification in Phase 8
+			console.error('Failed to load layout:', error);
+			alert(error instanceof Error ? error.message : 'Failed to load layout file');
+		}
 	}
 
 	function handleExport() {
