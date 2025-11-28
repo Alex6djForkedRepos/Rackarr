@@ -14,11 +14,21 @@
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import KeyboardHandler from '$lib/components/KeyboardHandler.svelte';
+	import ExportDialog from '$lib/components/ExportDialog.svelte';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getToastStore } from '$lib/stores/toast.svelte';
 	import { downloadLayout, openFilePicker, readLayoutFile } from '$lib/utils/file';
+	import {
+		generateExportSVG,
+		exportAsSVG,
+		exportAsPNG,
+		exportAsJPEG,
+		downloadBlob,
+		generateExportFilename
+	} from '$lib/utils/export';
+	import type { ExportOptions } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -29,6 +39,7 @@
 	let newRackFormOpen = $state(false);
 	let addDeviceFormOpen = $state(false);
 	let confirmDeleteOpen = $state(false);
+	let exportDialogOpen = $state(false);
 	let deleteTarget: { type: 'rack' | 'device'; name: string } | null = $state(null);
 
 	// Toolbar event handlers
@@ -78,8 +89,55 @@
 	}
 
 	function handleExport() {
-		// TODO: Implement in Phase 9
-		console.log('Export clicked');
+		if (layoutStore.racks.length === 0) {
+			toastStore.showToast('No racks to export', 'warning');
+			return;
+		}
+		exportDialogOpen = true;
+	}
+
+	async function handleExportSubmit(options: ExportOptions) {
+		exportDialogOpen = false;
+
+		try {
+			// Determine which racks to export
+			const racksToExport =
+				options.scope === 'selected' && selectionStore.selectedId
+					? layoutStore.racks.filter((r) => r.id === selectionStore.selectedId)
+					: layoutStore.racks;
+
+			// Generate the SVG
+			const svg = generateExportSVG(racksToExport, layoutStore.deviceLibrary, options);
+
+			// Generate filename
+			const filename = generateExportFilename(layoutStore.layout.name, options.format);
+
+			// Export based on format
+			if (options.format === 'svg') {
+				const svgString = exportAsSVG(svg);
+				const blob = new Blob([svgString], { type: 'image/svg+xml' });
+				downloadBlob(blob, filename);
+				toastStore.showToast('SVG exported successfully', 'success');
+			} else if (options.format === 'png') {
+				const blob = await exportAsPNG(svg);
+				downloadBlob(blob, filename);
+				toastStore.showToast('PNG exported successfully', 'success');
+			} else if (options.format === 'jpeg') {
+				const blob = await exportAsJPEG(svg);
+				downloadBlob(blob, filename);
+				toastStore.showToast('JPEG exported successfully', 'success');
+			} else if (options.format === 'pdf') {
+				// PDF export will be implemented with jspdf library
+				toastStore.showToast('PDF export not yet implemented', 'info');
+			}
+		} catch (error) {
+			console.error('Export failed:', error);
+			toastStore.showToast(error instanceof Error ? error.message : 'Export failed', 'error');
+		}
+	}
+
+	function handleExportCancel() {
+		exportDialogOpen = false;
 	}
 
 	function handleDelete() {
@@ -242,6 +300,14 @@
 		confirmLabel={deleteTarget?.type === 'rack' ? 'Delete Rack' : 'Remove'}
 		onconfirm={handleConfirmDelete}
 		oncancel={handleCancelDelete}
+	/>
+
+	<ExportDialog
+		open={exportDialogOpen}
+		racks={layoutStore.racks}
+		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
+		onexport={(e) => handleExportSubmit(e.detail)}
+		oncancel={handleExportCancel}
 	/>
 
 	<ToastContainer />
