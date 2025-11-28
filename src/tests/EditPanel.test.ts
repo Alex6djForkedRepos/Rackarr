@@ -16,9 +16,11 @@ describe('EditPanel Component', () => {
 	describe('Visibility', () => {
 		it('is hidden when nothing is selected', () => {
 			render(EditPanel);
-			const panel = screen.queryByRole('complementary');
+			// Use hidden: true to find elements with aria-hidden="true"
+			const panel = screen.queryByRole('complementary', { hidden: true });
 			// When no selection, right drawer should not have 'open' class
 			expect(panel).not.toHaveClass('open');
+			expect(panel).toHaveAttribute('aria-hidden', 'true');
 		});
 
 		it('shows when a rack is selected', () => {

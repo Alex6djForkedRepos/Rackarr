@@ -291,7 +291,7 @@
 		height={viewBoxHeight}
 		viewBox="0 0 {RACK_WIDTH} {viewBoxHeight}"
 		role="img"
-		aria-label="{rack.name}, {rack.height}U rack"
+		aria-label="{rack.name}, {rack.height}U rack{selected ? ', selected' : ''}"
 		tabindex="0"
 		onclick={handleClick}
 		onkeydown={handleKeyDown}

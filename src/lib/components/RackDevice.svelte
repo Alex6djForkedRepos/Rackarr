@@ -48,7 +48,7 @@
 
 	// Aria label for accessibility
 	const ariaLabel = $derived(
-		`${device.name}, ${device.height}U ${device.category} at U${position}`
+		`${device.name}, ${device.height}U ${device.category} at U${position}${selected ? ', selected' : ''}`
 	);
 
 	function handleClick(event: MouseEvent) {
@@ -85,6 +85,7 @@
 	transform="translate({RAIL_WIDTH}, {yPosition})"
 	role="button"
 	aria-label={ariaLabel}
+	aria-pressed={selected}
 	tabindex="0"
 	draggable="true"
 	onclick={handleClick}

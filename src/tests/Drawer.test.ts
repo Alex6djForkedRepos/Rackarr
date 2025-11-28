@@ -27,8 +27,10 @@ describe('Drawer Component', () => {
 
 		it('is hidden when open=false', () => {
 			render(Drawer, { props: { side: 'left', open: false, title: 'Test' } });
-			const drawer = screen.getByRole('complementary');
+			// Use hidden: true to find elements with aria-hidden="true"
+			const drawer = screen.getByRole('complementary', { hidden: true });
 			expect(drawer).not.toHaveClass('open');
+			expect(drawer).toHaveAttribute('aria-hidden', 'true');
 		});
 	});
 

@@ -17,7 +17,7 @@
 	let { side, open, title, onclose, children }: Props = $props();
 </script>
 
-<aside class="drawer drawer-{side}" class:open aria-label={title}>
+<aside class="drawer drawer-{side}" class:open aria-label={title} aria-hidden={!open}>
 	<DrawerHeader {title} {onclose} />
 	<div class="drawer-content">
 		{#if children}
