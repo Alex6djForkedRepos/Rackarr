@@ -15,6 +15,7 @@
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import KeyboardHandler from '$lib/components/KeyboardHandler.svelte';
 	import ExportDialog from '$lib/components/ExportDialog.svelte';
+	import HelpPanel from '$lib/components/HelpPanel.svelte';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
@@ -40,6 +41,7 @@
 	let addDeviceFormOpen = $state(false);
 	let confirmDeleteOpen = $state(false);
 	let exportDialogOpen = $state(false);
+	let helpPanelOpen = $state(false);
 	let deleteTarget: { type: 'rack' | 'device'; name: string } | null = $state(null);
 
 	// Toolbar event handlers
@@ -195,8 +197,11 @@
 	}
 
 	function handleHelp() {
-		// TODO: Implement in Phase 10
-		console.log('Help clicked');
+		helpPanelOpen = true;
+	}
+
+	function handleHelpClose() {
+		helpPanelOpen = false;
 	}
 
 	function handleClosePalette() {
@@ -309,6 +314,8 @@
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}
 	/>
+
+	<HelpPanel open={helpPanelOpen} onclose={handleHelpClose} />
 
 	<ToastContainer />
 
