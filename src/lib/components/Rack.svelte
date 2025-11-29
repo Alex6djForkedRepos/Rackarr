@@ -12,6 +12,7 @@
 		getDropFeedback,
 		type DropFeedback
 	} from '$lib/utils/dragdrop';
+	import { screenToSVG } from '$lib/utils/coordinates';
 
 	interface Props {
 		rack: RackType;
@@ -129,10 +130,10 @@
 
 		event.dataTransfer.dropEffect = isInternalMove ? 'move' : 'copy';
 
-		// Calculate target position from mouse Y
-		const svg = event.currentTarget as SVGElement;
-		const rect = svg.getBoundingClientRect();
-		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
+		// Calculate target position from mouse Y using transform-aware coordinates
+		const svg = event.currentTarget as SVGSVGElement;
+		const svgCoords = screenToSVG(svg, event.clientX, event.clientY);
+		const mouseY = svgCoords.y - RACK_PADDING;
 
 		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
 
@@ -197,10 +198,10 @@
 			dragData.sourceRackId !== rack.id &&
 			dragData.sourceIndex !== undefined;
 
-		// Calculate target position
-		const svg = event.currentTarget as SVGElement;
-		const rect = svg.getBoundingClientRect();
-		const mouseY = (event.clientY - rect.top) / zoomScale - RACK_PADDING;
+		// Calculate target position using transform-aware coordinates
+		const svg = event.currentTarget as SVGSVGElement;
+		const svgCoords = screenToSVG(svg, event.clientX, event.clientY);
+		const mouseY = svgCoords.y - RACK_PADDING;
 
 		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
 
