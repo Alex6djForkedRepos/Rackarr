@@ -76,6 +76,19 @@ describe('HelpPanel', () => {
 			expect(repoLinks.length).toBeGreaterThan(0);
 		});
 
+		it('shows GitHub repository link', () => {
+			render(HelpPanel, { props: { open: true } });
+
+			expect(screen.getByRole('link', { name: /github/i })).toBeInTheDocument();
+		});
+
+		it('does not show Forgejo link', () => {
+			render(HelpPanel, { props: { open: true } });
+
+			expect(screen.queryByText(/forgejo/i)).not.toBeInTheDocument();
+			expect(screen.queryByText(/primary repository/i)).not.toBeInTheDocument();
+		});
+
 		it('links open in new tab', () => {
 			render(HelpPanel, { props: { open: true } });
 

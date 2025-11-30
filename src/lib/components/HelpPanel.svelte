@@ -31,11 +31,7 @@
 	// Repository links
 	const links = [
 		{
-			name: 'Primary Repository',
-			url: 'https://git.falcon-wahoe.ts.net/ggfevans/rackarr'
-		},
-		{
-			name: 'GitHub Mirror',
+			name: 'GitHub Repository',
 			url: 'https://github.com/ggfevans/rackarr'
 		}
 	];
