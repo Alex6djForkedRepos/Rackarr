@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-11-30
+
+### Added
+
+- Front/rear rack view toggle with device face filtering
+- Device face assignment (front, rear, or both)
+- Fit All zoom button with F keyboard shortcut
+- Rack duplication with Ctrl/Cmd+D shortcut
+- Device library import from JSON files
+- Layout migration from v0.1 to v0.2
+
+### Changed
+
+- Device Library toggle button replaces branding in toolbar
+- Rack titles now positioned above racks (not below)
+- Device icons vertically centered in rack slots
+- Help panel shows only GitHub link
+
+### Fixed
+
+- Coordinate calculations now use getScreenCTM() for better zoom/pan handling
+- Drag-and-drop works correctly at all zoom levels and pan positions
+
+### Technical
+
+- Integrated panzoom library for smooth canvas zoom/pan
+- Added comprehensive test coverage (793 tests)
+
 ## [0.1.0] - 2025-11-28
 
 ### Added
