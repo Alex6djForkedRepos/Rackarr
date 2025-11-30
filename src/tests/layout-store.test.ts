@@ -354,6 +354,12 @@ describe('Layout Store', () => {
 			expect(store.racks[0]!.devices[0]!.position).toBe(5);
 		});
 
+		it('places device with default front face', () => {
+			const result = store.placeDevice(rackId, device.id, 5);
+			expect(result).toBe(true);
+			expect(store.racks[0]!.devices[0]!.face).toBe('front');
+		});
+
 		it('returns false for invalid position (collision)', () => {
 			store.placeDevice(rackId, device.id, 5);
 
@@ -470,6 +476,19 @@ describe('Layout Store', () => {
 			expect(targetRack!.devices).toHaveLength(1);
 			expect(targetRack!.devices[0]!.libraryId).toBe(device.id);
 			expect(targetRack!.devices[0]!.position).toBe(10);
+		});
+
+		it('preserves face property when moving between racks', () => {
+			// The device should have been placed with default front face
+			const sourceRack = store.racks.find((r) => r.id === sourceRackId);
+			expect(sourceRack!.devices[0]!.face).toBe('front');
+
+			const result = store.moveDeviceToRack(sourceRackId, 0, targetRackId, 10);
+			expect(result).toBe(true);
+
+			// Target rack should preserve the face
+			const targetRack = store.racks.find((r) => r.id === targetRackId);
+			expect(targetRack!.devices[0]!.face).toBe('front');
 		});
 
 		it('returns false for collision in target rack', () => {
