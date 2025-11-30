@@ -37,7 +37,6 @@ describe('Accessibility Tests', () => {
 		it('ToolbarButton has aria-label', () => {
 			const { container } = render(ToolbarButton, {
 				props: {
-					icon: IconPlus,
 					label: 'Add item',
 					disabled: false
 				}
@@ -51,7 +50,6 @@ describe('Accessibility Tests', () => {
 			render(Toolbar, {
 				props: {
 					paletteOpen: false,
-					zoom: 100,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -76,8 +74,7 @@ describe('Accessibility Tests', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: [],
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -91,6 +88,10 @@ describe('Accessibility Tests', () => {
 					device: mockDevice,
 					position: 1,
 					rackHeight: 12,
+					rackId: 'rack-1',
+					deviceIndex: 0,
+					uHeight: 22,
+					rackWidth: 240,
 					selected: false
 				}
 			});
@@ -112,7 +113,6 @@ describe('Accessibility Tests', () => {
 		it('ToolbarButton has focus styles defined', () => {
 			const { container } = render(ToolbarButton, {
 				props: {
-					icon: IconPlus,
 					label: 'Test button',
 					disabled: false
 				}
@@ -128,8 +128,7 @@ describe('Accessibility Tests', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: [],
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -144,7 +143,6 @@ describe('Accessibility Tests', () => {
 			render(Toolbar, {
 				props: {
 					paletteOpen: false,
-					zoom: 100,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -248,7 +246,8 @@ describe('Accessibility Tests', () => {
 			const { container } = render(Drawer, {
 				props: {
 					side: 'left',
-					open: true
+					open: true,
+					title: 'Test Drawer'
 				}
 			});
 
@@ -263,7 +262,6 @@ describe('Accessibility Tests', () => {
 			render(Toolbar, {
 				props: {
 					paletteOpen: false,
-					zoom: 100,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -282,7 +280,6 @@ describe('Accessibility Tests', () => {
 			render(Toolbar, {
 				props: {
 					paletteOpen: true,
-					zoom: 100,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -299,8 +296,7 @@ describe('Accessibility Tests', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: [],
-					selected: true,
-					zoom: 100
+					selected: true
 				}
 			});
 
@@ -313,8 +309,7 @@ describe('Accessibility Tests', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: [],
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 

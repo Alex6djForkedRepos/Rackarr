@@ -1,11 +1,14 @@
 <!--
   Canvas Component
   Main content area displaying all racks in a horizontal layout
+  Uses panzoom for zoom and pan functionality
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import panzoom from 'panzoom';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
-	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { getCanvasStore, ZOOM_MIN, ZOOM_MAX } from '$lib/stores/canvas.svelte';
 	import { getDropFeedback } from '$lib/utils/dragdrop';
 	import Rack from './Rack.svelte';
 	import WelcomeScreen from './WelcomeScreen.svelte';
@@ -43,11 +46,44 @@
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
-	const uiStore = getUIStore();
+	const canvasStore = getCanvasStore();
 
 	// Sort racks by position
 	const sortedRacks = $derived([...layoutStore.racks].sort((a, b) => a.position - b.position));
 	const hasRacks = $derived(layoutStore.rackCount > 0);
+
+	// Panzoom container reference
+	let panzoomContainer: HTMLDivElement | null = $state(null);
+
+	// Initialize panzoom on mount
+	onMount(() => {
+		if (panzoomContainer) {
+			const instance = panzoom(panzoomContainer, {
+				minZoom: ZOOM_MIN,
+				maxZoom: ZOOM_MAX,
+				smoothScroll: false,
+				// Disable default zoom on double-click (we handle zoom via toolbar)
+				zoomDoubleClickSpeed: 1,
+				// Allow panning only when not interacting with drag targets
+				beforeMouseDown: (e: MouseEvent) => {
+					// Allow drag-and-drop to work - don't initiate pan on draggable elements
+					const target = e.target as HTMLElement;
+					if (target.draggable || target.closest('[draggable="true"]')) {
+						return false;
+					}
+					return true;
+				},
+				// Filter out drag events from panzoom handling
+				filterKey: () => true
+			});
+
+			canvasStore.setPanzoomInstance(instance);
+		}
+
+		return () => {
+			canvasStore.disposePanzoom();
+		};
+	});
 
 	function handleCanvasClick(event: MouseEvent) {
 		// Only clear selection if clicking directly on the canvas (not on a rack)
@@ -157,23 +193,25 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="canvas" role="application" onclick={handleCanvasClick}>
 	{#if hasRacks}
-		<div class="rack-row">
-			{#each sortedRacks as rack (rack.id)}
-				<Rack
-					{rack}
-					deviceLibrary={layoutStore.deviceLibrary}
-					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedId === rack.id}
-					zoom={uiStore.zoom}
-					selectedDeviceId={selectionStore.selectedType === 'device'
-						? selectionStore.selectedId
-						: null}
-					onselect={(e) => handleRackSelect(e)}
-					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
-					ondevicedrop={(e) => handleDeviceDrop(e)}
-					ondevicemove={(e) => handleDeviceMove(e)}
-					ondevicemoverack={(e) => handleDeviceMoveRack(e)}
-				/>
-			{/each}
+		<div class="panzoom-container" bind:this={panzoomContainer}>
+			<div class="rack-row">
+				{#each sortedRacks as rack (rack.id)}
+					<Rack
+						{rack}
+						deviceLibrary={layoutStore.deviceLibrary}
+						selected={selectionStore.selectedType === 'rack' &&
+							selectionStore.selectedId === rack.id}
+						selectedDeviceId={selectionStore.selectedType === 'device'
+							? selectionStore.selectedId
+							: null}
+						onselect={(e) => handleRackSelect(e)}
+						ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
+						ondevicedrop={(e) => handleDeviceDrop(e)}
+						ondevicemove={(e) => handleDeviceMove(e)}
+						ondevicemoverack={(e) => handleDeviceMoveRack(e)}
+					/>
+				{/each}
+			</div>
 		</div>
 	{:else}
 		<WelcomeScreen onnewrack={handleNewRack} {onload} />
@@ -186,11 +224,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		overflow-x: auto;
-		overflow-y: auto;
-		padding: 24px;
+		overflow: hidden;
 		background-color: var(--colour-bg, #1a1a1a);
 		min-height: 0;
+		position: relative;
+	}
+
+	.panzoom-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 100%;
+		min-height: 100%;
+		transform-origin: center center;
 	}
 
 	.rack-row {

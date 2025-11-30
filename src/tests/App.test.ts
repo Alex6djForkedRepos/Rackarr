@@ -4,12 +4,14 @@ import App from '../App.svelte';
 import { resetLayoutStore, getLayoutStore } from '$lib/stores/layout.svelte';
 import { resetSelectionStore, getSelectionStore } from '$lib/stores/selection.svelte';
 import { resetUIStore } from '$lib/stores/ui.svelte';
+import { resetCanvasStore, getCanvasStore } from '$lib/stores/canvas.svelte';
 
 describe('App Component', () => {
 	beforeEach(() => {
 		resetLayoutStore();
 		resetSelectionStore();
 		resetUIStore();
+		resetCanvasStore();
 		// Note: resetUIStore applies the theme to the document
 	});
 
@@ -136,7 +138,17 @@ describe('App Component', () => {
 
 	describe('Zoom Controls', () => {
 		it('zoom in updates zoom level', async () => {
+			// Need a rack so panzoom initializes (Canvas needs panzoom-container)
+			const layoutStore = getLayoutStore();
+			layoutStore.addRack('Test Rack', 12);
+
 			render(App);
+
+			// Wait for panzoom to initialize
+			const canvasStore = getCanvasStore();
+			await waitFor(() => {
+				expect(canvasStore.hasPanzoom).toBe(true);
+			});
 
 			// Initial zoom should be 100%
 			expect(screen.getByText('100%')).toBeInTheDocument();
@@ -146,11 +158,23 @@ describe('App Component', () => {
 			await fireEvent.click(zoomInBtn);
 
 			// Should increase by 25%
-			expect(screen.getByText('125%')).toBeInTheDocument();
+			await waitFor(() => {
+				expect(screen.getByText('125%')).toBeInTheDocument();
+			});
 		});
 
 		it('zoom out updates zoom level', async () => {
+			// Need a rack so panzoom initializes
+			const layoutStore = getLayoutStore();
+			layoutStore.addRack('Test Rack', 12);
+
 			render(App);
+
+			// Wait for panzoom to initialize
+			const canvasStore = getCanvasStore();
+			await waitFor(() => {
+				expect(canvasStore.hasPanzoom).toBe(true);
+			});
 
 			// Start at 100%
 			expect(screen.getByText('100%')).toBeInTheDocument();
@@ -160,7 +184,9 @@ describe('App Component', () => {
 			await fireEvent.click(zoomOutBtn);
 
 			// Should decrease by 25%
-			expect(screen.getByText('75%')).toBeInTheDocument();
+			await waitFor(() => {
+				expect(screen.getByText('75%')).toBeInTheDocument();
+			});
 		});
 	});
 

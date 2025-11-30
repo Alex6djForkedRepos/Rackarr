@@ -21,8 +21,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -37,8 +36,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -59,8 +57,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: tallRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -81,8 +78,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -96,8 +92,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: true,
-					zoom: 100
+					selected: true
 				}
 			});
 
@@ -110,8 +105,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -129,7 +123,6 @@ describe('Rack SVG Component', () => {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
 					selected: false,
-					zoom: 100,
 					onselect: handleSelect
 				}
 			});
@@ -155,7 +148,6 @@ describe('Rack SVG Component', () => {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
 					selected: false,
-					zoom: 100,
 					onselect: handleSelect
 				}
 			});
@@ -176,7 +168,6 @@ describe('Rack SVG Component', () => {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
 					selected: false,
-					zoom: 100,
 					onselect: handleSelect
 				}
 			});
@@ -190,49 +181,13 @@ describe('Rack SVG Component', () => {
 		});
 	});
 
-	describe('Zoom', () => {
-		it('applies zoom transform correctly', () => {
-			const { container } = render(Rack, {
-				props: {
-					rack: mockRack,
-					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 150
-				}
-			});
-
-			const rackContainer = container.querySelector('.rack-container');
-			expect(rackContainer).toBeInTheDocument();
-
-			const style = rackContainer?.getAttribute('style');
-			expect(style).toContain('transform');
-			expect(style).toContain('scale(1.5)');
-		});
-
-		it('applies 50% zoom correctly', () => {
-			const { container } = render(Rack, {
-				props: {
-					rack: mockRack,
-					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 50
-				}
-			});
-
-			const rackContainer = container.querySelector('.rack-container');
-			const style = rackContainer?.getAttribute('style');
-			expect(style).toContain('scale(0.5)');
-		});
-	});
-
 	describe('Accessibility', () => {
 		it('has correct aria-label', () => {
 			const { container } = render(Rack, {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -245,8 +200,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 
@@ -259,8 +213,7 @@ describe('Rack SVG Component', () => {
 				props: {
 					rack: mockRack,
 					deviceLibrary: mockDeviceLibrary,
-					selected: false,
-					zoom: 100
+					selected: false
 				}
 			});
 

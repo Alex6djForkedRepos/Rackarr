@@ -19,6 +19,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getToastStore } from '$lib/stores/toast.svelte';
 	import { downloadLayout, openFilePicker, readLayoutFile } from '$lib/utils/file';
 	import {
@@ -34,6 +35,7 @@
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
 	const uiStore = getUIStore();
+	const canvasStore = getCanvasStore();
 	const toastStore = getToastStore();
 
 	// Dialog state
@@ -185,11 +187,11 @@
 	}
 
 	function handleZoomIn() {
-		uiStore.zoomIn();
+		canvasStore.zoomIn();
 	}
 
 	function handleZoomOut() {
-		uiStore.zoomOut();
+		canvasStore.zoomOut();
 	}
 
 	function handleToggleTheme() {
@@ -256,7 +258,6 @@
 		hasSelection={selectionStore.hasSelection}
 		paletteOpen={uiStore.leftDrawerOpen}
 		theme={uiStore.theme}
-		zoom={uiStore.zoom}
 		onnewrack={handleNewRack}
 		ontogglepalette={handleTogglePalette}
 		onsave={handleSave}

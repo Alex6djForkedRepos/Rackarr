@@ -21,8 +21,9 @@ export function generateId(): string {
 	crypto.getRandomValues(bytes);
 
 	// Set version (4) and variant (8, 9, a, or b) bits per RFC 4122
-	bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
-	bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant 10xx
+	// Array is exactly 16 bytes, so indices 6 and 8 are always valid
+	bytes[6] = (bytes[6]! & 0x0f) | 0x40; // Version 4
+	bytes[8] = (bytes[8]! & 0x3f) | 0x80; // Variant 10xx
 
 	// Convert to hex string with dashes
 	const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');

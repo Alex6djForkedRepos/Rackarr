@@ -17,13 +17,12 @@
 		IconMoon,
 		IconHelp
 	} from './icons';
-	import { ZOOM_MIN, ZOOM_MAX } from '$lib/stores/ui.svelte';
+	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 
 	interface Props {
 		hasSelection?: boolean;
 		paletteOpen?: boolean;
 		theme?: 'dark' | 'light';
-		zoom?: number;
 		onnewrack?: () => void;
 		ontogglepalette?: () => void;
 		onsave?: () => void;
@@ -40,7 +39,6 @@
 		hasSelection = false,
 		paletteOpen = false,
 		theme = 'dark',
-		zoom = 100,
 		onnewrack,
 		ontogglepalette,
 		onsave,
@@ -53,8 +51,7 @@
 		onhelp
 	}: Props = $props();
 
-	const canZoomIn = $derived(zoom < ZOOM_MAX);
-	const canZoomOut = $derived(zoom > ZOOM_MIN);
+	const canvasStore = getCanvasStore();
 </script>
 
 <header class="toolbar">
@@ -108,13 +105,13 @@
 
 	<!-- Right section: Zoom, theme, help -->
 	<div class="toolbar-section toolbar-right">
-		<ToolbarButton label="Zoom Out" disabled={!canZoomOut} onclick={onzoomout}>
+		<ToolbarButton label="Zoom Out" disabled={!canvasStore.canZoomOut} onclick={onzoomout}>
 			<IconZoomOut />
 		</ToolbarButton>
 
-		<span class="zoom-display">{zoom}%</span>
+		<span class="zoom-display">{canvasStore.zoomPercentage}%</span>
 
-		<ToolbarButton label="Zoom In" disabled={!canZoomIn} onclick={onzoomin}>
+		<ToolbarButton label="Zoom In" disabled={!canvasStore.canZoomIn} onclick={onzoomin}>
 			<IconZoomIn />
 		</ToolbarButton>
 

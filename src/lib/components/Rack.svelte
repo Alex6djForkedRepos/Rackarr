@@ -18,7 +18,6 @@
 		rack: RackType;
 		deviceLibrary: Device[];
 		selected: boolean;
-		zoom: number;
 		selectedDeviceId?: string | null;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
 		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
@@ -43,7 +42,6 @@
 		rack,
 		deviceLibrary,
 		selected,
-		zoom,
 		selectedDeviceId = null,
 		onselect,
 		ondeviceselect,
@@ -72,7 +70,6 @@
 	const totalHeight = $derived(rack.height * U_HEIGHT);
 	const viewBoxHeight = $derived(totalHeight + NAME_HEIGHT);
 	const interiorWidth = $derived(RACK_WIDTH - RAIL_WIDTH * 2);
-	const zoomScale = $derived(zoom / 100);
 
 	// Drop preview state
 	let dropPreview = $state<{
@@ -276,7 +273,6 @@
 
 <div
 	class="rack-container"
-	style="transform: scale({zoomScale}); transform-origin: top left;"
 	tabindex="0"
 	aria-selected={selected}
 	role="option"

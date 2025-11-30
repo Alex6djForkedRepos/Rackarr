@@ -5,12 +5,35 @@ import ToolbarButton from '$lib/components/ToolbarButton.svelte';
 import { resetLayoutStore } from '$lib/stores/layout.svelte';
 import { resetSelectionStore } from '$lib/stores/selection.svelte';
 import { resetUIStore } from '$lib/stores/ui.svelte';
+import { resetCanvasStore, getCanvasStore, ZOOM_MIN, ZOOM_MAX } from '$lib/stores/canvas.svelte';
+
+// Helper to create mock panzoom instance at a specific zoom level
+function createMockPanzoom(initialScale = 1) {
+	let transform = { x: 0, y: 0, scale: initialScale };
+	const listeners: Record<string, Array<() => void>> = {};
+
+	return {
+		getTransform: () => ({ ...transform }),
+		zoomAbs: vi.fn((x: number, y: number, scale: number) => {
+			transform = { x, y, scale };
+			listeners['zoom']?.forEach((cb) => cb());
+		}),
+		smoothZoomAbs: vi.fn(),
+		moveTo: vi.fn(),
+		on: vi.fn((event: string, callback: () => void) => {
+			if (!listeners[event]) listeners[event] = [];
+			listeners[event].push(callback);
+		}),
+		dispose: vi.fn()
+	} as unknown as ReturnType<typeof import('panzoom').default>;
+}
 
 describe('Toolbar Component', () => {
 	beforeEach(() => {
 		resetLayoutStore();
 		resetSelectionStore();
 		resetUIStore();
+		resetCanvasStore();
 	});
 
 	describe('Layout', () => {
@@ -86,20 +109,29 @@ describe('Toolbar Component', () => {
 	});
 
 	describe('Zoom controls', () => {
-		it('zoom in disabled at ZOOM_MAX (200)', () => {
-			render(Toolbar, { props: { zoom: 200 } });
+		it('zoom in disabled at ZOOM_MAX', () => {
+			const store = getCanvasStore();
+			store.setPanzoomInstance(createMockPanzoom(ZOOM_MAX));
+
+			render(Toolbar);
 			const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
 			expect(zoomInBtn).toBeDisabled();
 		});
 
-		it('zoom out disabled at ZOOM_MIN (50)', () => {
-			render(Toolbar, { props: { zoom: 50 } });
+		it('zoom out disabled at ZOOM_MIN', () => {
+			const store = getCanvasStore();
+			store.setPanzoomInstance(createMockPanzoom(ZOOM_MIN));
+
+			render(Toolbar);
 			const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
 			expect(zoomOutBtn).toBeDisabled();
 		});
 
-		it('zoom controls enabled at default zoom (100)', () => {
-			render(Toolbar, { props: { zoom: 100 } });
+		it('zoom controls enabled at default zoom (100%)', () => {
+			const store = getCanvasStore();
+			store.setPanzoomInstance(createMockPanzoom(1));
+
+			render(Toolbar);
 			const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
 			const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
 			expect(zoomInBtn).not.toBeDisabled();
@@ -107,7 +139,10 @@ describe('Toolbar Component', () => {
 		});
 
 		it('displays current zoom level', () => {
-			render(Toolbar, { props: { zoom: 150 } });
+			const store = getCanvasStore();
+			store.setPanzoomInstance(createMockPanzoom(1.5));
+
+			render(Toolbar);
 			expect(screen.getByText('150%')).toBeInTheDocument();
 		});
 	});

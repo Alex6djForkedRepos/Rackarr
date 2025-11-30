@@ -60,6 +60,7 @@
 		]
 	},
 	"dependencies": {
+		"panzoom": "^9.4.3",
 		"svelte-dnd-action": "^0.9.67"
 	}
 }

@@ -3,13 +3,15 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import Canvas from '$lib/components/Canvas.svelte';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
 import { getSelectionStore, resetSelectionStore } from '$lib/stores/selection.svelte';
-import { getUIStore, resetUIStore } from '$lib/stores/ui.svelte';
+import { resetUIStore } from '$lib/stores/ui.svelte';
+import { resetCanvasStore, getCanvasStore } from '$lib/stores/canvas.svelte';
 
 describe('Canvas Component', () => {
 	beforeEach(() => {
 		resetLayoutStore();
 		resetSelectionStore();
 		resetUIStore();
+		resetCanvasStore();
 	});
 
 	describe('Empty State', () => {
@@ -146,35 +148,26 @@ describe('Canvas Component', () => {
 		});
 	});
 
-	describe('Zoom', () => {
-		it('applies zoom to rack containers', () => {
+	describe('Zoom (panzoom)', () => {
+		it('has panzoom container when racks exist', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
 
-			const uiStore = getUIStore();
-			uiStore.setZoom(150);
-
 			const { container } = render(Canvas);
 
-			const rackContainer = container.querySelector('.rack-container');
-			const style = rackContainer?.getAttribute('style');
-
-			expect(style).toContain('scale(1.5)');
+			const panzoomContainer = container.querySelector('.panzoom-container');
+			expect(panzoomContainer).toBeInTheDocument();
 		});
 
-		it('updates when zoom changes', () => {
+		it('initializes canvas store with panzoom instance', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
 
-			const uiStore = getUIStore();
-			uiStore.setZoom(50);
+			render(Canvas);
 
-			const { container } = render(Canvas);
-
-			const rackContainer = container.querySelector('.rack-container');
-			const style = rackContainer?.getAttribute('style');
-
-			expect(style).toContain('scale(0.5)');
+			const canvasStore = getCanvasStore();
+			// Panzoom should be initialized after mount
+			expect(canvasStore.hasPanzoom).toBe(true);
 		});
 	});
 
