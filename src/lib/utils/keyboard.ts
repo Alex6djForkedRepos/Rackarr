@@ -64,6 +64,12 @@ export function matchesShortcut(event: KeyboardEvent, shortcut: ShortcutHandler)
 			return false;
 		}
 	}
+	if (!shortcut.meta && event.metaKey) {
+		// Allow meta key to match if ctrl is also defined (cross-platform)
+		if (!shortcut.ctrl) {
+			return false;
+		}
+	}
 
 	// Check shift modifier
 	if (shortcut.shift && !event.shiftKey) {

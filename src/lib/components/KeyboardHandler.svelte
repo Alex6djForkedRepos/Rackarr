@@ -7,6 +7,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { showToast } from '$lib/stores/toast.svelte';
 
 	interface Props {
 		onsave?: () => void;
@@ -114,6 +115,18 @@
 				action: () => onexport?.()
 			},
 
+			// Ctrl/Cmd+D - duplicate rack
+			{
+				key: 'd',
+				ctrl: true,
+				action: () => duplicateSelectedRack()
+			},
+			{
+				key: 'd',
+				meta: true,
+				action: () => duplicateSelectedRack()
+			},
+
 			// ? - show help
 			{
 				key: '?',
@@ -191,6 +204,18 @@
 		if (newIndex < 0 || newIndex >= layoutStore.racks.length) return;
 
 		layoutStore.reorderRacks(rackIndex, newIndex);
+	}
+
+	/**
+	 * Duplicate the selected rack
+	 */
+	function duplicateSelectedRack() {
+		if (!selectionStore.isRackSelected || !selectionStore.selectedId) return;
+
+		const result = layoutStore.duplicateRack(selectionStore.selectedId);
+		if (result.error) {
+			showToast(result.error, 'error');
+		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {

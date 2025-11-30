@@ -298,6 +298,42 @@ describe('KeyboardHandler Component', () => {
 
 			expect(onExport).toHaveBeenCalledTimes(1);
 		});
+
+		it('Ctrl+D duplicates selected rack', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			// Create and select a rack
+			const rack = layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(rack!.id);
+			expect(layoutStore.racks).toHaveLength(1);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'd', ctrlKey: true });
+
+			// Should now have 2 racks (original + duplicate)
+			expect(layoutStore.racks).toHaveLength(2);
+			expect(layoutStore.racks[1]!.name).toBe('Test Rack (Copy)');
+		});
+
+		it('Cmd+D duplicates selected rack (Mac)', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			// Create and select a rack
+			const rack = layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(rack!.id);
+			expect(layoutStore.racks).toHaveLength(1);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'd', metaKey: true });
+
+			// Should now have 2 racks (original + duplicate)
+			expect(layoutStore.racks).toHaveLength(2);
+			expect(layoutStore.racks[1]!.name).toBe('Test Rack (Copy)');
+		});
 	});
 
 	describe('Ignore in Input Fields', () => {
