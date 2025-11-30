@@ -141,6 +141,64 @@ describe('DevicePalette Component', () => {
 			expect(handleAdd).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('Import Device Library', () => {
+		it('renders import button', () => {
+			render(DevicePalette);
+
+			const importButton = screen.getByRole('button', { name: /import/i });
+			expect(importButton).toBeInTheDocument();
+		});
+
+		it('has file input that accepts JSON files', () => {
+			const { container } = render(DevicePalette);
+
+			const fileInput = container.querySelector('input[type="file"]');
+			expect(fileInput).toBeInTheDocument();
+			expect(fileInput?.getAttribute('accept')).toBe('.json,application/json');
+		});
+
+		it('file input is hidden', () => {
+			const { container } = render(DevicePalette);
+
+			const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+			expect(fileInput).toBeInTheDocument();
+
+			// Should not be visible (using CSS or hidden attribute)
+			const styles = window.getComputedStyle(fileInput);
+			expect(styles.display === 'none' || fileInput.hidden).toBe(true);
+		});
+
+		it('clicking import button triggers file input', async () => {
+			const { container } = render(DevicePalette);
+
+			const importButton = screen.getByRole('button', { name: /import/i });
+			const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+			const clickSpy = vi.spyOn(fileInput, 'click');
+			await fireEvent.click(importButton);
+
+			expect(clickSpy).toHaveBeenCalled();
+			clickSpy.mockRestore();
+		});
+
+		// Note: Full file import flow is tested in E2E tests due to JSDOM file API limitations
+		it('import button and file input are properly wired together', async () => {
+			const { container } = render(DevicePalette);
+
+			const importButton = screen.getByRole('button', { name: /import/i });
+			const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+			// Verify import button triggers file input click
+			const clickSpy = vi.spyOn(fileInput, 'click');
+			await fireEvent.click(importButton);
+
+			expect(clickSpy).toHaveBeenCalled();
+			expect(fileInput.accept).toBe('.json,application/json');
+
+			clickSpy.mockRestore();
+		});
+	});
 });
 
 describe('DevicePaletteItem Component', () => {
