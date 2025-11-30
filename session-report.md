@@ -124,6 +124,63 @@ The migration system ensures v0.1 layouts can be loaded in v0.2 without data los
 
 ---
 
+## Post-Completion Fixes
+
+After completing all prompts, three bugs were identified and fixed during user testing:
+
+### Fix 1: Toast Import Error (Blank Screen on Load)
+
+**Issue:** Application showed blank screen on load with error:
+
+```
+Uncaught SyntaxError: The requested module doesn't provide an export named: 'showToast'
+```
+
+**Root Cause:** In `src/lib/components/KeyboardHandler.svelte`, imported `showToast` directly instead of through the store getter pattern.
+
+**Fix Applied:**
+
+- Changed import from `import { showToast }` to `import { getToastStore }`
+- Added `const toastStore = getToastStore()`
+- Updated call from `showToast(...)` to `toastStore.showToast(...)`
+- **Commit:** `85ca976` - fix(keyboard): use toast store getter pattern
+
+### Fix 2: Accessibility Warning Suppression
+
+**Issue:** Build warning on `src/lib/components/Canvas.svelte:300`:
+
+```
+Non-interactive element <div> should not be assigned mouse or keyboard event listeners
+```
+
+**Root Cause:** Canvas div had `role="application"` and `onclick` handler but linter wanted explicit acknowledgment.
+
+**Fix Applied:**
+
+- Added ignore comment: `<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->`
+- Suppressed intentional a11y exception
+- No commit (cosmetic fix)
+
+### Fix 3: Export Missing Top/Bottom Bars
+
+**Issue:** Exported SVG only showed left and right vertical rails, missing the horizontal bars at top and bottom that appear on screen.
+
+**Root Cause:** `src/lib/utils/export.ts` only rendered vertical rails, not matching the 4-bar structure in `Rack.svelte`.
+
+**Fix Applied:**
+
+- Added top horizontal bar at `y = RACK_PADDING`
+- Added bottom horizontal bar at `y = RACK_PADDING + RAIL_WIDTH + rackHeight`
+- Adjusted rack interior Y position to `RACK_PADDING + RAIL_WIDTH`
+- Adjusted vertical rails to start at `RACK_PADDING + RAIL_WIDTH`
+- Adjusted grid line Y calculations to include `RAIL_WIDTH` offset
+- Export now matches on-screen rendering exactly
+- **Commit:** `5101926` - fix(export): add top and bottom horizontal bars to match on-screen rendering
+
+**Test Results After Fixes:** ✅ 791 passing (791 total)
+
+---
+
 ## Stopping Condition Met
 
 **Reason:** All prompts in v0.2-prompt_plan.md marked complete ✅
@@ -144,16 +201,26 @@ v0.2 is feature-complete and all tests passing. Recommended next actions:
 
 ## Files Modified (This Session)
 
+### Prompt Implementation
+
 1. `src/lib/stores/layout.svelte.ts`
 2. `src/tests/layout-store.test.ts`
+
+### Bug Fixes
+
+3. `src/lib/components/KeyboardHandler.svelte` - Fixed toast import error
+4. `src/lib/components/Canvas.svelte` - Suppressed a11y warning
+5. `src/lib/utils/export.ts` - Added top/bottom bars to export
 
 ---
 
 ## Git Commits (This Session)
 
-**1 commit:**
+**3 commits:**
 
-- `250fc17` - feat(migration): integrate migration into load flows
+1. `250fc17` - feat(migration): integrate migration into load flows
+2. `85ca976` - fix(keyboard): use toast store getter pattern
+3. `5101926` - fix(export): add top and bottom horizontal bars to match on-screen rendering
 
 ---
 
