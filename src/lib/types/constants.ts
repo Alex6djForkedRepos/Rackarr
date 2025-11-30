@@ -63,7 +63,7 @@ export const MAX_RACKS = 6;
 /**
  * Current layout schema version
  */
-export const CURRENT_VERSION = '1.0';
+export const CURRENT_VERSION = '0.2.0';
 
 /**
  * Standard rack width in inches (19" rack)

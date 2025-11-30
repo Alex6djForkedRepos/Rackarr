@@ -7,6 +7,7 @@ import type { Layout, Device, Rack } from '$lib/types';
 import { CURRENT_VERSION } from '$lib/types/constants';
 import { getDeviceURange, doRangesOverlap } from './collision';
 import { getStarterLibrary } from '$lib/data/starterLibrary';
+import { migrateLayout } from './migration';
 
 /**
  * Create a new empty layout
@@ -46,8 +47,9 @@ export function serializeLayout(layout: Layout): string {
 
 /**
  * Deserialize a layout from JSON string
+ * Automatically migrates older layout versions
  * @param json - JSON string to parse
- * @returns Layout object
+ * @returns Layout object (migrated to current version if needed)
  * @throws Error if JSON is invalid or layout structure is invalid
  */
 export function deserializeLayout(json: string): Layout {
@@ -63,7 +65,12 @@ export function deserializeLayout(json: string): Layout {
 		throw new Error('Invalid layout structure');
 	}
 
-	// Check version compatibility
+	// Migrate if needed (supports v0.1.0 and v1.0)
+	if (parsed.version === '0.1.0' || parsed.version === '1.0') {
+		return migrateLayout(parsed);
+	}
+
+	// Check version compatibility for other versions
 	if (parsed.version !== CURRENT_VERSION) {
 		throw new Error(`Unsupported layout version: ${parsed.version}`);
 	}

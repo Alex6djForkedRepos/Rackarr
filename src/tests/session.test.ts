@@ -121,6 +121,71 @@ describe('Session Persistence', () => {
 			const loaded = loadFromSession();
 			expect(loaded).toBeNull();
 		});
+
+		it('migrates v0.1.0 layouts to current version', () => {
+			const v01Layout = {
+				version: '0.1.0',
+				name: 'Old Layout',
+				created: '2025-01-01T00:00:00.000Z',
+				modified: '2025-01-01T00:00:00.000Z',
+				settings: { theme: 'dark' },
+				deviceLibrary: [
+					{
+						id: 'dev-1',
+						name: 'Test Device',
+						height: 2,
+						colour: '#4A90D9',
+						category: 'server'
+					}
+				],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Test Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						devices: [{ libraryId: 'dev-1', position: 5 }]
+					}
+				]
+			};
+
+			sessionStorageMock.__setRaw(STORAGE_KEY, JSON.stringify(v01Layout));
+
+			const loaded = loadFromSession();
+			expect(loaded).not.toBeNull();
+			expect(loaded!.version).toBe(CURRENT_VERSION);
+			expect(loaded!.racks[0]!.view).toBe('front');
+			expect(loaded!.racks[0]!.devices[0]!.face).toBe('front');
+		});
+
+		it('migrates v1.0 layouts to current version', () => {
+			const v10Layout = {
+				version: '1.0',
+				name: 'Old Layout',
+				created: '2025-01-01T00:00:00.000Z',
+				modified: '2025-01-01T00:00:00.000Z',
+				settings: { theme: 'dark' },
+				deviceLibrary: [],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Test Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						devices: []
+					}
+				]
+			};
+
+			sessionStorageMock.__setRaw(STORAGE_KEY, JSON.stringify(v10Layout));
+
+			const loaded = loadFromSession();
+			expect(loaded).not.toBeNull();
+			expect(loaded!.version).toBe(CURRENT_VERSION);
+			expect(loaded!.racks[0]!.view).toBe('front');
+		});
 	});
 
 	describe('clearSession', () => {

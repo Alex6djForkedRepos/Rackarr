@@ -3,11 +3,8 @@
  * Handles migration of layouts from older versions to current version
  */
 
-import type { Layout, Rack, PlacedDevice, RackView, DeviceFace } from '$lib/types';
-
-const CURRENT_VERSION = '0.2.0';
-const DEFAULT_RACK_VIEW: RackView = 'front';
-const DEFAULT_DEVICE_FACE: DeviceFace = 'front';
+import type { Layout, Rack, PlacedDevice } from '$lib/types';
+import { CURRENT_VERSION, DEFAULT_RACK_VIEW, DEFAULT_DEVICE_FACE } from '$lib/types/constants';
 
 /**
  * Migrate a layout from any version to the current version

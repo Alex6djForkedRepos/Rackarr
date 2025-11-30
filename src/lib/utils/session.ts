@@ -5,6 +5,7 @@
 
 import type { Layout } from '$lib/types';
 import { validateLayoutStructure } from './serialization';
+import { migrateLayout } from './migration';
 
 export const STORAGE_KEY = 'rackarr_session';
 
@@ -23,6 +24,7 @@ export function saveToSession(layout: Layout): void {
 
 /**
  * Load layout from sessionStorage
+ * Automatically migrates older layout versions
  * @returns Layout if valid session exists, null otherwise
  */
 export function loadFromSession(): Layout | null {
@@ -33,6 +35,11 @@ export function loadFromSession(): Layout | null {
 		const parsed: unknown = JSON.parse(json);
 		if (!validateLayoutStructure(parsed)) {
 			return null;
+		}
+
+		// Migrate if needed (supports v0.1.0 and v1.0)
+		if (parsed.version === '0.1.0' || parsed.version === '1.0') {
+			return migrateLayout(parsed);
 		}
 
 		return parsed;

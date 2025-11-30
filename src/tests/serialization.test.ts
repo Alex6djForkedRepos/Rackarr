@@ -275,11 +275,12 @@ describe('Layout Serialization', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			const original: Layout = {
-				version: '1.0',
+				version: CURRENT_VERSION,
 				name: 'My Homelab',
 				created: mockDate,
 				modified: mockDate,
@@ -298,6 +299,107 @@ describe('Layout Serialization', () => {
 			expect(restored.settings).toEqual(original.settings);
 			expect(restored.deviceLibrary).toEqual(original.deviceLibrary);
 			expect(restored.racks).toEqual(original.racks);
+		});
+	});
+
+	describe('Migration', () => {
+		it('migrates v0.1 layout with version 0.1.0', () => {
+			const v01Layout = {
+				version: '0.1.0',
+				name: 'Old Layout',
+				created: mockDate,
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [
+					{
+						id: 'd1',
+						name: 'Test Device',
+						height: 2,
+						colour: '#4A90D9',
+						category: 'server'
+					}
+				],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Test Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						devices: [{ libraryId: 'd1', position: 5 }]
+					}
+				]
+			};
+
+			const json = JSON.stringify(v01Layout);
+			const result = deserializeLayout(json);
+
+			expect(result.version).toBe(CURRENT_VERSION);
+			expect(result.racks[0]!.view).toBe('front');
+			expect(result.racks[0]!.devices[0]!.face).toBe('front');
+		});
+
+		it('migrates v0.1 layout with version 1.0', () => {
+			const v01Layout = {
+				version: '1.0',
+				name: 'Old Layout',
+				created: mockDate,
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Test Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						devices: []
+					}
+				]
+			};
+
+			const json = JSON.stringify(v01Layout);
+			const result = deserializeLayout(json);
+
+			expect(result.version).toBe(CURRENT_VERSION);
+			expect(result.racks[0]!.view).toBe('front');
+		});
+
+		it('preserves existing v0.2 values during migration', () => {
+			const v02Layout = {
+				version: CURRENT_VERSION,
+				name: 'New Layout',
+				created: mockDate,
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [
+					{
+						id: 'd1',
+						name: 'Test Device',
+						height: 2,
+						colour: '#4A90D9',
+						category: 'server'
+					}
+				],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Test Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'rear',
+						devices: [{ libraryId: 'd1', position: 5, face: 'both' }]
+					}
+				]
+			};
+
+			const json = JSON.stringify(v02Layout);
+			const result = deserializeLayout(json);
+
+			expect(result.racks[0]!.view).toBe('rear');
+			expect(result.racks[0]!.devices[0]!.face).toBe('both');
 		});
 	});
 });
