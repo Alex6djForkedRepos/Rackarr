@@ -49,7 +49,7 @@ describe('App Component', () => {
 		it('palette drawer toggles with toolbar button', async () => {
 			render(App);
 
-			const paletteBtn = screen.getByRole('button', { name: /device palette/i });
+			const paletteBtn = screen.getByRole('button', { name: /device library/i });
 
 			// Initially closed - drawer should not be visible
 			const drawer = document.querySelector('.drawer-left');

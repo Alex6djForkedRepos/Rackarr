@@ -58,15 +58,19 @@
 </script>
 
 <header class="toolbar">
-	<!-- Left section: Logo and app name -->
+	<!-- Left section: Device Library toggle -->
 	<div class="toolbar-section toolbar-left">
 		<button
 			type="button"
-			class="logo-button"
-			onclick={onhelp}
-			aria-label="Rackarr - Click for help"
+			class="library-toggle"
+			class:active={paletteOpen}
+			onclick={ontogglepalette}
+			aria-label="Device Library"
+			aria-expanded={paletteOpen}
+			aria-controls="device-library-drawer"
 		>
-			<span class="logo-text">Rackarr</span>
+			<IconPalette />
+			<span class="library-text">Device Library</span>
 		</button>
 	</div>
 
@@ -74,15 +78,6 @@
 	<div class="toolbar-section toolbar-center">
 		<ToolbarButton label="New Rack" onclick={onnewrack}>
 			<IconPlus />
-		</ToolbarButton>
-
-		<ToolbarButton
-			label="Device Palette"
-			active={paletteOpen}
-			expanded={paletteOpen}
-			onclick={ontogglepalette}
-		>
-			<IconPalette />
 		</ToolbarButton>
 
 		<div class="separator" aria-hidden="true"></div>
@@ -169,26 +164,40 @@
 		flex: 0 0 auto;
 	}
 
-	.logo-button {
+	.library-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 6px 12px;
+		padding: 8px 16px;
+		border: 1px solid var(--colour-border);
 		border-radius: 6px;
 		background: transparent;
 		color: var(--colour-text);
 		cursor: pointer;
-		transition: background-color var(--transition-fast);
+		transition: all var(--transition-fast);
+		font-size: 14px;
+		font-weight: 500;
 	}
 
-	.logo-button:hover {
+	.library-toggle:hover {
 		background: var(--colour-surface-hover);
+		border-color: var(--colour-selection);
 	}
 
-	.logo-text {
-		font-size: 18px;
-		font-weight: 600;
-		letter-spacing: -0.02em;
+	.library-toggle:focus {
+		outline: 2px solid var(--colour-selection);
+		outline-offset: 2px;
+	}
+
+	.library-toggle.active {
+		background: var(--colour-selection);
+		border-color: var(--colour-selection);
+		color: white;
+	}
+
+	.library-text {
+		font-size: 14px;
+		font-weight: 500;
 	}
 
 	.separator {

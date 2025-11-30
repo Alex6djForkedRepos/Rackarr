@@ -41,11 +41,10 @@ describe('Toolbar Component', () => {
 			render(Toolbar);
 
 			// Left section
-			expect(screen.getByText('Rackarr')).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: /device library/i })).toBeInTheDocument();
 
 			// Center section buttons
 			expect(screen.getByRole('button', { name: /new rack/i })).toBeInTheDocument();
-			expect(screen.getByRole('button', { name: /device palette/i })).toBeInTheDocument();
 			expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
 			expect(screen.getByRole('button', { name: /load/i })).toBeInTheDocument();
 			expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument();
@@ -78,17 +77,33 @@ describe('Toolbar Component', () => {
 		});
 	});
 
-	describe('Palette toggle', () => {
-		it('palette toggle shows expanded state when drawer open', () => {
-			render(Toolbar, { props: { paletteOpen: true } });
-			const paletteBtn = screen.getByRole('button', { name: /device palette/i });
-			expect(paletteBtn).toHaveAttribute('aria-expanded', 'true');
+	describe('Device Library toggle', () => {
+		it('renders icon and "Device Library" text', () => {
+			render(Toolbar);
+			const libraryBtn = screen.getByRole('button', { name: /device library/i });
+			expect(libraryBtn).toBeInTheDocument();
 		});
 
-		it('palette toggle shows collapsed state when drawer closed', () => {
-			render(Toolbar, { props: { paletteOpen: false } });
-			const paletteBtn = screen.getByRole('button', { name: /device palette/i });
-			expect(paletteBtn).toHaveAttribute('aria-expanded', 'false');
+		it('has aria-expanded reflecting drawer state', () => {
+			const { rerender } = render(Toolbar, { props: { paletteOpen: false } });
+			let libraryBtn = screen.getByRole('button', { name: /device library/i });
+			expect(libraryBtn).toHaveAttribute('aria-expanded', 'false');
+
+			rerender({ paletteOpen: true });
+			libraryBtn = screen.getByRole('button', { name: /device library/i });
+			expect(libraryBtn).toHaveAttribute('aria-expanded', 'true');
+		});
+
+		it('has aria-controls pointing to drawer', () => {
+			render(Toolbar);
+			const libraryBtn = screen.getByRole('button', { name: /device library/i });
+			expect(libraryBtn).toHaveAttribute('aria-controls', 'device-library-drawer');
+		});
+
+		it('shows active state when drawer open', () => {
+			render(Toolbar, { props: { paletteOpen: true } });
+			const libraryBtn = screen.getByRole('button', { name: /device library/i });
+			expect(libraryBtn).toHaveClass('active');
 		});
 	});
 
@@ -171,11 +186,11 @@ describe('Toolbar Component', () => {
 			expect(onNewRack).toHaveBeenCalledTimes(1);
 		});
 
-		it('dispatches togglePalette event when Palette clicked', async () => {
+		it('dispatches togglePalette event when Device Library clicked', async () => {
 			const onTogglePalette = vi.fn();
 			render(Toolbar, { props: { ontogglepalette: onTogglePalette } });
 
-			await fireEvent.click(screen.getByRole('button', { name: /device palette/i }));
+			await fireEvent.click(screen.getByRole('button', { name: /device library/i }));
 			expect(onTogglePalette).toHaveBeenCalledTimes(1);
 		});
 

@@ -276,7 +276,7 @@ describe('Accessibility Tests', () => {
 	});
 
 	describe('Expandable elements have aria-expanded', () => {
-		it('Palette toggle button has aria-expanded', () => {
+		it('Device Library toggle button has aria-expanded', () => {
 			render(Toolbar, {
 				props: {
 					paletteOpen: true,
@@ -285,8 +285,8 @@ describe('Accessibility Tests', () => {
 				}
 			});
 
-			const paletteButton = screen.getByRole('button', { name: /palette/i });
-			expect(paletteButton).toHaveAttribute('aria-expanded');
+			const libraryButton = screen.getByRole('button', { name: /library/i });
+			expect(libraryButton).toHaveAttribute('aria-expanded');
 		});
 	});
 
