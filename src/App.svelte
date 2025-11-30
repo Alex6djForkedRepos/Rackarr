@@ -277,9 +277,11 @@
 
 	<main class="app-main">
 		<Drawer
+			id="device-library-drawer"
 			side="left"
 			open={uiStore.leftDrawerOpen}
-			title="Device Palette"
+			title="Device Library"
+			showClose={false}
 			onclose={handleClosePalette}
 		>
 			<DevicePalette onadddevice={handleAddDevice} />

@@ -10,15 +10,17 @@
 		side: 'left' | 'right';
 		open: boolean;
 		title: string;
+		id?: string;
+		showClose?: boolean;
 		onclose?: () => void;
 		children?: Snippet;
 	}
 
-	let { side, open, title, onclose, children }: Props = $props();
+	let { side, open, title, id, showClose = true, onclose, children }: Props = $props();
 </script>
 
-<aside class="drawer drawer-{side}" class:open aria-label={title} aria-hidden={!open}>
-	<DrawerHeader {title} {onclose} />
+<aside {id} class="drawer drawer-{side}" class:open aria-label={title} aria-hidden={!open}>
+	<DrawerHeader {title} {showClose} {onclose} />
 	<div class="drawer-content">
 		{#if children}
 			{@render children()}

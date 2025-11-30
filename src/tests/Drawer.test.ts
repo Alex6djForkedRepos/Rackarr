@@ -42,7 +42,7 @@ describe('Drawer Component', () => {
 	});
 
 	describe('Close button', () => {
-		it('has a close button', () => {
+		it('has a close button by default', () => {
 			render(Drawer, { props: { side: 'left', open: true, title: 'Test' } });
 			expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
 		});
@@ -53,6 +53,13 @@ describe('Drawer Component', () => {
 
 			await fireEvent.click(screen.getByRole('button', { name: /close/i }));
 			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it('does not render close button when showClose is false', () => {
+			render(Drawer, {
+				props: { side: 'left', open: true, title: 'Test', showClose: false }
+			});
+			expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
 		});
 	});
 
@@ -87,6 +94,14 @@ describe('Drawer Component', () => {
 			const drawer = screen.getByRole('complementary');
 			expect(drawer).toHaveAttribute('aria-label', 'Device Library');
 		});
+
+		it('accepts id attribute for aria-controls', () => {
+			const { container } = render(Drawer, {
+				props: { side: 'left', open: true, title: 'Test', id: 'device-library-drawer' }
+			});
+			const drawer = container.querySelector('#device-library-drawer');
+			expect(drawer).toBeInTheDocument();
+		});
 	});
 });
 
@@ -96,7 +111,7 @@ describe('DrawerHeader Component', () => {
 		expect(screen.getByText('Test Title')).toBeInTheDocument();
 	});
 
-	it('has close button', () => {
+	it('has close button by default', () => {
 		render(DrawerHeader, { props: { title: 'Test' } });
 		expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
 	});
@@ -113,5 +128,15 @@ describe('DrawerHeader Component', () => {
 		render(DrawerHeader, { props: { title: 'Test' } });
 		const closeBtn = screen.getByRole('button', { name: /close/i });
 		expect(closeBtn).toHaveAttribute('aria-label', 'Close drawer');
+	});
+
+	it('does not render close button when showClose is false', () => {
+		render(DrawerHeader, { props: { title: 'Test', showClose: false } });
+		expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
+	});
+
+	it('renders close button when showClose is true', () => {
+		render(DrawerHeader, { props: { title: 'Test', showClose: true } });
+		expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
 	});
 });
