@@ -161,6 +161,169 @@ describe('Layout Store', () => {
 			store.loadLayout(v01Layout);
 			expect(store.layout.version).toBe(CURRENT_VERSION);
 		});
+
+		it('loads only first rack from multi-rack file', () => {
+			const store = getLayoutStore();
+			const multiRackLayout = {
+				version: '0.2.0',
+				name: 'Multi-Rack Layout',
+				created: new Date().toISOString(),
+				modified: new Date().toISOString(),
+				settings: { theme: 'dark' as const },
+				deviceLibrary: [],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'First Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'front' as const,
+						devices: []
+					},
+					{
+						id: 'rack-2',
+						name: 'Second Rack',
+						height: 24,
+						width: 19,
+						position: 1,
+						view: 'front' as const,
+						devices: []
+					},
+					{
+						id: 'rack-3',
+						name: 'Third Rack',
+						height: 18,
+						width: 19,
+						position: 2,
+						view: 'front' as const,
+						devices: []
+					}
+				]
+			};
+
+			store.loadLayout(multiRackLayout);
+
+			expect(store.racks).toHaveLength(1);
+			expect(store.racks[0]!.name).toBe('First Rack');
+		});
+
+		it('returns original rack count from multi-rack file', () => {
+			const store = getLayoutStore();
+			const multiRackLayout = {
+				version: '0.2.0',
+				name: 'Test',
+				created: new Date().toISOString(),
+				modified: new Date().toISOString(),
+				settings: { theme: 'dark' as const },
+				deviceLibrary: [],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Rack 1',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'front' as const,
+						devices: []
+					},
+					{
+						id: 'rack-2',
+						name: 'Rack 2',
+						height: 24,
+						width: 19,
+						position: 1,
+						view: 'front' as const,
+						devices: []
+					}
+				]
+			};
+
+			const originalCount = store.loadLayout(multiRackLayout);
+
+			expect(originalCount).toBe(2);
+		});
+
+		it('preserves full device library from multi-rack file', () => {
+			const store = getLayoutStore();
+			const multiRackLayout = {
+				version: '0.2.0',
+				name: 'Test',
+				created: new Date().toISOString(),
+				modified: new Date().toISOString(),
+				settings: { theme: 'dark' as const },
+				deviceLibrary: [
+					{
+						id: 'dev-1',
+						name: 'Server',
+						height: 2,
+						category: 'server' as const,
+						colour: '#4A90D9'
+					},
+					{
+						id: 'dev-2',
+						name: 'Switch',
+						height: 1,
+						category: 'network' as const,
+						colour: '#50C878'
+					}
+				],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Rack 1',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'front' as const,
+						devices: []
+					},
+					{
+						id: 'rack-2',
+						name: 'Rack 2',
+						height: 24,
+						width: 19,
+						position: 1,
+						view: 'front' as const,
+						devices: []
+					}
+				]
+			};
+
+			store.loadLayout(multiRackLayout);
+
+			// All library devices preserved even though only first rack loaded
+			expect(store.deviceLibrary).toHaveLength(2);
+		});
+
+		it('loads single-rack file normally', () => {
+			const store = getLayoutStore();
+			const singleRackLayout = {
+				version: '0.2.0',
+				name: 'Single Rack',
+				created: new Date().toISOString(),
+				modified: new Date().toISOString(),
+				settings: { theme: 'dark' as const },
+				deviceLibrary: [],
+				racks: [
+					{
+						id: 'rack-1',
+						name: 'Only Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'front' as const,
+						devices: []
+					}
+				]
+			};
+
+			const originalCount = store.loadLayout(singleRackLayout);
+
+			expect(store.racks).toHaveLength(1);
+			expect(store.racks[0]!.name).toBe('Only Rack');
+			expect(originalCount).toBe(1);
+		});
 	});
 
 	describe('addRack', () => {

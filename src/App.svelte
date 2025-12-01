@@ -110,10 +110,18 @@
 			}
 
 			const loadedLayout = await readLayoutFile(file);
-			layoutStore.loadLayout(loadedLayout);
+			const originalRackCount = layoutStore.loadLayout(loadedLayout);
 			layoutStore.markClean();
 			selectionStore.clearSelection();
-			toastStore.showToast('Layout loaded successfully', 'success');
+
+			if (originalRackCount > 1) {
+				toastStore.showToast(
+					`Layout contained ${originalRackCount} racks. Loaded first rack only.`,
+					'warning'
+				);
+			} else {
+				toastStore.showToast('Layout loaded successfully', 'success');
+			}
 		} catch (error) {
 			console.error('Failed to load layout:', error);
 			toastStore.showToast(

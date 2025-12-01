@@ -98,11 +98,24 @@ function createNewLayout(name: string): void {
 /**
  * Load an existing layout
  * Automatically migrates from older versions
+ * v0.1.1: Loads only first rack from multi-rack files
  * @param layoutData - Layout to load
+ * @returns Number of racks that were in the original file (for toast display)
  */
-function loadLayout(layoutData: Layout): void {
-	layout = migrateLayout(layoutData);
+function loadLayout(layoutData: Layout): number {
+	const migrated = migrateLayout(layoutData);
+	const originalRackCount = migrated.racks.length;
+
+	// Single-rack mode: only load first rack
+	const singleRackData = {
+		...migrated,
+		racks: migrated.racks.slice(0, 1)
+	};
+
+	layout = singleRackData;
 	isDirty = false;
+
+	return originalRackCount;
 }
 
 /**
