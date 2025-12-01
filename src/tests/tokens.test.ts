@@ -44,7 +44,7 @@ describe('Design Token System', () => {
 
 	describe('Primitives - Typography', () => {
 		it('defines font size scale', () => {
-			const sizes = ['xs', 'sm', 'base', 'lg', 'xl'];
+			const sizes = ['xs', 'sm', 'base', 'md', 'lg', 'xl'];
 			sizes.forEach((size) => {
 				expect(tokensCSS).toContain(`--font-size-${size}:`);
 			});
@@ -60,7 +60,7 @@ describe('Design Token System', () => {
 
 	describe('Primitives - Borders and Shadows', () => {
 		it('defines border radius scale', () => {
-			const radii = ['sm', 'md', 'lg', 'full'];
+			const radii = ['sm', 'md', 'lg', 'xl', 'full'];
 			radii.forEach((r) => {
 				expect(tokensCSS).toContain(`--radius-${r}:`);
 			});
@@ -83,7 +83,7 @@ describe('Design Token System', () => {
 		});
 
 		it('defines easing tokens', () => {
-			const easings = ['linear', 'in', 'out', 'in-out'];
+			const easings = ['linear', 'in', 'out', 'in-out', 'spring'];
 			easings.forEach((e) => {
 				expect(tokensCSS).toContain(`--ease-${e}:`);
 			});
@@ -119,7 +119,7 @@ describe('Design Token System', () => {
 	describe('Component Tokens', () => {
 		it('defines rack tokens', () => {
 			expect(tokensCSS).toContain('--rack-width:');
-			expect(tokensCSS).toContain('--u-height:');
+			expect(tokensCSS).toContain('--rack-u-height:');
 		});
 
 		it('defines toolbar tokens', () => {
@@ -133,11 +133,15 @@ describe('Design Token System', () => {
 
 	describe('Theme Support', () => {
 		it('has dark theme defaults in :root', () => {
-			expect(tokensCSS).toMatch(/:root,\s*\[data-theme='dark'\]/);
+			// Dark theme is the default in :root
+			expect(tokensCSS).toContain(':root {');
+			expect(tokensCSS).toContain('--colour-bg: var(--neutral-950)');
 		});
 
 		it('has light theme overrides', () => {
 			expect(tokensCSS).toMatch(/\[data-theme='light'\]/);
+			// Verify light theme overrides background
+			expect(tokensCSS).toContain("[data-theme='light']");
 		});
 	});
 });

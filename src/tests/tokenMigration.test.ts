@@ -68,8 +68,9 @@ describe('Token Migration', () => {
 		const tokensPath = resolve(srcDir, 'lib/styles/tokens.css');
 		const tokensCSS = readFileSync(tokensPath, 'utf-8');
 
-		// Check that both dark and light themes are defined
-		expect(tokensCSS).toContain("[data-theme='dark']");
+		// Check that both dark (default in :root) and light themes are defined
+		expect(tokensCSS).toContain(':root {');
+		expect(tokensCSS).toContain('--colour-bg: var(--neutral-950)'); // dark theme default
 		expect(tokensCSS).toContain("[data-theme='light']");
 	});
 

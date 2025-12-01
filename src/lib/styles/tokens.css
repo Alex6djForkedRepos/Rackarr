@@ -1,40 +1,39 @@
 /**
- * Rackarr Design Token System
- * Three-layer structure: Primitives → Semantic → Component
+ * Rackarr Design Tokens
+ * Three-layer token system for consistent styling
  */
 
-/* ===========================
-   LAYER 1: PRIMITIVES
-   Raw values, no semantic meaning
-   =========================== */
+/* ============================================================
+   LAYER 1: PRIMITIVES (Raw Values)
+   ============================================================ */
 
 :root {
 	/* Spacing Scale (4px base) */
-	--space-0: 0px;
-	--space-1: 4px;
-	--space-2: 8px;
-	--space-3: 12px;
-	--space-4: 16px;
-	--space-5: 20px;
-	--space-6: 24px;
-	--space-8: 32px;
-	--space-10: 40px;
-	--space-12: 48px;
+	--space-0: 0;
+	--space-1: 0.25rem; /* 4px */
+	--space-2: 0.5rem; /* 8px */
+	--space-3: 0.75rem; /* 12px */
+	--space-4: 1rem; /* 16px */
+	--space-5: 1.25rem; /* 20px */
+	--space-6: 1.5rem; /* 24px */
+	--space-8: 2rem; /* 32px */
+	--space-10: 2.5rem; /* 40px */
+	--space-12: 3rem; /* 48px */
 
-	/* Color Palette: Neutrals */
+	/* Color Palette - Neutrals */
 	--neutral-50: #fafafa;
-	--neutral-100: #f5f5f5;
-	--neutral-200: #e5e5e5;
-	--neutral-300: #d4d4d4;
-	--neutral-400: #a3a3a3;
-	--neutral-500: #737373;
-	--neutral-600: #525252;
-	--neutral-700: #404040;
-	--neutral-800: #262626;
-	--neutral-900: #171717;
-	--neutral-950: #0a0a0a;
+	--neutral-100: #f4f4f5;
+	--neutral-200: #e4e4e7;
+	--neutral-300: #d4d4d8;
+	--neutral-400: #a1a1aa;
+	--neutral-500: #71717a;
+	--neutral-600: #52525b;
+	--neutral-700: #3f3f46;
+	--neutral-800: #27272a;
+	--neutral-900: #18181b;
+	--neutral-950: #09090b;
 
-	/* Color Palette: Blue (Primary) */
+	/* Color Palette - Blue (Primary) */
 	--blue-50: #eff6ff;
 	--blue-100: #dbeafe;
 	--blue-200: #bfdbfe;
@@ -46,28 +45,29 @@
 	--blue-800: #1e40af;
 	--blue-900: #1e3a8a;
 
-	/* Color Palette: Red (Error) */
+	/* Color Palette - Red (Error) */
 	--red-50: #fef2f2;
 	--red-500: #ef4444;
 	--red-600: #dc2626;
 	--red-700: #b91c1c;
 
-	/* Color Palette: Green (Success) */
+	/* Color Palette - Green (Success) */
 	--green-50: #f0fdf4;
 	--green-500: #22c55e;
 	--green-600: #16a34a;
 
-	/* Color Palette: Amber (Warning) */
+	/* Color Palette - Amber (Warning) */
 	--amber-50: #fffbeb;
 	--amber-500: #f59e0b;
 	--amber-600: #d97706;
 
 	/* Typography Scale */
-	--font-size-xs: 11px;
-	--font-size-sm: 13px;
-	--font-size-base: 14px;
-	--font-size-lg: 16px;
-	--font-size-xl: 18px;
+	--font-size-xs: 0.6875rem; /* 11px */
+	--font-size-sm: 0.8125rem; /* 13px */
+	--font-size-base: 0.875rem; /* 14px */
+	--font-size-md: 1rem; /* 16px */
+	--font-size-lg: 1.125rem; /* 18px */
+	--font-size-xl: 1.25rem; /* 20px */
 
 	/* Font Weights */
 	--font-weight-normal: 400;
@@ -81,9 +81,10 @@
 	--line-height-relaxed: 1.75;
 
 	/* Border Radius */
-	--radius-sm: 4px;
-	--radius-md: 6px;
-	--radius-lg: 8px;
+	--radius-sm: 0.25rem; /* 4px */
+	--radius-md: 0.375rem; /* 6px */
+	--radius-lg: 0.5rem; /* 8px */
+	--radius-xl: 0.75rem; /* 12px */
 	--radius-full: 9999px;
 
 	/* Shadows */
@@ -92,13 +93,13 @@
 	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-	/* Timing */
+	/* Animation Timing */
 	--duration-instant: 0ms;
 	--duration-fast: 100ms;
 	--duration-normal: 200ms;
 	--duration-slow: 300ms;
 
-	/* Easing */
+	/* Animation Easing */
 	--ease-linear: linear;
 	--ease-in: cubic-bezier(0.4, 0, 1, 1);
 	--ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -106,19 +107,17 @@
 	--ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* ===========================
-   LAYER 2: SEMANTIC TOKENS
-   Dark Theme (Default)
-   =========================== */
+/* ============================================================
+   LAYER 2: SEMANTIC TOKENS (Dark Theme Default)
+   ============================================================ */
 
-:root,
-[data-theme='dark'] {
+:root {
 	/* Backgrounds */
-	--colour-bg: var(--neutral-900);
-	--colour-surface: var(--neutral-800);
-	--colour-surface-raised: var(--neutral-700);
-	--colour-surface-hover: var(--neutral-700);
-	--colour-surface-active: var(--neutral-600);
+	--colour-bg: var(--neutral-950);
+	--colour-surface: var(--neutral-900);
+	--colour-surface-raised: var(--neutral-800);
+	--colour-surface-hover: var(--neutral-800);
+	--colour-surface-active: var(--neutral-700);
 
 	/* Text */
 	--colour-text: var(--neutral-50);
@@ -126,137 +125,122 @@
 	--colour-text-disabled: var(--neutral-600);
 
 	/* Borders */
-	--colour-border: var(--neutral-700);
-	--colour-border-hover: var(--neutral-600);
+	--colour-border: var(--neutral-800);
+	--colour-border-hover: var(--neutral-700);
 	--colour-border-focus: var(--blue-500);
 
 	/* Interactive */
+	--colour-primary: var(--blue-600);
 	--colour-selection: var(--blue-500);
-	--colour-selection-hover: var(--blue-400);
+	--colour-selection-hover: var(--blue-600);
 	--colour-focus-ring: var(--blue-500);
-	--colour-hover: var(--neutral-700);
 
-	/* Semantic */
+	/* Semantic Colors */
 	--colour-success: var(--green-500);
 	--colour-warning: var(--amber-500);
 	--colour-error: var(--red-500);
 
 	/* Drag and Drop */
-	--colour-dnd-valid: var(--blue-500);
-	--colour-dnd-valid-bg: rgb(59 130 246 / 0.15);
+	--colour-dnd-valid: var(--green-500);
+	--colour-dnd-valid-bg: rgba(34, 197, 94, 0.1);
 	--colour-dnd-invalid: var(--red-500);
-	--colour-dnd-invalid-bg: rgb(239 68 68 / 0.15);
-	--colour-dnd-dragging: var(--blue-400);
-
-	/* Component-specific semantic overrides */
-	--colour-rack-interior: var(--neutral-800);
-	--colour-rack-rail: var(--neutral-700);
-	--colour-rack-border: var(--neutral-600);
-	--colour-toolbar-bg: var(--neutral-900);
-	--colour-drawer-bg: var(--neutral-800);
-	--colour-text-secondary: var(--neutral-400);
-	--colour-valid: var(--green-500);
-	--colour-invalid: var(--red-500);
-}
-
-/* ===========================
-   LAYER 2: Light Theme Overrides
-   =========================== */
-
-[data-theme='light'] {
-	/* Backgrounds */
-	--colour-bg: var(--neutral-100);
-	--colour-surface: var(--neutral-50);
-	--colour-surface-raised: var(--neutral-200);
-	--colour-surface-hover: var(--neutral-200);
-	--colour-surface-active: var(--neutral-300);
-
-	/* Text */
-	--colour-text: var(--neutral-900);
-	--colour-text-muted: var(--neutral-500);
-	--colour-text-disabled: var(--neutral-400);
-
-	/* Borders */
-	--colour-border: var(--neutral-300);
-	--colour-border-hover: var(--neutral-400);
-	--colour-border-focus: var(--blue-600);
-
-	/* Interactive */
-	--colour-selection: var(--blue-600);
-	--colour-selection-hover: var(--blue-500);
-	--colour-focus-ring: var(--blue-600);
-	--colour-hover: var(--neutral-200);
-
-	/* Semantic */
-	--colour-success: var(--green-600);
-	--colour-warning: var(--amber-600);
-	--colour-error: var(--red-600);
-
-	/* Drag and Drop */
-	--colour-dnd-valid: var(--blue-600);
-	--colour-dnd-valid-bg: rgb(37 99 235 / 0.1);
-	--colour-dnd-invalid: var(--red-600);
-	--colour-dnd-invalid-bg: rgb(220 38 38 / 0.1);
+	--colour-dnd-invalid-bg: rgba(239, 68, 68, 0.1);
 	--colour-dnd-dragging: var(--blue-500);
-
-	/* Component-specific semantic overrides */
-	--colour-rack-interior: var(--neutral-200);
-	--colour-rack-rail: var(--neutral-300);
-	--colour-rack-border: var(--neutral-400);
-	--colour-toolbar-bg: var(--neutral-50);
-	--colour-drawer-bg: var(--neutral-100);
-	--colour-text-secondary: var(--neutral-500);
-	--colour-valid: var(--green-600);
-	--colour-invalid: var(--red-600);
-
-	/* Lighter shadows for light theme */
-	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.07), 0 8px 10px -6px rgb(0 0 0 / 0.05);
 }
 
-/* ===========================
+/* ============================================================
    LAYER 3: COMPONENT TOKENS
-   =========================== */
+   ============================================================ */
 
 :root {
 	/* Rack */
-	--u-height: 22px;
-	--rack-width: 220px;
-	--rack-rail-width: 20px;
-	--rack-padding: 18px;
-	--rack-bg: var(--colour-rack-interior);
-	--rack-slot: var(--colour-rack-interior);
-	--rack-slot-alt: var(--colour-surface);
-	--rack-grid: var(--colour-border);
+	--rack-u-height: 17.78px; /* 1U height in scaled pixels */
+	--rack-width: 482.6px; /* 19" rack width */
+	--rack-rail-width: 30px;
+	--rack-padding: 16px;
+	--rack-bg: var(--neutral-900);
+	--rack-slot: rgba(255, 255, 255, 0.02);
+	--rack-slot-alt: rgba(255, 255, 255, 0.04);
+	--rack-grid: var(--neutral-800);
 
 	/* Toolbar */
-	--toolbar-height: 52px;
-	--toolbar-bg: var(--colour-toolbar-bg);
-	--toolbar-border: var(--colour-border);
+	--toolbar-height: 56px;
+	--toolbar-bg: var(--neutral-900);
+	--toolbar-border: var(--neutral-800);
 
 	/* Drawer */
-	--drawer-width: 300px;
-	--drawer-bg: var(--colour-drawer-bg);
+	--drawer-width: 320px;
+	--drawer-bg: var(--neutral-900);
 
 	/* Device */
-	--device-font-size: var(--font-size-sm);
+	--device-font-size: var(--font-size-xs);
 	--device-padding: var(--space-2);
 	--device-radius: var(--radius-sm);
 	--device-ghost-opacity: 0.5;
 
 	/* Toast */
-	--toast-bg: var(--colour-surface-raised);
-	--toast-border: var(--colour-border);
+	--toast-bg: var(--neutral-800);
+	--toast-border: var(--neutral-700);
 	--toast-radius: var(--radius-md);
+}
 
-	/* Typography */
-	--font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	--font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+/* ============================================================
+   LIGHT THEME OVERRIDES
+   ============================================================ */
 
-	/* Transitions (legacy support) */
-	--transition-fast: var(--duration-fast) var(--ease-out);
-	--transition-normal: var(--duration-normal) var(--ease-out);
-	--font-size-device: var(--font-size-sm);
+[data-theme='light'] {
+	/* Backgrounds */
+	--colour-bg: var(--neutral-50);
+	--colour-surface: #ffffff;
+	--colour-surface-raised: var(--neutral-100);
+	--colour-surface-hover: var(--neutral-100);
+	--colour-surface-active: var(--neutral-200);
+
+	/* Text */
+	--colour-text: var(--neutral-950);
+	--colour-text-muted: var(--neutral-600);
+	--colour-text-disabled: var(--neutral-400);
+
+	/* Borders */
+	--colour-border: var(--neutral-200);
+	--colour-border-hover: var(--neutral-300);
+	--colour-border-focus: var(--blue-500);
+
+	/* Interactive */
+	--colour-primary: var(--blue-600);
+	--colour-selection: var(--blue-600);
+	--colour-selection-hover: var(--blue-700);
+	--colour-focus-ring: var(--blue-600);
+
+	/* Semantic Colors */
+	--colour-success: var(--green-600);
+	--colour-warning: var(--amber-600);
+	--colour-error: var(--red-600);
+
+	/* Drag and Drop */
+	--colour-dnd-valid: var(--green-600);
+	--colour-dnd-valid-bg: rgba(22, 163, 74, 0.1);
+	--colour-dnd-invalid: var(--red-600);
+	--colour-dnd-invalid-bg: rgba(220, 38, 38, 0.1);
+	--colour-dnd-dragging: var(--blue-600);
+
+	/* Component Overrides */
+	--rack-bg: #ffffff;
+	--rack-slot: rgba(0, 0, 0, 0.02);
+	--rack-slot-alt: rgba(0, 0, 0, 0.04);
+	--rack-grid: var(--neutral-200);
+
+	--toolbar-bg: #ffffff;
+	--toolbar-border: var(--neutral-200);
+
+	--drawer-bg: #ffffff;
+
+	--toast-bg: #ffffff;
+	--toast-border: var(--neutral-200);
+
+	/* Lighter shadows for light theme */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.12), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.18), 0 8px 10px -6px rgb(0 0 0 / 0.12);
 }
