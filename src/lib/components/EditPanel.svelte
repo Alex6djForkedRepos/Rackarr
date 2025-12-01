@@ -150,6 +150,7 @@
 				<input
 					type="text"
 					id="rack-name"
+					class="input-field"
 					bind:value={rackName}
 					onblur={handleNameBlur}
 					onkeydown={handleNameKeydown}
@@ -159,12 +160,13 @@
 			<div class="form-group">
 				<label for="rack-height">Height</label>
 				{#if rackHasDevices}
-					<input type="number" id="rack-height" value={rackHeight} disabled />
+					<input type="number" id="rack-height" class="input-field" value={rackHeight} disabled />
 					<p class="helper-text warning">Remove all devices to resize</p>
 				{:else}
 					<input
 						type="number"
 						id="rack-height"
+						class="input-field"
 						bind:value={rackHeight}
 						onchange={handleHeightChange}
 						min="1"

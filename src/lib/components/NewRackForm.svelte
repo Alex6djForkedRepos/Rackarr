@@ -97,6 +97,7 @@
 			<input
 				type="text"
 				id="rack-name"
+				class="input-field"
 				bind:value={name}
 				placeholder="e.g., Main Server Rack"
 				class:error={nameError}
@@ -134,6 +135,7 @@
 					<input
 						type="number"
 						id="custom-height"
+						class="input-field"
 						aria-label="Custom height"
 						bind:value={customHeight}
 						min={MIN_RACK_HEIGHT}

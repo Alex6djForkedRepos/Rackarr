@@ -74,6 +74,57 @@ textarea {
 	background: var(--colour-text-muted);
 }
 
+/* Form Input Styles */
+.input-field {
+	width: 100%;
+	padding: var(--space-2) var(--space-3);
+	border: 1px solid var(--colour-border);
+	border-radius: var(--radius-md);
+	background-color: var(--colour-surface);
+	color: var(--colour-text);
+	font-size: var(--font-size-base);
+	transition:
+		border-color var(--duration-fast) var(--ease-out),
+		box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Hover state */
+.input-field:hover:not(:disabled):not(:focus) {
+	border-color: var(--colour-border-hover);
+}
+
+/* Focus state */
+.input-field:focus {
+	outline: none;
+	border-color: var(--colour-border-focus);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--colour-selection) 25%, transparent);
+}
+
+/* Invalid state */
+.input-field:invalid,
+.input-field.error {
+	border-color: var(--colour-error);
+}
+
+.input-field:invalid:focus,
+.input-field.error:focus {
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--colour-error) 25%, transparent);
+}
+
+/* Disabled state */
+.input-field:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background-color: var(--colour-surface-muted, rgba(255, 255, 255, 0.02));
+}
+
+/* Error message */
+.input-error {
+	color: var(--colour-error);
+	font-size: var(--font-size-xs);
+	margin-top: var(--space-1);
+}
+
 /* Utility classes */
 .sr-only {
 	position: absolute;

@@ -133,6 +133,7 @@
 			<input
 				type="text"
 				id="device-name"
+				class="input-field"
 				bind:value={name}
 				placeholder="e.g., Dell PowerEdge R740"
 				class:error={nameError}
@@ -148,6 +149,7 @@
 				<input
 					type="number"
 					id="device-height"
+					class="input-field"
 					bind:value={height}
 					min={MIN_DEVICE_HEIGHT}
 					max={MAX_DEVICE_HEIGHT}
@@ -160,7 +162,12 @@
 
 			<div class="form-group">
 				<label for="device-category">Category</label>
-				<select id="device-category" value={category} onchange={handleCategoryChange}>
+				<select
+					id="device-category"
+					class="input-field"
+					value={category}
+					onchange={handleCategoryChange}
+				>
 					{#each ALL_CATEGORIES as cat (cat)}
 						<option value={cat}>{getCategoryLabel(cat)}</option>
 					{/each}
@@ -201,6 +208,7 @@
 			<label for="device-notes">Notes (optional)</label>
 			<textarea
 				id="device-notes"
+				class="input-field"
 				bind:value={notes}
 				placeholder="Additional notes about the device..."
 				rows="3"
