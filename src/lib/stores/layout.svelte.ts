@@ -385,11 +385,12 @@ function moveDevice(rackId: string, deviceIndex: number, newPosition: number): b
 
 /**
  * Move a device from one rack to another
+ * v0.1.1: Cross-rack moves disabled in single-rack mode
  * @param fromRackId - Source rack ID
  * @param deviceIndex - Index of device in source rack
  * @param toRackId - Target rack ID
  * @param newPosition - Position in target rack
- * @returns true if moved successfully, false otherwise
+ * @returns true if moved successfully, false otherwise (cross-rack always false)
  */
 function moveDeviceToRack(
 	fromRackId: string,
@@ -402,46 +403,11 @@ function moveDeviceToRack(
 		return moveDevice(fromRackId, deviceIndex, newPosition);
 	}
 
-	const fromRackIndex = layout.racks.findIndex((r) => r.id === fromRackId);
-	const toRackIndex = layout.racks.findIndex((r) => r.id === toRackId);
-	if (fromRackIndex === -1 || toRackIndex === -1) return false;
-
-	const fromRack = layout.racks[fromRackIndex]!;
-	const toRack = layout.racks[toRackIndex]!;
-
-	if (deviceIndex < 0 || deviceIndex >= fromRack.devices.length) return false;
-
-	const placedDevice = fromRack.devices[deviceIndex]!;
-	const device = layout.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
-	if (!device) return false;
-
-	// Check if placement is valid in target rack
-	if (!canPlaceDevice(toRack, layout.deviceLibrary, device.height, newPosition)) {
-		return false;
-	}
-
-	// Remove from source rack
-	const updatedFromDevices = fromRack.devices.filter((_, idx) => idx !== deviceIndex);
-
-	// Add to target rack (preserve face from source device)
-	const updatedToDevices = [
-		...toRack.devices,
-		{ libraryId: placedDevice.libraryId, position: newPosition, face: placedDevice.face }
-	];
-
-	// Update both racks
-	layout.racks = layout.racks.map((r) => {
-		if (r.id === fromRackId) {
-			return { ...r, devices: updatedFromDevices };
-		}
-		if (r.id === toRackId) {
-			return { ...r, devices: updatedToDevices };
-		}
-		return r;
-	});
-	isDirty = true;
-
-	return true;
+	// Cross-rack moves blocked in single-rack mode (v0.1.1)
+	// This code path should never be reached with MAX_RACKS=1,
+	// but we block explicitly for safety
+	console.debug('Cross-rack move blocked in single-rack mode');
+	return false;
 }
 
 /**
