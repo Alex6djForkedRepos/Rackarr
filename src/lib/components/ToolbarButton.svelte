@@ -10,11 +10,23 @@
 		disabled?: boolean;
 		active?: boolean;
 		expanded?: boolean;
+		tooltip?: string;
 		onclick?: () => void;
 		children?: Snippet;
 	}
 
-	let { label, disabled = false, active = false, expanded, onclick, children }: Props = $props();
+	let {
+		label,
+		disabled = false,
+		active = false,
+		expanded,
+		tooltip,
+		onclick,
+		children
+	}: Props = $props();
+
+	// Use tooltip if provided, otherwise fall back to label for title
+	const titleText = $derived(tooltip ?? label);
 
 	function handleClick() {
 		if (!disabled && onclick) {
@@ -30,6 +42,7 @@
 	aria-label={label}
 	aria-pressed={active !== undefined && expanded === undefined ? active : undefined}
 	aria-expanded={expanded !== undefined ? expanded : undefined}
+	title={titleText}
 	{disabled}
 	onclick={handleClick}
 >
@@ -40,40 +53,56 @@
 
 <style>
 	.toolbar-button {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		gap: var(--space-2);
 		width: var(--space-8);
 		height: var(--space-8);
 		padding: var(--space-2);
+		border: none;
 		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--colour-text);
+		cursor: pointer;
 		transition:
 			background-color var(--duration-fast) var(--ease-out),
-			color var(--duration-fast) var(--ease-out);
+			color var(--duration-fast) var(--ease-out),
+			transform var(--duration-fast) var(--ease-out);
 	}
 
+	/* Hover state */
 	.toolbar-button:hover:not(:disabled) {
-		background: var(--colour-surface-hover);
+		background-color: var(--colour-surface-hover);
 	}
 
+	/* Focus state - CRITICAL for accessibility */
 	.toolbar-button:focus-visible {
-		outline: 2px solid var(--colour-focus-ring);
-		outline-offset: var(--space-1);
+		outline: none;
+		box-shadow:
+			0 0 0 2px var(--colour-bg),
+			0 0 0 4px var(--colour-focus-ring);
 	}
 
-	.toolbar-button:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
+	/* Active/pressed state */
+	.toolbar-button:active:not(:disabled) {
+		transform: scale(0.97);
+		background-color: var(--colour-surface-active);
 	}
 
+	/* Toggle active state */
 	.toolbar-button.active {
-		background: var(--colour-selection);
-		color: var(--neutral-50);
+		background-color: color-mix(in srgb, var(--colour-selection) 20%, transparent);
+		color: var(--colour-selection);
 	}
 
 	.toolbar-button.active:hover:not(:disabled) {
-		background: var(--colour-selection-hover);
+		background-color: color-mix(in srgb, var(--colour-selection) 30%, transparent);
+	}
+
+	/* Disabled state */
+	.toolbar-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>
