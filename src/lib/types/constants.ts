@@ -18,6 +18,7 @@ export const CATEGORY_COLOURS: Record<DeviceCategory, string> = {
 	kvm: '#FF8C00',
 	'av-media': '#9932CC',
 	cooling: '#00CED1',
+	shelf: '#8B4513',
 	blank: '#2F4F4F',
 	other: '#808080'
 } as const;
@@ -34,6 +35,7 @@ export const ALL_CATEGORIES: readonly DeviceCategory[] = [
 	'kvm',
 	'av-media',
 	'cooling',
+	'shelf',
 	'blank',
 	'other'
 ] as const;

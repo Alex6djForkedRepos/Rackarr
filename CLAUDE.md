@@ -11,13 +11,13 @@ Full planning documentation is in `docs/planning/`:
 
 ```
 docs/planning/
-├── spec.md              → Technical specification (v0.2)
-├── roadmap.md           → Version planning
-├── v0.3-spec.md         → Next version specification
+├── spec-combined.md     → Technical specification (single source of truth)
+├── roadmap.md           → Version planning and future features
 └── CLAUDE-planning.md   → Full project instructions
 ```
 
-**Read `docs/planning/CLAUDE-planning.md` for complete instructions including scope guard.**
+**Read `docs/planning/spec-combined.md` for complete technical specification.**
+**Read `docs/planning/CLAUDE-planning.md` for development instructions including scope guard.**
 
 ## Autonomous Mode
 

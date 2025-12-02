@@ -231,6 +231,7 @@ describe('Constants', () => {
 				'kvm',
 				'av-media',
 				'cooling',
+				'shelf',
 				'blank',
 				'other'
 			];
@@ -248,11 +249,15 @@ describe('Constants', () => {
 		it('returns correct colour for network category', () => {
 			expect(CATEGORY_COLOURS.network).toBe('#7B68EE');
 		});
+
+		it('returns correct colour for shelf category', () => {
+			expect(CATEGORY_COLOURS.shelf).toBe('#8B4513');
+		});
 	});
 
 	describe('ALL_CATEGORIES', () => {
-		it('contains all 10 categories', () => {
-			expect(ALL_CATEGORIES).toHaveLength(10);
+		it('contains all 11 categories', () => {
+			expect(ALL_CATEGORIES).toHaveLength(11);
 		});
 
 		it('includes all expected categories', () => {
@@ -264,8 +269,15 @@ describe('Constants', () => {
 			expect(ALL_CATEGORIES).toContain('kvm');
 			expect(ALL_CATEGORIES).toContain('av-media');
 			expect(ALL_CATEGORIES).toContain('cooling');
+			expect(ALL_CATEGORIES).toContain('shelf');
 			expect(ALL_CATEGORIES).toContain('blank');
 			expect(ALL_CATEGORIES).toContain('other');
+		});
+
+		it('has shelf category before blank', () => {
+			const shelfIndex = ALL_CATEGORIES.indexOf('shelf');
+			const blankIndex = ALL_CATEGORIES.indexOf('blank');
+			expect(shelfIndex).toBeLessThan(blankIndex);
 		});
 	});
 
