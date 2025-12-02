@@ -23,7 +23,10 @@ export function createRack(name: string, height: number, view?: RackView): Rack 
 		width: STANDARD_RACK_WIDTH,
 		position: 0,
 		view: view ?? DEFAULT_RACK_VIEW,
-		devices: []
+		devices: [],
+		form_factor: '4-post-cabinet',
+		desc_units: false,
+		starting_unit: 1
 	};
 }
 

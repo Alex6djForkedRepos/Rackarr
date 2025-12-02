@@ -50,6 +50,18 @@ export type Airflow =
 export type WeightUnit = 'kg' | 'g' | 'lb' | 'oz';
 
 /**
+ * Rack form factor types
+ */
+export type FormFactor =
+	| '4-post-cabinet'
+	| '4-post-frame'
+	| '2-post-frame'
+	| 'wall-cabinet'
+	| 'wall-frame'
+	| 'wall-frame-vertical'
+	| 'wall-cabinet-vertical';
+
+/**
  * Device images - front and rear image paths
  */
 export interface DeviceImages {
@@ -119,7 +131,7 @@ export interface Rack {
 	name: string;
 	/** Height in rack units (1-100U) */
 	height: number;
-	/** Width in inches (fixed at 19 for v0.1) */
+	/** Width in inches (10 or 19) */
 	width: number;
 	/** Order position in row (0-indexed) */
 	position: number;
@@ -127,6 +139,12 @@ export interface Rack {
 	view: RackView;
 	/** Devices placed in this rack */
 	devices: PlacedDevice[];
+	/** Rack form factor (default: 4-post-cabinet) */
+	form_factor?: FormFactor;
+	/** Descending units - if true, U1 is at top (default: false) */
+	desc_units?: boolean;
+	/** Starting unit number (default: 1, min: 1) */
+	starting_unit?: number;
 }
 
 /**

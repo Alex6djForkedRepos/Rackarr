@@ -9,7 +9,8 @@ import type {
 	DeviceFace,
 	Airflow,
 	WeightUnit,
-	DeviceImages
+	DeviceImages,
+	FormFactor
 } from '$lib/types';
 import {
 	CATEGORY_COLOURS,
@@ -249,6 +250,77 @@ describe('Types', () => {
 			expect(rack.devices[0]?.libraryId).toBe('device-1');
 			expect(rack.devices[0]?.position).toBe(1);
 			expect(rack.devices[0]?.face).toBe('front');
+		});
+
+		it('accepts rack with all configuration fields', () => {
+			const rack: Rack = {
+				id: '123e4567-e89b-12d3-a456-426614174001',
+				name: 'Configured Rack',
+				height: 42,
+				width: 19,
+				position: 0,
+				view: 'front',
+				devices: [],
+				form_factor: '4-post-cabinet',
+				desc_units: false,
+				starting_unit: 1
+			};
+
+			expect(rack.form_factor).toBe('4-post-cabinet');
+			expect(rack.desc_units).toBe(false);
+			expect(rack.starting_unit).toBe(1);
+		});
+
+		it('accepts rack with descending units', () => {
+			const rack: Rack = {
+				id: '123e4567-e89b-12d3-a456-426614174001',
+				name: 'Descending Rack',
+				height: 42,
+				width: 19,
+				position: 0,
+				view: 'front',
+				devices: [],
+				desc_units: true,
+				starting_unit: 5
+			};
+
+			expect(rack.desc_units).toBe(true);
+			expect(rack.starting_unit).toBe(5);
+		});
+
+		it('works without optional configuration fields (backwards compatible)', () => {
+			const rack: Rack = {
+				id: '123e4567-e89b-12d3-a456-426614174001',
+				name: 'Simple Rack',
+				height: 42,
+				width: 19,
+				position: 0,
+				view: 'front',
+				devices: []
+			};
+
+			expect(rack.form_factor).toBeUndefined();
+			expect(rack.desc_units).toBeUndefined();
+			expect(rack.starting_unit).toBeUndefined();
+		});
+	});
+
+	describe('FormFactor type', () => {
+		it('accepts all valid form factor values', () => {
+			const formFactors: FormFactor[] = [
+				'4-post-cabinet',
+				'4-post-frame',
+				'2-post-frame',
+				'wall-cabinet',
+				'wall-frame',
+				'wall-frame-vertical',
+				'wall-cabinet-vertical'
+			];
+
+			expect(formFactors).toHaveLength(7);
+			formFactors.forEach((value) => {
+				expect(typeof value).toBe('string');
+			});
 		});
 	});
 

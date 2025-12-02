@@ -72,6 +72,21 @@ describe('Rack Utilities', () => {
 			const rack = createRack('Test', 42, 'rear');
 			expect(rack.view).toBe('rear');
 		});
+
+		it('sets default form_factor to 4-post-cabinet', () => {
+			const rack = createRack('Test', 42);
+			expect(rack.form_factor).toBe('4-post-cabinet');
+		});
+
+		it('sets default desc_units to false', () => {
+			const rack = createRack('Test', 42);
+			expect(rack.desc_units).toBe(false);
+		});
+
+		it('sets default starting_unit to 1', () => {
+			const rack = createRack('Test', 42);
+			expect(rack.starting_unit).toBe(1);
+		});
 	});
 
 	describe('validateRack', () => {
