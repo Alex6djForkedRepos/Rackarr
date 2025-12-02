@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-12-01
+
+### Added
+
+- WCAG AA accessibility compliance with ARIA audit
+- Color contrast verification utilities
+- Animation keyframes system (device-settle, drawer, toast, dialog, shake)
+- Reduced motion support (CSS + JavaScript utilities)
+- 5th U number highlighting for easier rack unit reading
+- Tabular figures and monospace font for U numbers
+- Comprehensive accessibility test suite
+
+### Changed
+
+- Design tokens system consolidated in `src/lib/styles/tokens.css`
+- Edit panel visual hierarchy improved
+- Form inputs consistent styling
+
+### Technical
+
+- Test suite expanded to 1043 tests
+- Added accessibility checklist documentation
+
 ## [0.2.0] - 2025-11-30
 
 ### Added
