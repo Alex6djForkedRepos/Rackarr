@@ -1,0 +1,132 @@
+import { test, expect, Page } from '@playwright/test';
+
+/**
+ * Helper to create a rack with given name
+ */
+async function createRack(page: Page, name: string, height: number = 24) {
+	await page.click('.btn-primary:has-text("New Rack")');
+	await page.fill('#rack-name', name);
+
+	const presetHeights = [12, 18, 24, 42];
+	if (presetHeights.includes(height)) {
+		await page.click(`.height-btn:has-text("${height}U")`);
+	} else {
+		await page.click('.height-btn:has-text("Custom")');
+		await page.fill('#custom-height', String(height));
+	}
+
+	await page.click('button:has-text("Create")');
+	await expect(page.locator('.rack-container')).toBeVisible();
+}
+
+/**
+ * Helper to drag device to rack using JavaScript events
+ */
+async function dragDeviceToRack(page: Page, deviceName: string) {
+	// Find the device item using Playwright's locator (supports :has-text)
+	const deviceLocator = page.locator(`.device-palette-item:has-text("${deviceName}")`);
+	await expect(deviceLocator).toBeVisible();
+
+	// Get the element handle and use evaluate on it
+	const deviceHandle = await deviceLocator.elementHandle();
+	const rackHandle = await page.locator('.rack-container svg').elementHandle();
+
+	if (!deviceHandle || !rackHandle) {
+		throw new Error(`Could not find device "${deviceName}" or rack`);
+	}
+
+	await page.evaluate(
+		([device, rack]) => {
+			const dataTransfer = new DataTransfer();
+
+			device.dispatchEvent(
+				new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer })
+			);
+			rack.dispatchEvent(
+				new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer })
+			);
+			rack.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }));
+			device.dispatchEvent(
+				new DragEvent('dragend', { bubbles: true, cancelable: true, dataTransfer })
+			);
+		},
+		[deviceHandle, rackHandle] as const
+	);
+
+	await page.waitForTimeout(100);
+}
+
+test.describe('Shelf Category', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/');
+		await page.evaluate(() => sessionStorage.clear());
+		await page.reload();
+	});
+
+	test('shelf devices appear in device library', async ({ page }) => {
+		// Device library sidebar should be visible (fixed sidebar in v0.3)
+		const sidebar = page.locator('.sidebar');
+		await expect(sidebar).toBeVisible();
+
+		// Search for shelf devices
+		const searchInput = page.locator('.search-input');
+		await searchInput.fill('shelf');
+
+		// Should find shelf devices
+		await expect(page.locator('.device-palette-item:has-text("1U Shelf")')).toBeVisible();
+		await expect(page.locator('.device-palette-item:has-text("2U Shelf")')).toBeVisible();
+		await expect(page.locator('.device-palette-item:has-text("4U Shelf")')).toBeVisible();
+	});
+
+	test('can add shelf device to rack', async ({ page }) => {
+		// Create a rack first
+		await createRack(page, 'Shelf Test Rack', 24);
+
+		// Filter to shelf category
+		const searchInput = page.locator('.search-input');
+		await searchInput.fill('shelf');
+		await page.waitForTimeout(200);
+
+		// Drag shelf device to rack
+		await dragDeviceToRack(page, '1U Shelf');
+
+		// Verify shelf is placed in rack
+		await expect(page.locator('.rack-device')).toBeVisible({ timeout: 5000 });
+	});
+
+	test('shelf icon displays correctly', async ({ page }) => {
+		// Search for shelf devices
+		const searchInput = page.locator('.search-input');
+		await searchInput.fill('shelf');
+
+		// Find a shelf device in the palette
+		const shelfItem = page.locator('.device-palette-item:has-text("1U Shelf")');
+		await expect(shelfItem).toBeVisible();
+
+		// Should have an SVG icon
+		const icon = shelfItem.locator('svg');
+		await expect(icon).toBeVisible();
+	});
+
+	test('shelf has correct colour (#8B4513)', async ({ page }) => {
+		// Create a rack
+		await createRack(page, 'Colour Test Rack', 24);
+
+		// Filter to shelf
+		const searchInput = page.locator('.search-input');
+		await searchInput.fill('shelf');
+		await page.waitForTimeout(200);
+
+		// Add shelf device
+		await dragDeviceToRack(page, '1U Shelf');
+
+		// Check the device has the shelf colour
+		const placedDevice = page.locator('.rack-device').first();
+		await expect(placedDevice).toBeVisible({ timeout: 5000 });
+
+		// The fill should be the shelf colour #8B4513
+		const deviceRect = placedDevice.locator('rect').first();
+		const fill = await deviceRect.getAttribute('fill');
+		expect(fill?.toLowerCase()).toBe('#8b4513');
+	});
+});

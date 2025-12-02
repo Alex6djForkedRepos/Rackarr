@@ -25,7 +25,7 @@ test.describe('Persistence', () => {
 		await page.reload();
 	});
 
-	test('save layout downloads JSON file', async ({ page }) => {
+	test('save layout downloads ZIP file', async ({ page }) => {
 		// Create a rack
 		await page.click('.btn-primary:has-text("New Rack")');
 		await fillRackForm(page, 'Save Test Rack', 18);
@@ -39,7 +39,7 @@ test.describe('Persistence', () => {
 
 		// Wait for download
 		const download = await downloadPromise;
-		expect(download.suggestedFilename()).toMatch(/\.json$/);
+		expect(download.suggestedFilename()).toMatch(/\.rackarr\.zip$/);
 	});
 
 	test('saved file contains correct layout structure', async ({ page }) => {
@@ -60,8 +60,17 @@ test.describe('Persistence', () => {
 
 		if (path) {
 			const fs = await import('fs/promises');
-			const content = await fs.readFile(path, 'utf-8');
-			const layout = JSON.parse(content);
+			const JSZip = (await import('jszip')).default;
+
+			// Read the ZIP file
+			const zipData = await fs.readFile(path);
+			const zip = await JSZip.loadAsync(zipData);
+
+			// Extract layout.json from the ZIP
+			const layoutJson = await zip.file('layout.json')?.async('string');
+			expect(layoutJson).toBeDefined();
+
+			const layout = JSON.parse(layoutJson!);
 
 			// Verify structure
 			expect(layout).toHaveProperty('version');
@@ -74,6 +83,9 @@ test.describe('Persistence', () => {
 	});
 
 	test('load layout from file', async ({ page }) => {
+		const fs = await import('fs');
+		const path = await import('path');
+
 		// First create and save a layout
 		await page.click('.btn-primary:has-text("New Rack")');
 		await fillRackForm(page, 'Load Test Rack', 24);
@@ -82,7 +94,14 @@ test.describe('Persistence', () => {
 		const downloadPromise = page.waitForEvent('download');
 		await page.click('button[aria-label="Save"]');
 		const download = await downloadPromise;
-		const path = await download.path();
+
+		// Save to a specific path
+		const downloadsPath = path.join(process.cwd(), 'e2e', 'downloads');
+		if (!fs.existsSync(downloadsPath)) {
+			fs.mkdirSync(downloadsPath, { recursive: true });
+		}
+		const savedPath = path.join(downloadsPath, 'load-test.rackarr.zip');
+		await download.saveAs(savedPath);
 
 		// Clear session and reload
 		await page.evaluate(() => sessionStorage.clear());
@@ -99,13 +118,16 @@ test.describe('Persistence', () => {
 
 		// Handle file chooser
 		const fileChooser = await fileChooserPromise;
-		if (path) {
-			await fileChooser.setFiles(path);
-		}
+		await fileChooser.setFiles(savedPath);
 
 		// Layout should be loaded
 		await expect(page.locator('.rack-container')).toBeVisible({ timeout: 5000 });
-		await expect(page.locator('text=Load Test Rack')).toBeVisible();
+		await expect(page.locator('.rack-name')).toContainText('Load Test Rack');
+
+		// Cleanup
+		if (fs.existsSync(savedPath)) {
+			fs.unlinkSync(savedPath);
+		}
 	});
 
 	// Session auto-save is planned for a later phase (see App.svelte comment)

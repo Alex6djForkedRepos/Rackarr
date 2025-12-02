@@ -10,9 +10,7 @@ const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
 beforeAll(() => {
-	// @ts-expect-error - polyfill for jsdom
 	URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-	// @ts-expect-error - polyfill for jsdom
 	URL.revokeObjectURL = vi.fn();
 });
 
@@ -62,7 +60,9 @@ describe('Archive Utilities', () => {
 
 			expect(zip.files['layout.json']).toBeDefined();
 
-			const content = await zip.files['layout.json'].async('string');
+			const layoutFile = zip.files['layout.json'];
+			expect(layoutFile).toBeDefined();
+			const content = await layoutFile!.async('string');
 			const parsed = JSON.parse(content);
 			expect(parsed.name).toBe('Test Layout');
 		});

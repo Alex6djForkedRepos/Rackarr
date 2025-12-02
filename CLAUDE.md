@@ -1,9 +1,20 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.2.1
+**Version:** 0.3.0
 
 ---
+
+## v0.3.0 Features
+
+- 11 device categories (+ shelf category)
+- Save/load as ZIP archive (`.rackarr.zip`) with embedded images
+- Device images (front/rear) stored in archive
+- Label/image display mode toggle (keyboard: `I`)
+- Fixed device library sidebar (always visible)
+- 10" and 19" rack width options
+- Bundled export with metadata (ZIP containing image + metadata.json)
+- Zod schema validation
 
 ## Planning Docs
 
@@ -81,6 +92,20 @@ npm run test:e2e     # Playwright E2E
 npm run build        # Production build
 npm run lint         # ESLint check
 ```
+
+### Keyboard Shortcuts
+
+| Key      | Action                  |
+| -------- | ----------------------- |
+| `Ctrl+S` | Save layout             |
+| `Ctrl+O` | Load layout             |
+| `Ctrl+E` | Export                  |
+| `I`      | Toggle display mode     |
+| `F`      | Fit all                 |
+| `Delete` | Delete selection        |
+| `?`      | Show help               |
+| `Escape` | Clear selection / close |
+| `↑↓`     | Move device in rack     |
 
 ---
 

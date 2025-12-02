@@ -68,32 +68,34 @@ function migrateSettings(settings: LayoutSettings): LayoutSettings {
  * Adds form_factor, desc_units, starting_unit if missing (v0.3)
  */
 function migrateRack(rack: Rack): Rack {
-	const migratedRack = { ...rack };
+	// Use Partial to allow missing properties during migration
+	const migratedRack: Partial<Rack> &
+		Pick<Rack, 'id' | 'name' | 'height' | 'width' | 'position' | 'devices'> = { ...rack };
 
 	// Add view property if missing (v0.1 -> v0.2)
-	if (!('view' in migratedRack)) {
+	if (migratedRack.view === undefined) {
 		migratedRack.view = DEFAULT_RACK_VIEW;
 	}
 
 	// Add form_factor if missing (v0.2 -> v0.3)
-	if (!('form_factor' in migratedRack)) {
+	if (migratedRack.form_factor === undefined) {
 		migratedRack.form_factor = DEFAULT_FORM_FACTOR;
 	}
 
 	// Add desc_units if missing (v0.2 -> v0.3)
-	if (!('desc_units' in migratedRack)) {
+	if (migratedRack.desc_units === undefined) {
 		migratedRack.desc_units = DEFAULT_DESC_UNITS;
 	}
 
 	// Add starting_unit if missing (v0.2 -> v0.3)
-	if (!('starting_unit' in migratedRack)) {
+	if (migratedRack.starting_unit === undefined) {
 		migratedRack.starting_unit = DEFAULT_STARTING_UNIT;
 	}
 
 	// Migrate all placed devices
 	migratedRack.devices = rack.devices.map(migrateDevice);
 
-	return migratedRack;
+	return migratedRack as Rack;
 }
 
 /**
@@ -101,12 +103,15 @@ function migrateRack(rack: Rack): Rack {
  * Adds face property if missing
  */
 function migrateDevice(device: PlacedDevice): PlacedDevice {
-	const migratedDevice = { ...device };
+	// Use Partial to allow missing properties during migration
+	const migratedDevice: Partial<PlacedDevice> & Pick<PlacedDevice, 'libraryId' | 'position'> = {
+		...device
+	};
 
 	// Add face property if missing (v0.1 -> v0.2)
-	if (!('face' in migratedDevice)) {
+	if (migratedDevice.face === undefined) {
 		migratedDevice.face = DEFAULT_DEVICE_FACE;
 	}
 
-	return migratedDevice;
+	return migratedDevice as PlacedDevice;
 }

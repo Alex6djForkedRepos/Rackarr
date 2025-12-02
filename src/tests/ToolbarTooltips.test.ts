@@ -17,7 +17,6 @@ describe('Toolbar Tooltips', () => {
 			const { container } = render(Toolbar, {
 				props: {
 					hasSelection: true,
-					paletteOpen: false,
 					theme: 'dark'
 				}
 			});

@@ -33,6 +33,7 @@ describe('DnD Within Rack', () => {
 		height: 12,
 		width: 19,
 		position: 0,
+		view: 'front',
 		devices: []
 	};
 
@@ -63,7 +64,7 @@ describe('DnD Within Rack', () => {
 			// Rack with device at U5-U6
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Without exclusion, dropping at U5 would be blocked
@@ -80,8 +81,8 @@ describe('DnD Within Rack', () => {
 			const rackWithDevices: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'device-1', position: 5 }, // Index 0: U5-U6
-					{ libraryId: 'device-2', position: 8 } // Index 1: U8
+					{ libraryId: 'device-1', position: 5, face: 'front' }, // Index 0: U5-U6
+					{ libraryId: 'device-2', position: 8, face: 'front' } // Index 1: U8
 				]
 			};
 
@@ -93,7 +94,7 @@ describe('DnD Within Rack', () => {
 		it('returns valid for same position (no-op move)', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Moving device back to its original position is valid
@@ -104,7 +105,7 @@ describe('DnD Within Rack', () => {
 		it('returns valid for new position without collision', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Moving device from U5 to U8 (empty space)
@@ -138,7 +139,7 @@ describe('DnD Within Rack', () => {
 			// Device at U5, moving to U6
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 5 }]
+				devices: [{ libraryId: 'dev-1', position: 5, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 6, 0);
@@ -149,7 +150,7 @@ describe('DnD Within Rack', () => {
 			// Device at U5, moving to U4
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 5 }]
+				devices: [{ libraryId: 'dev-1', position: 5, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 4, 0);
@@ -160,7 +161,7 @@ describe('DnD Within Rack', () => {
 			// 2U device at U11, moving to U12 would go beyond rack (12U rack)
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 11 }]
+				devices: [{ libraryId: 'dev-1', position: 11, face: 'front' }]
 			};
 
 			// Device at U11-U12, moving to U12-U13 is invalid (beyond 12U)
@@ -172,7 +173,7 @@ describe('DnD Within Rack', () => {
 			// Device at U1, cannot move below
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 1 }]
+				devices: [{ libraryId: 'dev-1', position: 1, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 0, 0);
@@ -184,8 +185,8 @@ describe('DnD Within Rack', () => {
 			const rack: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'dev-1', position: 3 },
-					{ libraryId: 'dev-2', position: 7 }
+					{ libraryId: 'dev-1', position: 3, face: 'front' },
+					{ libraryId: 'dev-2', position: 7, face: 'front' }
 				]
 			};
 
@@ -199,8 +200,8 @@ describe('DnD Within Rack', () => {
 			const rack: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'dev-1', position: 3 },
-					{ libraryId: 'dev-2', position: 7 }
+					{ libraryId: 'dev-1', position: 3, face: 'front' },
+					{ libraryId: 'dev-2', position: 7, face: 'front' }
 				]
 			};
 

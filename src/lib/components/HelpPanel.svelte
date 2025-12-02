@@ -13,16 +13,15 @@
 
 	let { open, onclose }: Props = $props();
 
-	// Keyboard shortcuts from spec Section 8
+	// Keyboard shortcuts (v0.3.0)
 	const shortcuts = [
 		{ key: 'Escape', action: 'Clear selection / Close dialog' },
 		{ key: 'Delete / Backspace', action: 'Delete selected rack or device' },
 		{ key: 'Arrow Up', action: 'Move device up 1U' },
 		{ key: 'Arrow Down', action: 'Move device down 1U' },
-		{ key: 'Arrow Left', action: 'Move rack left' },
-		{ key: 'Arrow Right', action: 'Move rack right' },
-		{ key: 'D', action: 'Toggle device palette' },
-		{ key: 'Ctrl/Cmd + S', action: 'Save layout' },
+		{ key: 'I', action: 'Toggle display mode (Label/Image)' },
+		{ key: 'F', action: 'Fit all (zoom to fit)' },
+		{ key: 'Ctrl/Cmd + S', action: 'Save layout (.rackarr.zip)' },
 		{ key: 'Ctrl/Cmd + O', action: 'Load layout' },
 		{ key: 'Ctrl/Cmd + E', action: 'Export image' },
 		{ key: '?', action: 'Show help' }
@@ -67,6 +66,18 @@
 				A visual rack layout designer for homelabbers. Plan and document your server rack
 				configurations with an intuitive drag-and-drop interface.
 			</p>
+		</section>
+
+		<section class="help-section">
+			<h4>Features</h4>
+			<ul class="features-list">
+				<li>11 device categories including shelf</li>
+				<li>10" and 19" rack width options</li>
+				<li>Device images (front/rear) with Label/Image display toggle</li>
+				<li>Save as .rackarr.zip with embedded images</li>
+				<li>Export as PNG, JPEG, SVG with optional bundled metadata</li>
+				<li>Rack options: form factor, unit numbering direction</li>
+			</ul>
 		</section>
 
 		<section class="help-section">
@@ -188,6 +199,16 @@
 		border-radius: 3px;
 		padding: 4px 8px !important;
 		white-space: nowrap;
+	}
+
+	.features-list {
+		margin: 0;
+		padding: 0 0 0 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		font-size: 13px;
+		color: var(--colour-text-secondary, #a0a0a0);
 	}
 
 	.links-list {

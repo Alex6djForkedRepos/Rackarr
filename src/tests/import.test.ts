@@ -72,7 +72,7 @@ describe('parseDeviceLibraryImport', () => {
 		const result = parseDeviceLibraryImport(json);
 		expect(result.devices).toHaveLength(1);
 		expect(result.skipped).toBe(0);
-		expect(result.devices[0].name).toBe('Server');
+		expect(result.devices[0]?.name).toBe('Server');
 	});
 
 	it('skips invalid entries and reports count', () => {
@@ -85,7 +85,7 @@ describe('parseDeviceLibraryImport', () => {
 		const result = parseDeviceLibraryImport(json);
 		expect(result.devices).toHaveLength(1);
 		expect(result.skipped).toBe(1);
-		expect(result.devices[0].name).toBe('Valid');
+		expect(result.devices[0]?.name).toBe('Valid');
 	});
 
 	it('renames duplicates with (imported) suffix', () => {
@@ -94,7 +94,7 @@ describe('parseDeviceLibraryImport', () => {
 			devices: [{ name: 'Server', height: 2, category: 'server' }]
 		});
 		const result = parseDeviceLibraryImport(json, existingNames);
-		expect(result.devices[0].name).toBe('Server (imported)');
+		expect(result.devices[0]?.name).toBe('Server (imported)');
 	});
 
 	it('assigns unique IDs to imported devices', () => {
@@ -105,9 +105,9 @@ describe('parseDeviceLibraryImport', () => {
 			]
 		});
 		const result = parseDeviceLibraryImport(json);
-		expect(result.devices[0].id).toBeTruthy();
-		expect(result.devices[1].id).toBeTruthy();
-		expect(result.devices[0].id).not.toBe(result.devices[1].id);
+		expect(result.devices[0]?.id).toBeTruthy();
+		expect(result.devices[1]?.id).toBeTruthy();
+		expect(result.devices[0]?.id).not.toBe(result.devices[1]?.id);
 	});
 
 	it('assigns colours to imported devices', () => {
@@ -115,8 +115,8 @@ describe('parseDeviceLibraryImport', () => {
 			devices: [{ name: 'Server', height: 2, category: 'server' }]
 		});
 		const result = parseDeviceLibraryImport(json);
-		expect(result.devices[0].colour).toBeTruthy();
-		expect(result.devices[0].colour).toMatch(/^#[0-9a-fA-F]{6}$/);
+		expect(result.devices[0]?.colour).toBeTruthy();
+		expect(result.devices[0]?.colour).toMatch(/^#[0-9a-fA-F]{6}$/);
 	});
 
 	it('preserves optional notes field', () => {
@@ -124,7 +124,7 @@ describe('parseDeviceLibraryImport', () => {
 			devices: [{ name: 'Server', height: 2, category: 'server', notes: 'Test notes' }]
 		});
 		const result = parseDeviceLibraryImport(json);
-		expect(result.devices[0].notes).toBe('Test notes');
+		expect(result.devices[0]?.notes).toBe('Test notes');
 	});
 
 	it('returns empty array for invalid JSON', () => {
@@ -145,6 +145,6 @@ describe('parseDeviceLibraryImport', () => {
 			devices: [{ name: 'Server', height: 2, category: 'server' }]
 		});
 		const result = parseDeviceLibraryImport(json, existingNames);
-		expect(result.devices[0].name).toBe('Server (imported 2)');
+		expect(result.devices[0]?.name).toBe('Server (imported 2)');
 	});
 });

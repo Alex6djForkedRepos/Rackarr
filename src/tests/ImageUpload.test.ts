@@ -8,9 +8,7 @@ const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
 beforeAll(() => {
-	// @ts-expect-error - polyfill for jsdom
 	URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-	// @ts-expect-error - polyfill for jsdom
 	URL.revokeObjectURL = vi.fn();
 });
 
@@ -180,7 +178,7 @@ describe('ImageUpload Component', () => {
 				expect(onupload).toHaveBeenCalledTimes(1);
 			});
 
-			const callArg = onupload.mock.calls[0][0];
+			const callArg = onupload.mock.calls[0]?.[0];
 			expect(callArg).toHaveProperty('blob');
 			expect(callArg).toHaveProperty('dataUrl');
 			expect(callArg).toHaveProperty('filename');

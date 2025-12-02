@@ -24,7 +24,7 @@ describe('migrateLayout', () => {
 		} as unknown as Layout;
 
 		const result = migrateLayout(v01Layout);
-		expect(result.racks[0].view).toBe('front');
+		expect(result.racks[0]?.view).toBe('front');
 	});
 
 	it('adds face: front to v0.1 placed devices', () => {
@@ -48,7 +48,7 @@ describe('migrateLayout', () => {
 		} as unknown as Layout;
 
 		const result = migrateLayout(v01Layout);
-		expect(result.racks[0].devices[0].face).toBe('front');
+		expect(result.racks[0]?.devices[0]?.face).toBe('front');
 	});
 
 	it('preserves existing v0.2 rack view values', () => {
@@ -73,8 +73,8 @@ describe('migrateLayout', () => {
 		} as unknown as Layout;
 
 		const result = migrateLayout(v02Layout);
-		expect(result.racks[0].view).toBe('rear');
-		expect(result.racks[0].devices[0].face).toBe('both');
+		expect(result.racks[0]?.view).toBe('rear');
+		expect(result.racks[0]?.devices[0]?.face).toBe('both');
 	});
 
 	it('updates version to 0.3.0', () => {
@@ -131,9 +131,9 @@ describe('migrateLayout', () => {
 		} as unknown as Layout;
 
 		const result = migrateLayout(v02Layout);
-		expect(result.racks[0].form_factor).toBe('4-post-cabinet');
-		expect(result.racks[0].desc_units).toBe(false);
-		expect(result.racks[0].starting_unit).toBe(1);
+		expect(result.racks[0]?.form_factor).toBe('4-post-cabinet');
+		expect(result.racks[0]?.desc_units).toBe(false);
+		expect(result.racks[0]?.starting_unit).toBe(1);
 	});
 
 	it('preserves existing v0.3 rack fields', () => {
@@ -163,9 +163,9 @@ describe('migrateLayout', () => {
 		const result = migrateLayout(v03Layout);
 		expect(result.settings.displayMode).toBe('image');
 		expect(result.settings.showLabelsOnImages).toBe(true);
-		expect(result.racks[0].form_factor).toBe('2-post-frame');
-		expect(result.racks[0].desc_units).toBe(true);
-		expect(result.racks[0].starting_unit).toBe(5);
+		expect(result.racks[0]?.form_factor).toBe('2-post-frame');
+		expect(result.racks[0]?.desc_units).toBe(true);
+		expect(result.racks[0]?.starting_unit).toBe(5);
 	});
 
 	it('handles multiple racks with multiple devices', () => {
@@ -201,12 +201,12 @@ describe('migrateLayout', () => {
 
 		const result = migrateLayout(v01Layout);
 
-		expect(result.racks[0].view).toBe('front');
-		expect(result.racks[0].devices[0].face).toBe('front');
-		expect(result.racks[0].devices[1].face).toBe('front');
+		expect(result.racks[0]?.view).toBe('front');
+		expect(result.racks[0]?.devices[0]?.face).toBe('front');
+		expect(result.racks[0]?.devices[1]?.face).toBe('front');
 
-		expect(result.racks[1].view).toBe('front');
-		expect(result.racks[1].devices[0].face).toBe('front');
+		expect(result.racks[1]?.view).toBe('front');
+		expect(result.racks[1]?.devices[0]?.face).toBe('front');
 	});
 
 	it('preserves all other layout properties', () => {
@@ -235,7 +235,7 @@ describe('migrateLayout', () => {
 		expect(result.modified).toBe('2025-01-02T00:00:00Z');
 		expect(result.settings.theme).toBe('light');
 		expect(result.deviceLibrary).toHaveLength(1);
-		expect(result.deviceLibrary[0].name).toBe('Server');
+		expect(result.deviceLibrary[0]?.name).toBe('Server');
 	});
 
 	it('does not modify original layout object', () => {
@@ -266,9 +266,9 @@ describe('migrateLayout', () => {
 		// Original should be unchanged
 		expect(v01Layout.version).toBe(originalVersion);
 		expect(v01Layout.racks).toHaveLength(originalRacksLength);
-		expect((v01Layout.racks[0] as unknown as Record<string, unknown>).view).toBeUndefined();
+		expect((v01Layout.racks[0] as unknown as Record<string, unknown>)?.view).toBeUndefined();
 		expect(
-			(v01Layout.racks[0].devices[0] as unknown as Record<string, unknown>).face
+			(v01Layout.racks[0]?.devices[0] as unknown as Record<string, unknown>)?.face
 		).toBeUndefined();
 	});
 });

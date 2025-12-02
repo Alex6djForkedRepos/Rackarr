@@ -11,6 +11,7 @@ describe('ExportDialog', () => {
 			height: 42,
 			width: 19,
 			position: 0,
+			view: 'front',
 			devices: []
 		},
 		{
@@ -19,6 +20,7 @@ describe('ExportDialog', () => {
 			height: 24,
 			width: 19,
 			position: 1,
+			view: 'front',
 			devices: []
 		}
 	];
@@ -173,7 +175,8 @@ describe('ExportDialog', () => {
 				scope: 'all',
 				includeNames: true,
 				includeLegend: false,
-				background: 'dark'
+				background: 'dark',
+				exportMode: 'quick'
 			});
 		});
 
@@ -213,7 +216,8 @@ describe('ExportDialog', () => {
 				scope: 'selected',
 				includeNames: true,
 				includeLegend: true,
-				background: 'transparent'
+				background: 'transparent',
+				exportMode: 'quick'
 			});
 		});
 	});

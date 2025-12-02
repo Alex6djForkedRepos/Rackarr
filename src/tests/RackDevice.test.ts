@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import RackDevice from '$lib/components/RackDevice.svelte';
 import type { Device } from '$lib/types';
+import { getImageStore, resetImageStore } from '$lib/stores/images.svelte';
+import type { ImageData } from '$lib/types/images';
 
 describe('RackDevice SVG Component', () => {
 	const U_HEIGHT = 22;
@@ -281,6 +283,177 @@ describe('RackDevice SVG Component', () => {
 			const dragHandle = container.querySelector('.drag-handle');
 			expect(dragHandle).toBeInTheDocument();
 			// Cursor style is applied via CSS, just verify element exists
+		});
+	});
+
+	describe('Display Mode', () => {
+		const mockImageData: ImageData = {
+			blob: new Blob(['test'], { type: 'image/png' }),
+			dataUrl: 'data:image/png;base64,dGVzdA==',
+			filename: 'test.png'
+		};
+
+		beforeEach(() => {
+			resetImageStore();
+		});
+
+		it('renders label when displayMode is label', () => {
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'label' }
+			});
+
+			const deviceName = container.querySelector('.device-name');
+			expect(deviceName).toBeInTheDocument();
+			expect(deviceName?.textContent).toBe('Test Server');
+		});
+
+		it('renders image when displayMode is image and device has image', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			const image = container.querySelector('.device-image');
+			expect(image).toBeInTheDocument();
+		});
+
+		it('falls back to label when displayMode is image but no image exists', () => {
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			// Should show label since no image
+			const deviceName = container.querySelector('.device-name');
+			expect(deviceName).toBeInTheDocument();
+		});
+
+		it('shows correct image for front view', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.id, 'rear', {
+				...mockImageData,
+				dataUrl: 'data:image/png;base64,cmVhcg=='
+			});
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			const image = container.querySelector('.device-image');
+			expect(image?.getAttribute('href')).toBe('data:image/png;base64,dGVzdA==');
+		});
+
+		it('shows correct image for rear view', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.id, 'rear', {
+				...mockImageData,
+				dataUrl: 'data:image/png;base64,cmVhcg=='
+			});
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'rear' }
+			});
+
+			const image = container.querySelector('.device-image');
+			expect(image?.getAttribute('href')).toBe('data:image/png;base64,cmVhcg==');
+		});
+
+		it('image scales to fit device dimensions', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			const image = container.querySelector('.device-image');
+			const expectedWidth = RACK_WIDTH - RAIL_WIDTH * 2;
+			const expectedHeight = U_HEIGHT;
+			expect(image?.getAttribute('width')).toBe(String(expectedWidth));
+			expect(image?.getAttribute('height')).toBe(String(expectedHeight));
+		});
+	});
+
+	describe('Label Overlay', () => {
+		const mockImageData: ImageData = {
+			blob: new Blob(['test'], { type: 'image/png' }),
+			dataUrl: 'data:image/png;base64,dGVzdA==',
+			filename: 'test.png'
+		};
+
+		beforeEach(() => {
+			resetImageStore();
+		});
+
+		it('does not show label overlay when showLabelsOnImages is false', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: {
+					...defaultProps,
+					displayMode: 'image',
+					rackView: 'front',
+					showLabelsOnImages: false
+				}
+			});
+
+			// Should have image
+			expect(container.querySelector('.device-image')).toBeInTheDocument();
+			// Should NOT have label overlay
+			expect(container.querySelector('.label-overlay')).not.toBeInTheDocument();
+		});
+
+		it('shows label overlay when showLabelsOnImages is true in image mode', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: {
+					...defaultProps,
+					displayMode: 'image',
+					rackView: 'front',
+					showLabelsOnImages: true
+				}
+			});
+
+			// Should have both image and label overlay
+			expect(container.querySelector('.device-image')).toBeInTheDocument();
+			const overlay = container.querySelector('.label-overlay');
+			expect(overlay).toBeInTheDocument();
+			expect(overlay?.textContent).toBe('Test Server');
+		});
+
+		it('does not show label overlay in label mode even when showLabelsOnImages is true', () => {
+			const { container } = render(RackDevice, {
+				props: {
+					...defaultProps,
+					displayMode: 'label',
+					showLabelsOnImages: true
+				}
+			});
+
+			// Should have device name but not as overlay
+			expect(container.querySelector('.device-name')).toBeInTheDocument();
+			expect(container.querySelector('.label-overlay')).not.toBeInTheDocument();
+		});
+
+		it('does not show label overlay when image mode but no image exists', () => {
+			const { container } = render(RackDevice, {
+				props: {
+					...defaultProps,
+					displayMode: 'image',
+					rackView: 'front',
+					showLabelsOnImages: true
+				}
+			});
+
+			// Falls back to label display, no overlay
+			expect(container.querySelector('.device-name')).toBeInTheDocument();
+			expect(container.querySelector('.label-overlay')).not.toBeInTheDocument();
 		});
 	});
 });

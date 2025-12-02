@@ -193,8 +193,7 @@ const SpecLayoutSchema = z.object({
  * Format Zod errors into user-friendly messages
  */
 function formatZodErrors(error: z.ZodError): string[] {
-	// Use issues property (errors is an alias)
-	const issues = error?.issues ?? error?.errors ?? [];
+	const issues = error.issues;
 	return issues.map((e) => {
 		const path = e.path.join('.');
 		return path ? `${path}: ${e.message}` : e.message;
@@ -294,6 +293,15 @@ export function deserializeLayout(json: string): Layout {
 	// Migrate if needed (supports v0.1.0 and v1.0)
 	if (parsed.version === '0.1.0' || parsed.version === '1.0') {
 		return migrateLayout(parsed);
+	}
+
+	// v0.2.x layouts are structurally compatible with v0.3.0
+	// Just update the version to current
+	if (parsed.version.startsWith('0.2.')) {
+		return {
+			...parsed,
+			version: CURRENT_VERSION
+		};
 	}
 
 	// Check version compatibility for other versions

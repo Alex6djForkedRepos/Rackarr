@@ -66,7 +66,6 @@
 			// Add imported devices to library
 			for (const device of result.devices) {
 				layoutStore.addDeviceToLibrary({
-					id: device.id,
 					name: device.name,
 					height: device.height,
 					category: device.category,

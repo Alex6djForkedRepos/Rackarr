@@ -8,9 +8,7 @@ const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
 beforeAll(() => {
-	// @ts-expect-error - polyfill for jsdom
 	URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-	// @ts-expect-error - polyfill for jsdom
 	URL.revokeObjectURL = vi.fn();
 });
 
@@ -243,9 +241,9 @@ describe('AddDeviceForm Component', () => {
 			await fireEvent.click(submitBtn);
 
 			expect(onAdd).toHaveBeenCalledTimes(1);
-			const callArg = onAdd.mock.calls[0][0];
-			expect(callArg.frontImage).toBeUndefined();
-			expect(callArg.rearImage).toBeUndefined();
+			const callArg = onAdd.mock.calls[0]?.[0];
+			expect(callArg?.frontImage).toBeUndefined();
+			expect(callArg?.rearImage).toBeUndefined();
 		});
 	});
 });

@@ -47,7 +47,7 @@ describe('Token Migration', () => {
 		svelteFilePaths.forEach((path) => {
 			const content = readFileSync(path, 'utf-8');
 			const styleMatch = content.match(/<style[^>]*>([\s\S]*?)<\/style>/);
-			if (styleMatch) {
+			if (styleMatch && styleMatch[1]) {
 				cssFiles.push({ path: path + ' <style>', content: styleMatch[1] });
 			}
 		});

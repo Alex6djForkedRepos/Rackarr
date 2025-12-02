@@ -3,10 +3,11 @@
   Renders a device within a rack at the specified U position
 -->
 <script lang="ts">
-	import type { Device } from '$lib/types';
+	import type { Device, DisplayMode, RackView } from '$lib/types';
 	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
 	import CategoryIcon from './CategoryIcon.svelte';
 	import { IconGrip } from './icons';
+	import { getImageStore } from '$lib/stores/images.svelte';
 
 	interface Props {
 		device: Device;
@@ -17,6 +18,9 @@
 		selected: boolean;
 		uHeight: number;
 		rackWidth: number;
+		displayMode?: DisplayMode;
+		rackView?: RackView;
+		showLabelsOnImages?: boolean;
 		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
@@ -31,10 +35,25 @@
 		selected,
 		uHeight,
 		rackWidth,
+		displayMode = 'label',
+		rackView = 'front',
+		showLabelsOnImages = false,
 		onselect,
 		ondragstart: ondragstartProp,
 		ondragend: ondragendProp
 	}: Props = $props();
+
+	const imageStore = getImageStore();
+
+	// Get the device image for the current view
+	const deviceImage = $derived.by(() => {
+		if (displayMode !== 'image') return null;
+		const face = rackView === 'rear' ? 'rear' : 'front';
+		return imageStore.getDeviceImage(device.id, face);
+	});
+
+	// Should show image or fall back to label
+	const showImage = $derived(displayMode === 'image' && deviceImage?.dataUrl);
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);
@@ -135,24 +154,50 @@
 		/>
 	{/if}
 
-	<!-- Device name (centered) -->
-	<text
-		class="device-name"
-		x={deviceWidth / 2}
-		y={deviceHeight / 2}
-		dominant-baseline="middle"
-		text-anchor="middle"
-	>
-		{device.name}
-	</text>
+	<!-- Device content: Image or Label -->
+	{#if showImage}
+		<!-- Device image -->
+		<image
+			class="device-image"
+			x="0"
+			y="0"
+			width={deviceWidth}
+			height={deviceHeight}
+			href={deviceImage?.dataUrl}
+			preserveAspectRatio="xMidYMid slice"
+		/>
+		<!-- Label overlay when showLabelsOnImages is true -->
+		{#if showLabelsOnImages}
+			<foreignObject
+				x="0"
+				y="0"
+				width={deviceWidth}
+				height={deviceHeight}
+				class="label-overlay-wrapper"
+			>
+				<div class="label-overlay">{device.name}</div>
+			</foreignObject>
+		{/if}
+	{:else}
+		<!-- Device name (centered) -->
+		<text
+			class="device-name"
+			x={deviceWidth / 2}
+			y={deviceHeight / 2}
+			dominant-baseline="middle"
+			text-anchor="middle"
+		>
+			{device.name}
+		</text>
 
-	<!-- Category icon (vertically centered) -->
-	{#if deviceHeight >= 22}
-		<foreignObject x="4" y="0" width="14" height={deviceHeight} class="category-icon-wrapper">
-			<div class="icon-container">
-				<CategoryIcon category={device.category} size={12} />
-			</div>
-		</foreignObject>
+		<!-- Category icon (vertically centered) -->
+		{#if deviceHeight >= 22}
+			<foreignObject x="4" y="0" width="14" height={deviceHeight} class="category-icon-wrapper">
+				<div class="icon-container">
+					<CategoryIcon category={device.category} size={12} />
+				</div>
+			</foreignObject>
+		{/if}
 	{/if}
 </g>
 
@@ -246,5 +291,32 @@
 	.drag-handle:active .grip-icon-container {
 		opacity: 1;
 		transform: translateY(-50%) scale(0.9);
+	}
+
+	.label-overlay-wrapper {
+		overflow: visible;
+		pointer-events: none;
+	}
+
+	.label-overlay {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		height: 100%;
+		padding-bottom: 2px;
+		font-size: var(--font-size-device, 12px);
+		font-family: var(--font-family, system-ui, sans-serif);
+		font-weight: 500;
+		color: #ffffff;
+		text-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.8),
+			0 0 4px rgba(0, 0, 0, 0.5);
+		background: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.6) 0%,
+			rgba(0, 0, 0, 0.3) 50%,
+			transparent 100%
+		);
+		user-select: none;
 	}
 </style>

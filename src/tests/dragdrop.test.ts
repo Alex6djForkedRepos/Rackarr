@@ -76,6 +76,7 @@ describe('Drag and Drop Utilities', () => {
 			height: 12,
 			width: 19,
 			position: 0,
+			view: 'front',
 			devices: []
 		};
 
@@ -110,7 +111,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for collision with existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// Trying to place at U5 (would collide)
@@ -121,7 +122,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for partial collision', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 4 would occupy U4-U5 (collides with U5)
@@ -132,7 +133,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "valid" for position adjacent to existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5 }] // Device at U5-U6
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 7 would occupy U7-U8 (no collision)

@@ -16,7 +16,7 @@ declare global {
 // Check for debug flag - automatically enabled in dev mode
 const getDebugFlag = (): boolean => {
 	// Always enable in development mode
-	if (import.meta.env.DEV) {
+	if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
 		return true;
 	}
 
@@ -80,7 +80,7 @@ if (typeof window !== 'undefined') {
 	};
 
 	// Log mode on startup
-	if (import.meta.env.DEV) {
+	if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
 		console.log('[RACKARR] Running in development mode - debug logging enabled');
 	}
 }

@@ -8,7 +8,9 @@
 		ExportFormat,
 		ExportScope,
 		ExportBackground,
-		ExportOptions
+		ExportOptions,
+		ExportMode,
+		BundledExportOptions
 	} from '$lib/types';
 	import Dialog from './Dialog.svelte';
 
@@ -16,7 +18,7 @@
 		open: boolean;
 		racks: Rack[];
 		selectedRackId: string | null;
-		onexport?: (event: CustomEvent<ExportOptions>) => void;
+		onexport?: (event: CustomEvent<ExportOptions | BundledExportOptions>) => void;
 		oncancel?: () => void;
 	}
 
@@ -28,6 +30,8 @@
 	let includeNames = $state(true);
 	let includeLegend = $state(false);
 	let background = $state<ExportBackground>('dark');
+	let exportMode = $state<ExportMode>('quick');
+	let includeSource = $state(true);
 
 	// Computed: Can select "selected rack" scope
 	const canSelectRack = $derived(selectedRackId !== null);
@@ -37,6 +41,12 @@
 
 	// Computed: Can export (has racks)
 	const canExport = $derived(racks.length > 0);
+
+	// Computed: Show bundled options
+	const isBundled = $derived(exportMode === 'bundled');
+
+	// Computed: Bundled not available for SVG (since it's already text-based)
+	const canUseBundled = $derived(format !== 'svg');
 
 	// Reset transparent background when switching away from SVG
 	$effect(() => {
@@ -52,15 +62,36 @@
 		}
 	});
 
+	// Reset export mode to quick when switching to SVG
+	$effect(() => {
+		if (!canUseBundled && exportMode === 'bundled') {
+			exportMode = 'quick';
+		}
+	});
+
 	function handleExport() {
-		const options: ExportOptions = {
-			format,
-			scope,
-			includeNames,
-			includeLegend,
-			background
-		};
-		onexport?.(new CustomEvent('export', { detail: options }));
+		if (exportMode === 'bundled') {
+			const options: BundledExportOptions = {
+				format,
+				scope,
+				includeNames,
+				includeLegend,
+				background,
+				exportMode: 'bundled',
+				includeSource
+			};
+			onexport?.(new CustomEvent('export', { detail: options }));
+		} else {
+			const options: ExportOptions = {
+				format,
+				scope,
+				includeNames,
+				includeLegend,
+				background,
+				exportMode: 'quick'
+			};
+			onexport?.(new CustomEvent('export', { detail: options }));
+		}
 	}
 
 	function handleCancel() {
@@ -95,6 +126,27 @@
 				<option value="pdf">PDF</option>
 			</select>
 		</div>
+
+		<div class="form-group">
+			<label for="export-mode">Export Mode</label>
+			<select id="export-mode" bind:value={exportMode} disabled={!canUseBundled}>
+				<option value="quick">Quick (Single File)</option>
+				<option value="bundled">Bundled (ZIP with Metadata)</option>
+			</select>
+			{#if !canUseBundled}
+				<span class="help-text">Bundled export not available for SVG format</span>
+			{/if}
+		</div>
+
+		{#if isBundled}
+			<div class="form-group checkbox-group bundled-option">
+				<label>
+					<input type="checkbox" bind:checked={includeSource} />
+					Include source layout
+				</label>
+				<span class="help-text">Include the .rackarr.zip file for editing later</span>
+			</div>
+		{/if}
 
 		<div class="form-group">
 			<label for="export-scope">Scope</label>
@@ -193,6 +245,22 @@
 		height: 16px;
 		accent-color: var(--colour-selection, #0066ff);
 		cursor: pointer;
+	}
+
+	.help-text {
+		font-size: 12px;
+		color: var(--colour-text-muted, #808080);
+		margin-top: 4px;
+	}
+
+	.bundled-option {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.form-group select:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.dialog-actions {

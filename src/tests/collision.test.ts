@@ -31,7 +31,8 @@ function createTestRack(
 		height,
 		width: 19,
 		position: 0,
-		devices
+		view: 'front',
+		devices: devices.map((d) => ({ ...d, face: 'front' as const }))
 	};
 }
 
@@ -138,7 +139,7 @@ describe('Collision Detection', () => {
 
 			const collisions = findCollisions(rack, [device1], 2, 4);
 			expect(collisions).toHaveLength(1);
-			expect(collisions[0]).toEqual({ libraryId: 'device-1', position: 5 });
+			expect(collisions[0]).toEqual({ libraryId: 'device-1', position: 5, face: 'front' });
 		});
 
 		it('excludes device at excludeIndex (for move operations)', () => {

@@ -16,9 +16,7 @@ const originalCreateObjectURL = URL.createObjectURL;
 const originalRevokeObjectURL = URL.revokeObjectURL;
 
 beforeAll(() => {
-	// @ts-expect-error - polyfill for jsdom
 	URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-	// @ts-expect-error - polyfill for jsdom
 	URL.revokeObjectURL = vi.fn();
 });
 

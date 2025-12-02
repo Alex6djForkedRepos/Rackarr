@@ -107,6 +107,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -122,6 +123,7 @@ describe('Rack Utilities', () => {
 				height: 0,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -137,6 +139,7 @@ describe('Rack Utilities', () => {
 				height: 101,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -152,6 +155,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -167,6 +171,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 10,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -181,6 +186,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -195,6 +201,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 23,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -212,6 +219,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -228,7 +236,8 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -244,7 +253,8 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -261,7 +271,8 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 10 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 10, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -281,9 +292,10 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: [
-					{ libraryId: 'device-1', position: 1 },
-					{ libraryId: 'device-2', position: 10 }
+					{ libraryId: 'device-1', position: 1, face: 'front' },
+					{ libraryId: 'device-2', position: 10, face: 'front' }
 				]
 			};
 
@@ -303,6 +315,7 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: []
 			};
 
@@ -318,7 +331,8 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			expect(isUAvailable(rack, [device], 5)).toBe(false);
@@ -333,7 +347,8 @@ describe('Rack Utilities', () => {
 				height: 42,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 5 }]
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 			};
 
 			expect(isUAvailable(rack, [device], 1)).toBe(true);

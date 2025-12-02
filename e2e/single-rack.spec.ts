@@ -72,8 +72,8 @@ test.describe('Single Rack Mode (v0.1.1)', () => {
 
 		// Only new rack should exist
 		await expect(page.locator('.rack-container')).toHaveCount(1);
-		await expect(page.locator('text=New Rack')).toBeVisible();
-		await expect(page.locator('text=Old Rack')).not.toBeVisible();
+		await expect(page.locator('.rack-name', { hasText: 'New Rack' })).toBeVisible();
+		await expect(page.locator('.rack-name', { hasText: 'Old Rack' })).not.toBeVisible();
 	});
 
 	test('Cancel preserves existing rack', async ({ page }) => {

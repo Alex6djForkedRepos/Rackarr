@@ -21,6 +21,7 @@ const mockRack = {
 	height: 12,
 	width: 19,
 	position: 0,
+	view: 'front' as const,
 	devices: []
 };
 
@@ -49,7 +50,6 @@ describe('Accessibility Tests', () => {
 		it('Toolbar buttons have accessible labels', () => {
 			render(Toolbar, {
 				props: {
-					paletteOpen: false,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -142,7 +142,6 @@ describe('Accessibility Tests', () => {
 		it('Toolbar buttons are in tab order', () => {
 			render(Toolbar, {
 				props: {
-					paletteOpen: false,
 					hasSelection: false,
 					theme: 'dark' as const
 				}
@@ -261,7 +260,6 @@ describe('Accessibility Tests', () => {
 		it('Buttons use button element, not div', () => {
 			render(Toolbar, {
 				props: {
-					paletteOpen: false,
 					hasSelection: false,
 					theme: 'dark' as const
 				}

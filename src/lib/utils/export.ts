@@ -2,7 +2,8 @@
  * Export utilities for generating images from rack layouts
  */
 
-import type { Rack, Device, ExportOptions, ExportFormat } from '$lib/types';
+import type { Rack, Device, ExportOptions, ExportFormat, ExportMetadata, Layout } from '$lib/types';
+import JSZip from 'jszip';
 
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
@@ -436,4 +437,72 @@ export function generateExportFilename(layoutName: string, format: ExportFormat)
 		.replace(/^-+|-+$/g, '');
 
 	return `${sanitized || 'rackarr-export'}.${format}`;
+}
+
+/**
+ * Generate metadata for bundled export
+ */
+export function generateExportMetadata(
+	layout: Layout,
+	rack: Rack,
+	options: ExportOptions,
+	includeSource: boolean
+): ExportMetadata {
+	return {
+		version: layout.version,
+		exportedAt: new Date().toISOString(),
+		layoutName: layout.name,
+		rackName: rack.name,
+		rackHeight: rack.height,
+		deviceCount: rack.devices.length,
+		exportOptions: options,
+		sourceIncluded: includeSource
+	};
+}
+
+/**
+ * Generate filename for bundled export (ZIP)
+ */
+export function generateBundledExportFilename(layoutName: string, _format: ExportFormat): string {
+	if (!layoutName || layoutName.trim() === '') {
+		return 'rackarr-export.zip';
+	}
+
+	// Sanitize the layout name for filename
+	const sanitized = layoutName
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+
+	return `${sanitized || 'rackarr'}-export.zip`;
+}
+
+/**
+ * Create a bundled export ZIP containing image, metadata, and optionally source
+ */
+export async function createBundledExport(
+	imageBlob: Blob,
+	layout: Layout,
+	rack: Rack,
+	options: ExportOptions,
+	includeSource: boolean,
+	sourceBlob?: Blob
+): Promise<Blob> {
+	const zip = new JSZip();
+
+	// Add image file
+	const imageFilename = `rack.${options.format}`;
+	zip.file(imageFilename, imageBlob);
+
+	// Generate and add metadata
+	const metadata = generateExportMetadata(layout, rack, options, includeSource);
+	zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+
+	// Add source layout if requested
+	if (includeSource && sourceBlob) {
+		zip.file('source.rackarr.zip', sourceBlob);
+	}
+
+	// Generate ZIP blob
+	return zip.generateAsync({ type: 'blob', mimeType: 'application/zip' });
 }

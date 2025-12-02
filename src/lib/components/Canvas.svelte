@@ -10,6 +10,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getCanvasStore, ZOOM_MIN, ZOOM_MAX } from '$lib/stores/canvas.svelte';
+	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { debug } from '$lib/utils/debug';
 	import Rack from './Rack.svelte';
 	import WelcomeScreen from './WelcomeScreen.svelte';
@@ -48,6 +49,7 @@
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
 	const canvasStore = getCanvasStore();
+	const uiStore = getUIStore();
 
 	// Single-rack mode: direct access to first rack (v0.1.1)
 	const rack = $derived(layoutStore.racks[0]);
@@ -213,6 +215,8 @@
 					selectedDeviceId={selectionStore.selectedType === 'device'
 						? selectionStore.selectedId
 						: null}
+					displayMode={uiStore.displayMode}
+					showLabelsOnImages={uiStore.showLabelsOnImages}
 					onselect={(e) => handleRackSelect(e)}
 					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
 					ondevicedrop={(e) => handleDeviceDrop(e)}

@@ -34,7 +34,8 @@ describe('Export Utilities', () => {
 			height: 42,
 			width: 19,
 			position: 0,
-			devices: [{ libraryId: 'device-1', position: 1 }]
+			view: 'front',
+			devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
 		},
 		{
 			id: 'rack-2',
@@ -42,7 +43,8 @@ describe('Export Utilities', () => {
 			height: 24,
 			width: 19,
 			position: 1,
-			devices: [{ libraryId: 'device-2', position: 5 }]
+			view: 'front',
+			devices: [{ libraryId: 'device-2', position: 5, face: 'front' }]
 		}
 	];
 
@@ -260,6 +262,195 @@ describe('Export Utilities', () => {
 	});
 });
 
+describe('Bundled Export Utilities', () => {
+	const mockDevice: Device = {
+		id: 'device-1',
+		name: 'Server 1',
+		height: 2,
+		colour: '#4A90D9',
+		category: 'server'
+	};
+
+	const mockRack: Rack = {
+		id: 'rack-1',
+		name: 'Main Rack',
+		height: 42,
+		width: 19,
+		position: 0,
+		view: 'front',
+		devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
+	};
+
+	const mockLayout = {
+		version: '0.3.0',
+		name: 'Test Layout',
+		racks: [mockRack],
+		deviceLibrary: [mockDevice],
+		settings: {
+			theme: 'dark' as const,
+			displayMode: 'label' as const,
+			showLabelsOnImages: false
+		},
+		created: new Date().toISOString(),
+		modified: new Date().toISOString()
+	};
+
+	describe('generateExportMetadata', () => {
+		it('creates metadata with required fields', async () => {
+			const { generateExportMetadata } = await import('$lib/utils/export');
+
+			const options: ExportOptions = {
+				format: 'png',
+				scope: 'all',
+				includeNames: true,
+				includeLegend: false,
+				background: 'dark'
+			};
+
+			const metadata = generateExportMetadata(mockLayout, mockRack, options, false);
+
+			expect(metadata.version).toBe('0.3.0');
+			expect(metadata.layoutName).toBe('Test Layout');
+			expect(metadata.rackName).toBe('Main Rack');
+			expect(metadata.rackHeight).toBe(42);
+			expect(metadata.deviceCount).toBe(1);
+			expect(metadata.sourceIncluded).toBe(false);
+			expect(metadata.exportedAt).toBeDefined();
+		});
+
+		it('includes export options in metadata', async () => {
+			const { generateExportMetadata } = await import('$lib/utils/export');
+
+			const options: ExportOptions = {
+				format: 'jpeg',
+				scope: 'selected',
+				includeNames: false,
+				includeLegend: true,
+				background: 'light'
+			};
+
+			const metadata = generateExportMetadata(mockLayout, mockRack, options, true);
+
+			expect(metadata.exportOptions.format).toBe('jpeg');
+			expect(metadata.exportOptions.scope).toBe('selected');
+			expect(metadata.exportOptions.background).toBe('light');
+			expect(metadata.sourceIncluded).toBe(true);
+		});
+
+		it('uses ISO timestamp format', async () => {
+			const { generateExportMetadata } = await import('$lib/utils/export');
+
+			const options: ExportOptions = {
+				format: 'png',
+				scope: 'all',
+				includeNames: true,
+				includeLegend: false,
+				background: 'dark'
+			};
+
+			const metadata = generateExportMetadata(mockLayout, mockRack, options, false);
+
+			// Should be valid ISO date string
+			const date = new Date(metadata.exportedAt);
+			expect(date.toISOString()).toBe(metadata.exportedAt);
+		});
+	});
+
+	describe('generateBundledExportFilename', () => {
+		it('generates filename with layout name and format', async () => {
+			const { generateBundledExportFilename } = await import('$lib/utils/export');
+
+			const filename = generateBundledExportFilename('My Layout', 'png');
+			expect(filename).toBe('my-layout-export.zip');
+		});
+
+		it('handles empty layout name', async () => {
+			const { generateBundledExportFilename } = await import('$lib/utils/export');
+
+			const filename = generateBundledExportFilename('', 'png');
+			expect(filename).toBe('rackarr-export.zip');
+		});
+	});
+
+	describe('createBundledExport', () => {
+		beforeEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('creates ZIP with image and metadata', async () => {
+			const { createBundledExport } = await import('$lib/utils/export');
+			const JSZip = (await import('jszip')).default;
+
+			const imageBlob = new Blob(['fake-png-data'], { type: 'image/png' });
+			const options: ExportOptions = {
+				format: 'png',
+				scope: 'all',
+				includeNames: true,
+				includeLegend: false,
+				background: 'dark'
+			};
+
+			const zipBlob = await createBundledExport(imageBlob, mockLayout, mockRack, options, false);
+
+			expect(zipBlob).toBeInstanceOf(Blob);
+			expect(zipBlob.type).toBe('application/zip');
+
+			// Verify ZIP contents
+			const zip = await JSZip.loadAsync(zipBlob);
+			expect(zip.file('rack.png')).not.toBeNull();
+			expect(zip.file('metadata.json')).not.toBeNull();
+		});
+
+		it('includes source when includeSource is true', async () => {
+			const { createBundledExport } = await import('$lib/utils/export');
+			const JSZip = (await import('jszip')).default;
+
+			const imageBlob = new Blob(['fake-png-data'], { type: 'image/png' });
+			const sourceBlob = new Blob(['fake-source-data'], { type: 'application/zip' });
+			const options: ExportOptions = {
+				format: 'png',
+				scope: 'all',
+				includeNames: true,
+				includeLegend: false,
+				background: 'dark'
+			};
+
+			const zipBlob = await createBundledExport(
+				imageBlob,
+				mockLayout,
+				mockRack,
+				options,
+				true,
+				sourceBlob
+			);
+
+			// Verify ZIP contents include source
+			const zip = await JSZip.loadAsync(zipBlob);
+			expect(zip.file('source.rackarr.zip')).not.toBeNull();
+		});
+
+		it('uses correct image filename for format', async () => {
+			const { createBundledExport } = await import('$lib/utils/export');
+			const JSZip = (await import('jszip')).default;
+
+			const imageBlob = new Blob(['fake-jpeg-data'], { type: 'image/jpeg' });
+			const options: ExportOptions = {
+				format: 'jpeg',
+				scope: 'all',
+				includeNames: true,
+				includeLegend: false,
+				background: 'dark'
+			};
+
+			const zipBlob = await createBundledExport(imageBlob, mockLayout, mockRack, options, false);
+
+			const zip = await JSZip.loadAsync(zipBlob);
+			expect(zip.file('rack.jpeg')).not.toBeNull();
+			expect(zip.file('rack.png')).toBeNull();
+		});
+	});
+});
+
 describe('Export Legend', () => {
 	// These tests will be for the legend component if created separately
 	// For now, we test that legend content is included in SVG when enabled
@@ -282,9 +473,10 @@ describe('Export Legend', () => {
 				height: 42,
 				width: 19,
 				position: 0,
+				view: 'front',
 				devices: [
-					{ libraryId: 'device-1', position: 1 },
-					{ libraryId: 'device-1', position: 5 } // Same device twice
+					{ libraryId: 'device-1', position: 1, face: 'front' },
+					{ libraryId: 'device-1', position: 5, face: 'front' } // Same device twice
 				]
 			}
 		];

@@ -23,15 +23,8 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * Manually dispatches HTML5 drag events for more reliable DnD testing
  */
 async function dragDeviceToRack(page: Page) {
-	// Open palette if not already open
-	const paletteOpen = await page.locator('.drawer-left.open').count();
-	if (!paletteOpen) {
-		await page.click('button[aria-label="Device Palette"]');
-		await expect(page.locator('.drawer-left.open')).toBeVisible();
-	}
-
-	// Wait for palette content to be stable
-	await page.waitForTimeout(200);
+	// Device palette is always visible in the fixed sidebar
+	await expect(page.locator('.device-palette-item').first()).toBeVisible();
 
 	// Use evaluate to simulate drag and drop via JavaScript
 	await page.evaluate(() => {
@@ -158,11 +151,7 @@ test.describe('Basic Workflow', () => {
 		// Wait for device to appear
 		await expect(page.locator('.rack-device')).toBeVisible();
 
-		// Close palette first
-		await page.keyboard.press('d');
-		await expect(page.locator('.drawer-left.open')).not.toBeVisible();
-
-		// Now move the device within the rack using arrow keys
+		// Move the device within the rack using arrow keys
 		const device = page.locator('.rack-device');
 		await device.click();
 		await page.keyboard.press('ArrowUp');
@@ -182,9 +171,6 @@ test.describe('Basic Workflow', () => {
 
 		// Wait for device
 		await expect(page.locator('.rack-device')).toBeVisible();
-
-		// Close palette first
-		await page.keyboard.press('d');
 
 		// Click on device to select it
 		await page.locator('.rack-device').click();

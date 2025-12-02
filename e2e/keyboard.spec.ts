@@ -23,60 +23,34 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * Manually dispatches HTML5 drag events for more reliable DnD testing
  */
 async function dragDeviceToRack(page: Page) {
-	// Open palette if not already open
-	const paletteOpen = await page.locator('.drawer-left.open').count();
-	if (!paletteOpen) {
-		await page.click('button[aria-label="Device Palette"]');
-		await expect(page.locator('.drawer-left.open')).toBeVisible();
+	// Device palette is always visible in the fixed sidebar
+	await expect(page.locator('.device-palette-item').first()).toBeVisible();
+
+	// Get element handles using Playwright locators
+	const deviceHandle = await page.locator('.device-palette-item').first().elementHandle();
+	const rackHandle = await page.locator('.rack-container svg').elementHandle();
+
+	if (!deviceHandle || !rackHandle) {
+		throw new Error('Could not find device item or rack');
 	}
 
-	// Wait for palette content to be stable
-	await page.waitForTimeout(200);
+	await page.evaluate(
+		([device, rack]) => {
+			const dataTransfer = new DataTransfer();
 
-	// Use evaluate to simulate drag and drop via JavaScript
-	await page.evaluate(() => {
-		const deviceItem = document.querySelector('.device-palette-item');
-		const rack = document.querySelector('.rack-container svg');
-
-		if (!deviceItem || !rack) {
-			throw new Error('Could not find device item or rack');
-		}
-
-		// Create a DataTransfer object
-		const dataTransfer = new DataTransfer();
-
-		// Create and dispatch dragstart
-		const dragStartEvent = new DragEvent('dragstart', {
-			bubbles: true,
-			cancelable: true,
-			dataTransfer
-		});
-		deviceItem.dispatchEvent(dragStartEvent);
-
-		// Now dispatch dragover on the rack
-		const dragOverEvent = new DragEvent('dragover', {
-			bubbles: true,
-			cancelable: true,
-			dataTransfer
-		});
-		rack.dispatchEvent(dragOverEvent);
-
-		// Finally dispatch drop
-		const dropEvent = new DragEvent('drop', {
-			bubbles: true,
-			cancelable: true,
-			dataTransfer
-		});
-		rack.dispatchEvent(dropEvent);
-
-		// Dispatch dragend
-		const dragEndEvent = new DragEvent('dragend', {
-			bubbles: true,
-			cancelable: true,
-			dataTransfer
-		});
-		deviceItem.dispatchEvent(dragEndEvent);
-	});
+			device.dispatchEvent(
+				new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer })
+			);
+			rack.dispatchEvent(
+				new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer })
+			);
+			rack.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }));
+			device.dispatchEvent(
+				new DragEvent('dragend', { bubbles: true, cancelable: true, dataTransfer })
+			);
+		},
+		[deviceHandle, rackHandle] as const
+	);
 
 	// Wait a bit for state to update
 	await page.waitForTimeout(100);
@@ -138,19 +112,6 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(page.locator('.drawer-right.open')).not.toBeVisible();
 	});
 
-	test('D key toggles device palette', async ({ page }) => {
-		// Palette should be closed initially
-		await expect(page.locator('.drawer-left.open')).not.toBeVisible();
-
-		// Press D to open
-		await page.keyboard.press('d');
-		await expect(page.locator('.drawer-left.open')).toBeVisible();
-
-		// Press D to close
-		await page.keyboard.press('d');
-		await expect(page.locator('.drawer-left.open')).not.toBeVisible();
-	});
-
 	test('? key opens help dialog', async ({ page }) => {
 		// Press ? using keyboard.type which handles shift automatically
 		await page.keyboard.type('?');
@@ -170,7 +131,7 @@ test.describe('Keyboard Shortcuts', () => {
 		// Should trigger download
 		const download = await downloadPromise;
 		if (download) {
-			expect(download.suggestedFilename()).toContain('.json');
+			expect(download.suggestedFilename()).toContain('.rackarr.zip');
 		}
 	});
 
@@ -192,9 +153,6 @@ test.describe('Keyboard Shortcuts', () => {
 
 		// Wait for device
 		await expect(page.locator('.rack-device')).toBeVisible();
-
-		// Close palette first
-		await page.keyboard.press('d');
 
 		// Select the device
 		await page.locator('.rack-device').click();

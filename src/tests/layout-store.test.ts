@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
 import { CURRENT_VERSION } from '$lib/types/constants';
-import type { Device } from '$lib/types';
+import type { Device, Layout } from '$lib/types';
 
 describe('Layout Store', () => {
 	beforeEach(() => {
@@ -120,7 +120,7 @@ describe('Layout Store', () => {
 				]
 			} as unknown as Layout;
 			store.loadLayout(v01Layout);
-			expect(store.racks[0].view).toBe('front');
+			expect(store.racks[0]?.view).toBe('front');
 		});
 
 		it('migrates v0.1 layout by adding face property to placed devices', () => {
@@ -144,7 +144,7 @@ describe('Layout Store', () => {
 				]
 			} as unknown as Layout;
 			store.loadLayout(v01Layout);
-			expect(store.racks[0].devices[0].face).toBe('front');
+			expect(store.racks[0]?.devices[0]?.face).toBe('front');
 		});
 
 		it('updates version to current version after migration', () => {

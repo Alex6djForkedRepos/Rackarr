@@ -202,6 +202,11 @@ export type ExportScope = 'all' | 'selected';
 export type ExportBackground = 'dark' | 'light' | 'transparent';
 
 /**
+ * Export mode - quick (single file) or bundled (ZIP with metadata)
+ */
+export type ExportMode = 'quick' | 'bundled';
+
+/**
  * Export options for generating images/files
  */
 export interface ExportOptions {
@@ -215,4 +220,38 @@ export interface ExportOptions {
 	includeLegend: boolean;
 	/** Background style */
 	background: ExportBackground;
+	/** Export mode - quick or bundled (optional for backwards compat) */
+	exportMode?: ExportMode;
+}
+
+/**
+ * Bundled export options - extends ExportOptions with bundled-specific settings
+ */
+export interface BundledExportOptions extends ExportOptions {
+	/** Export mode must be bundled */
+	exportMode: 'bundled';
+	/** Whether to include source .rackarr.zip in the bundle */
+	includeSource: boolean;
+}
+
+/**
+ * Export metadata for bundled exports
+ */
+export interface ExportMetadata {
+	/** Application version that created this export */
+	version: string;
+	/** ISO timestamp of when export was created */
+	exportedAt: string;
+	/** Name of the layout */
+	layoutName: string;
+	/** Name of the exported rack */
+	rackName: string;
+	/** Height of the rack in U */
+	rackHeight: number;
+	/** Number of devices in the rack */
+	deviceCount: number;
+	/** Export options used */
+	exportOptions: ExportOptions;
+	/** Whether source layout is included in bundle */
+	sourceIncluded: boolean;
 }

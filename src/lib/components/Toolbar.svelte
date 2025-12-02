@@ -27,6 +27,7 @@
 		hasSelection?: boolean;
 		theme?: 'dark' | 'light';
 		displayMode?: DisplayMode;
+		showLabelsOnImages?: boolean;
 		onnewrack?: () => void;
 		onsave?: () => void;
 		onload?: () => void;
@@ -37,6 +38,7 @@
 		onfitall?: () => void;
 		ontoggletheme?: () => void;
 		ontoggledisplaymode?: () => void;
+		ontoggleshowlabelsonimages?: () => void;
 		onhelp?: () => void;
 	}
 
@@ -44,6 +46,7 @@
 		hasSelection = false,
 		theme = 'dark',
 		displayMode = 'label',
+		showLabelsOnImages = false,
 		onnewrack,
 		onsave,
 		onload,
@@ -54,6 +57,7 @@
 		onfitall,
 		ontoggletheme,
 		ontoggledisplaymode,
+		ontoggleshowlabelsonimages,
 		onhelp
 	}: Props = $props();
 
@@ -107,6 +111,20 @@
 				{/if}
 			</ToolbarButton>
 		</Tooltip>
+
+		{#if displayMode === 'image'}
+			<Tooltip text="Show Labels on Images" position="bottom">
+				<label class="checkbox-toggle">
+					<input
+						type="checkbox"
+						checked={showLabelsOnImages}
+						onchange={ontoggleshowlabelsonimages}
+						aria-label="Show labels on images"
+					/>
+					<span class="checkbox-label">Labels</span>
+				</label>
+			</Tooltip>
+		{/if}
 
 		<div class="separator" aria-hidden="true"></div>
 
@@ -210,5 +228,32 @@
 		font-size: var(--font-size-sm);
 		color: var(--colour-text-muted);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.checkbox-toggle {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		cursor: pointer;
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		color: var(--colour-text-muted);
+		font-size: var(--font-size-sm);
+	}
+
+	.checkbox-toggle:hover {
+		background: var(--colour-bg-hover);
+		color: var(--colour-text);
+	}
+
+	.checkbox-toggle input[type='checkbox'] {
+		width: 14px;
+		height: 14px;
+		accent-color: var(--colour-selection);
+		cursor: pointer;
+	}
+
+	.checkbox-label {
+		user-select: none;
 	}
 </style>

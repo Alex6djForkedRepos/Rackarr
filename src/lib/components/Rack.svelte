@@ -4,7 +4,7 @@
   Accepts device drops for placement
 -->
 <script lang="ts">
-	import type { Rack as RackType, Device, RackView } from '$lib/types';
+	import type { Rack as RackType, Device, RackView, DisplayMode } from '$lib/types';
 	import RackDevice from './RackDevice.svelte';
 	import RackViewToggle from './RackViewToggle.svelte';
 	import {
@@ -23,6 +23,8 @@
 		deviceLibrary: Device[];
 		selected: boolean;
 		selectedDeviceId?: string | null;
+		displayMode?: DisplayMode;
+		showLabelsOnImages?: boolean;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
 		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondevicedrop?: (
@@ -47,6 +49,8 @@
 		deviceLibrary,
 		selected,
 		selectedDeviceId = null,
+		displayMode = 'label',
+		showLabelsOnImages = false,
 		onselect,
 		ondeviceselect,
 		ondevicedrop,
@@ -433,6 +437,9 @@
 						selected={selectedDeviceId === placedDevice.libraryId}
 						uHeight={U_HEIGHT}
 						rackWidth={RACK_WIDTH}
+						{displayMode}
+						rackView={rack.view}
+						{showLabelsOnImages}
 						onselect={ondeviceselect}
 						ondragstart={() => handleDeviceDragStart(deviceIndex)}
 						ondragend={handleDeviceDragEnd}

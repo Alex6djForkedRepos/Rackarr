@@ -30,16 +30,18 @@
 		readLayoutFile,
 		detectFileFormat
 	} from '$lib/utils/file';
-	import { extractArchive } from '$lib/utils/archive';
+	import { extractArchive, createArchive } from '$lib/utils/archive';
 	import {
 		generateExportSVG,
 		exportAsSVG,
 		exportAsPNG,
 		exportAsJPEG,
 		downloadBlob,
-		generateExportFilename
+		generateExportFilename,
+		createBundledExport,
+		generateBundledExportFilename
 	} from '$lib/utils/export';
-	import type { ExportOptions } from '$lib/types';
+	import type { ExportOptions, BundledExportOptions } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -195,7 +197,7 @@
 		exportDialogOpen = true;
 	}
 
-	async function handleExportSubmit(options: ExportOptions) {
+	async function handleExportSubmit(options: ExportOptions | BundledExportOptions) {
 		exportDialogOpen = false;
 
 		try {
@@ -205,26 +207,44 @@
 					? layoutStore.racks.filter((r) => r.id === selectionStore.selectedId)
 					: layoutStore.racks;
 
+			// Get the first rack for bundled export metadata
+			const rack = racksToExport[0];
+			if (!rack) {
+				toastStore.showToast('No rack to export', 'warning');
+				return;
+			}
+
 			// Generate the SVG
 			const svg = generateExportSVG(racksToExport, layoutStore.deviceLibrary, options);
 
-			// Generate filename
-			const filename = generateExportFilename(layoutStore.layout.name, options.format);
+			// Check if bundled export
+			const isBundled = options.exportMode === 'bundled';
 
-			// Export based on format
+			// Export based on format and mode
 			if (options.format === 'svg') {
 				const svgString = exportAsSVG(svg);
 				const blob = new Blob([svgString], { type: 'image/svg+xml' });
+				const filename = generateExportFilename(layoutStore.layout.name, options.format);
 				downloadBlob(blob, filename);
 				toastStore.showToast('SVG exported successfully', 'success');
 			} else if (options.format === 'png') {
-				const blob = await exportAsPNG(svg);
-				downloadBlob(blob, filename);
-				toastStore.showToast('PNG exported successfully', 'success');
+				const imageBlob = await exportAsPNG(svg);
+				if (isBundled) {
+					await handleBundledExport(imageBlob, rack, options as BundledExportOptions);
+				} else {
+					const filename = generateExportFilename(layoutStore.layout.name, options.format);
+					downloadBlob(imageBlob, filename);
+					toastStore.showToast('PNG exported successfully', 'success');
+				}
 			} else if (options.format === 'jpeg') {
-				const blob = await exportAsJPEG(svg);
-				downloadBlob(blob, filename);
-				toastStore.showToast('JPEG exported successfully', 'success');
+				const imageBlob = await exportAsJPEG(svg);
+				if (isBundled) {
+					await handleBundledExport(imageBlob, rack, options as BundledExportOptions);
+				} else {
+					const filename = generateExportFilename(layoutStore.layout.name, options.format);
+					downloadBlob(imageBlob, filename);
+					toastStore.showToast('JPEG exported successfully', 'success');
+				}
 			} else if (options.format === 'pdf') {
 				// PDF export will be implemented with jspdf library
 				toastStore.showToast('PDF export not yet implemented', 'info');
@@ -233,6 +253,34 @@
 			console.error('Export failed:', error);
 			toastStore.showToast(error instanceof Error ? error.message : 'Export failed', 'error');
 		}
+	}
+
+	async function handleBundledExport(
+		imageBlob: Blob,
+		rack: import('$lib/types').Rack,
+		options: BundledExportOptions
+	) {
+		// Get source layout if requested
+		let sourceBlob: Blob | undefined;
+		if (options.includeSource) {
+			const images = imageStore.getAllImages();
+			sourceBlob = await createArchive(layoutStore.layout, images);
+		}
+
+		// Create bundled export
+		const zipBlob = await createBundledExport(
+			imageBlob,
+			layoutStore.layout,
+			rack,
+			options,
+			options.includeSource,
+			sourceBlob
+		);
+
+		// Download the ZIP
+		const filename = generateBundledExportFilename(layoutStore.layout.name, options.format);
+		downloadBlob(zipBlob, filename);
+		toastStore.showToast('Bundled export created successfully', 'success');
 	}
 
 	function handleExportCancel() {
@@ -303,6 +351,12 @@
 		layoutStore.updateDisplayMode(uiStore.displayMode);
 	}
 
+	function handleToggleShowLabelsOnImages() {
+		uiStore.toggleShowLabelsOnImages();
+		// Sync with layout settings
+		layoutStore.updateShowLabelsOnImages(uiStore.showLabelsOnImages);
+	}
+
 	function handleHelp() {
 		helpPanelOpen = true;
 	}
@@ -370,6 +424,7 @@
 		hasSelection={selectionStore.hasSelection}
 		theme={uiStore.theme}
 		displayMode={uiStore.displayMode}
+		showLabelsOnImages={uiStore.showLabelsOnImages}
 		onnewrack={handleNewRack}
 		onsave={handleSave}
 		onload={handleLoad}
@@ -380,6 +435,7 @@
 		onfitall={handleFitAll}
 		ontoggletheme={handleToggleTheme}
 		ontoggledisplaymode={handleToggleDisplayMode}
+		ontoggleshowlabelsonimages={handleToggleShowLabelsOnImages}
 		onhelp={handleHelp}
 	/>
 

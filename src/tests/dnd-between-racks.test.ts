@@ -41,7 +41,8 @@ describe('DnD Between Racks', () => {
 		height: 12,
 		width: 19,
 		position: 0,
-		devices: [{ libraryId: 'device-1', position: 5 }]
+		view: 'front',
+		devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
 	};
 
 	const targetRack: Rack = {
@@ -50,6 +51,7 @@ describe('DnD Between Racks', () => {
 		height: 12,
 		width: 19,
 		position: 1,
+		view: 'front',
 		devices: []
 	};
 
@@ -59,7 +61,8 @@ describe('DnD Between Racks', () => {
 		height: 12,
 		width: 19,
 		position: 1,
-		devices: [{ libraryId: 'device-2', position: 3 }]
+		view: 'front',
+		devices: [{ libraryId: 'device-2', position: 3, face: 'front' }]
 	};
 
 	const smallTargetRack: Rack = {
@@ -68,6 +71,7 @@ describe('DnD Between Racks', () => {
 		height: 6,
 		width: 19,
 		position: 2,
+		view: 'front',
 		devices: []
 	};
 
@@ -176,10 +180,11 @@ describe('DnD Between Racks', () => {
 			height: 12,
 			width: 19,
 			position: 1,
+			view: 'front',
 			devices: [
-				{ libraryId: 'device-1', position: 2 }, // U2-U3
-				{ libraryId: 'device-2', position: 6 }, // U6
-				{ libraryId: 'device-1', position: 9 } // U9-U10
+				{ libraryId: 'device-1', position: 2, face: 'front' }, // U2-U3
+				{ libraryId: 'device-2', position: 6, face: 'front' }, // U6
+				{ libraryId: 'device-1', position: 9, face: 'front' } // U9-U10
 			]
 		};
 
@@ -222,7 +227,8 @@ describe('DnD Between Racks', () => {
 				height: 12,
 				width: 19,
 				position: 0,
-				devices: [{ libraryId: 'device-1', position: 1 }] // U1-U2
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 1, face: 'front' }] // U1-U2
 			};
 			const feedback = getDropFeedback(rackWithBottomDevice, deviceLibrary, tallDevice.height, 3);
 			expect(feedback).toBe('valid');
