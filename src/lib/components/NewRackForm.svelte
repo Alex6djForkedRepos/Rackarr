@@ -32,6 +32,8 @@
 			height: number;
 			width: number;
 			form_factor: FormFactor;
+			desc_units: boolean;
+			starting_unit: number;
 		}) => void;
 		oncancel?: () => void;
 	}
@@ -45,6 +47,8 @@
 	let customHeight = $state(42);
 	let selectedWidth = $state(STANDARD_RACK_WIDTH);
 	let selectedFormFactor = $state<FormFactor>('4-post-cabinet');
+	let descUnits = $state(false);
+	let startingUnit = $state(1);
 
 	// Validation errors
 	let nameError = $state('');
@@ -59,6 +63,8 @@
 			customHeight = 42;
 			selectedWidth = STANDARD_RACK_WIDTH;
 			selectedFormFactor = '4-post-cabinet';
+			descUnits = false;
+			startingUnit = 1;
 			nameError = '';
 			heightError = '';
 		}
@@ -104,7 +110,9 @@
 				name: name.trim(),
 				height: getCurrentHeight(),
 				width: selectedWidth,
-				form_factor: selectedFormFactor
+				form_factor: selectedFormFactor,
+				desc_units: descUnits,
+				starting_unit: startingUnit
 			});
 		}
 	}
@@ -207,6 +215,24 @@
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>
+		</div>
+
+		<div class="form-group checkbox-group">
+			<label class="checkbox-label">
+				<input type="checkbox" bind:checked={descUnits} />
+				<span>Descending units (U1 at top)</span>
+			</label>
+		</div>
+
+		<div class="form-group">
+			<label for="starting-unit">Starting Unit</label>
+			<input
+				type="number"
+				id="starting-unit"
+				class="input-field"
+				bind:value={startingUnit}
+				min="1"
+			/>
 		</div>
 
 		<div class="form-actions">
@@ -343,6 +369,26 @@
 	.width-label {
 		font-size: 14px;
 		color: var(--colour-text);
+	}
+
+	.checkbox-group {
+		margin-top: 4px;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		font-size: 14px;
+		color: var(--colour-text);
+	}
+
+	.checkbox-label input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+		accent-color: var(--colour-selection);
+		cursor: pointer;
 	}
 
 	.form-actions {

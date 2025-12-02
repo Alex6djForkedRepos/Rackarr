@@ -433,4 +433,87 @@ describe('Rack SVG Component', () => {
 			expect(width10).toBeLessThan(width19);
 		});
 	});
+
+	describe('Descending Units', () => {
+		it('renders U labels ascending when desc_units=false', () => {
+			const rack: RackType = { ...mockRack, height: 6, desc_units: false };
+
+			render(Rack, {
+				props: {
+					rack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			// U1 should be at bottom (higher y), U6 at top (lower y)
+			const u1Label = screen.getByText('1');
+			const u6Label = screen.getByText('6');
+			const u1Y = parseFloat(u1Label.getAttribute('y') ?? '0');
+			const u6Y = parseFloat(u6Label.getAttribute('y') ?? '0');
+
+			expect(u1Y).toBeGreaterThan(u6Y);
+		});
+
+		it('renders U labels descending when desc_units=true', () => {
+			const rack: RackType = { ...mockRack, height: 6, desc_units: true };
+
+			render(Rack, {
+				props: {
+					rack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			// U1 should be at top (lower y), U6 at bottom (higher y)
+			const u1Label = screen.getByText('1');
+			const u6Label = screen.getByText('6');
+			const u1Y = parseFloat(u1Label.getAttribute('y') ?? '0');
+			const u6Y = parseFloat(u6Label.getAttribute('y') ?? '0');
+
+			expect(u1Y).toBeLessThan(u6Y);
+		});
+	});
+
+	describe('Starting Unit', () => {
+		it('renders U labels starting from starting_unit', () => {
+			const rack: RackType = { ...mockRack, height: 4, starting_unit: 5 };
+
+			render(Rack, {
+				props: {
+					rack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			// Should show 5, 6, 7, 8 instead of 1, 2, 3, 4
+			expect(screen.getByText('5')).toBeInTheDocument();
+			expect(screen.getByText('6')).toBeInTheDocument();
+			expect(screen.getByText('7')).toBeInTheDocument();
+			expect(screen.getByText('8')).toBeInTheDocument();
+			expect(screen.queryByText('1')).not.toBeInTheDocument();
+		});
+
+		it('combines desc_units=true with custom starting_unit', () => {
+			const rack: RackType = { ...mockRack, height: 3, desc_units: true, starting_unit: 10 };
+
+			render(Rack, {
+				props: {
+					rack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			// Should show 10, 11, 12 with 10 at top
+			const u10Label = screen.getByText('10');
+			const u12Label = screen.getByText('12');
+			const u10Y = parseFloat(u10Label.getAttribute('y') ?? '0');
+			const u12Y = parseFloat(u12Label.getAttribute('y') ?? '0');
+
+			expect(u10Y).toBeLessThan(u12Y);
+		});
+	});
 });

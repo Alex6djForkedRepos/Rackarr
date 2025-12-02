@@ -124,19 +124,23 @@ function loadLayout(layoutData: Layout): number {
  * @param height - Rack height in U
  * @param width - Rack width in inches (10 or 19)
  * @param form_factor - Rack form factor
+ * @param desc_units - Whether units are numbered top-down
+ * @param starting_unit - First U number
  * @returns The created rack, or null if max racks reached
  */
 function addRack(
 	name: string,
 	height: number,
 	width?: number,
-	form_factor?: FormFactor
+	form_factor?: FormFactor,
+	desc_units?: boolean,
+	starting_unit?: number
 ): Rack | null {
 	if (layout.racks.length >= MAX_RACKS) {
 		return null;
 	}
 
-	const rack = createRack(name, height, undefined, width, form_factor);
+	const rack = createRack(name, height, undefined, width, form_factor, desc_units, starting_unit);
 	rack.position = layout.racks.length;
 
 	layout.racks = [...layout.racks, rack];

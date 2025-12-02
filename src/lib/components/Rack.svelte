@@ -88,10 +88,15 @@
 		feedback: DropFeedback;
 	} | null>(null);
 
-	// Generate U labels (1 at bottom, rack.height at top)
+	// Generate U labels based on desc_units and starting_unit
+	// When desc_units=false (default): U1 at bottom, numbers increase upward
+	// When desc_units=true: U1 at top, numbers increase downward
 	const uLabels = $derived(
 		Array.from({ length: rack.height }, (_, i) => {
-			const uNumber = rack.height - i;
+			const startUnit = rack.starting_unit ?? 1;
+			const uNumber = rack.desc_units
+				? startUnit + i // Descending: lowest number at top
+				: startUnit + (rack.height - 1) - i; // Ascending: highest number at top
 			const yPosition = i * U_HEIGHT + U_HEIGHT / 2 + RACK_PADDING + RAIL_WIDTH;
 			return { uNumber, yPosition };
 		})

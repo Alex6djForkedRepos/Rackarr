@@ -21,7 +21,9 @@ export function createRack(
 	height: number,
 	view?: RackView,
 	width?: number,
-	form_factor?: FormFactor
+	form_factor?: FormFactor,
+	desc_units?: boolean,
+	starting_unit?: number
 ): Rack {
 	return {
 		id: generateId(),
@@ -32,8 +34,8 @@ export function createRack(
 		view: view ?? DEFAULT_RACK_VIEW,
 		devices: [],
 		form_factor: form_factor ?? '4-post-cabinet',
-		desc_units: false,
-		starting_unit: 1
+		desc_units: desc_units ?? false,
+		starting_unit: starting_unit ?? 1
 	};
 }
 

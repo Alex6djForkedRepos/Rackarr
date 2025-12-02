@@ -63,8 +63,17 @@
 		height: number;
 		width: number;
 		form_factor: import('$lib/types').FormFactor;
+		desc_units: boolean;
+		starting_unit: number;
 	}) {
-		layoutStore.addRack(data.name, data.height, data.width, data.form_factor);
+		layoutStore.addRack(
+			data.name,
+			data.height,
+			data.width,
+			data.form_factor,
+			data.desc_units,
+			data.starting_unit
+		);
 		newRackFormOpen = false;
 	}
 
