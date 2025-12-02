@@ -216,7 +216,7 @@ describe('NewRackForm Component', () => {
 
 			// Check form is reset to default name
 			const newNameInput = screen.getByLabelText(/name/i);
-			expect(newNameInput).toHaveValue('Rack 1');
+			expect(newNameInput).toHaveValue('Racky McRackface');
 		});
 	});
 

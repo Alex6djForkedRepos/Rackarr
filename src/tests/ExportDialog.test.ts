@@ -71,47 +71,7 @@ describe('ExportDialog', () => {
 		});
 	});
 
-	describe('Scope Options', () => {
-		it('shows scope dropdown with all racks option', () => {
-			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
-			});
-
-			const scopeSelect = screen.getByLabelText(/scope/i);
-			expect(scopeSelect).toBeInTheDocument();
-			expect(screen.getByRole('option', { name: /all racks/i })).toBeInTheDocument();
-		});
-
-		it('selected rack option disabled when no rack selected', () => {
-			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
-			});
-
-			const selectedOption = screen.getByRole('option', { name: /selected rack/i });
-			expect(selectedOption).toBeDisabled();
-		});
-
-		it('selected rack option enabled when rack is selected', () => {
-			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: 'rack-1' }
-			});
-
-			const selectedOption = screen.getByRole('option', { name: /selected rack/i });
-			expect(selectedOption).not.toBeDisabled();
-		});
-	});
-
 	describe('Include Options', () => {
-		it('shows include rack names checkbox (default checked)', () => {
-			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
-			});
-
-			const checkbox = screen.getByLabelText(/include rack names/i) as HTMLInputElement;
-			expect(checkbox).toBeInTheDocument();
-			expect(checkbox.checked).toBe(true);
-		});
-
 		it('shows include legend checkbox (default unchecked)', () => {
 			render(ExportDialog, {
 				props: { open: true, racks: mockRacks, selectedRackId: null }
@@ -196,10 +156,6 @@ describe('ExportDialog', () => {
 			const formatSelect = screen.getByLabelText(/format/i);
 			await fireEvent.change(formatSelect, { target: { value: 'svg' } });
 
-			// Change scope to selected
-			const scopeSelect = screen.getByLabelText(/scope/i);
-			await fireEvent.change(scopeSelect, { target: { value: 'selected' } });
-
 			// Toggle legend on
 			const legendCheckbox = screen.getByLabelText(/include legend/i);
 			await fireEvent.click(legendCheckbox);
@@ -213,7 +169,7 @@ describe('ExportDialog', () => {
 
 			expect(onExport).toHaveBeenCalledWith({
 				format: 'svg',
-				scope: 'selected',
+				scope: 'all',
 				includeNames: true,
 				includeLegend: true,
 				background: 'transparent',

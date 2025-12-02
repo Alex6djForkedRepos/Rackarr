@@ -194,10 +194,6 @@
 
 			<div class="info-section">
 				<div class="info-row">
-					<span class="info-label">Position</span>
-					<span class="info-value">{selectedRack.position + 1}</span>
-				</div>
-				<div class="info-row">
 					<span class="info-label">Devices</span>
 					<span class="info-value">{selectedRack.devices.length}</span>
 				</div>

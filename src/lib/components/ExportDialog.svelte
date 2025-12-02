@@ -6,7 +6,6 @@
 	import type {
 		Rack,
 		ExportFormat,
-		ExportScope,
 		ExportBackground,
 		ExportOptions,
 		ExportMode,
@@ -22,19 +21,14 @@
 		oncancel?: () => void;
 	}
 
-	let { open, racks, selectedRackId, onexport, oncancel }: Props = $props();
+	let { open, racks, selectedRackId: _selectedRackId, onexport, oncancel }: Props = $props();
 
 	// Form state
 	let format = $state<ExportFormat>('png');
-	let scope = $state<ExportScope>('all');
-	let includeNames = $state(true);
 	let includeLegend = $state(false);
 	let background = $state<ExportBackground>('dark');
 	let exportMode = $state<ExportMode>('quick');
 	let includeSource = $state(true);
-
-	// Computed: Can select "selected rack" scope
-	const canSelectRack = $derived(selectedRackId !== null);
 
 	// Computed: Can select transparent background (only for SVG)
 	const canSelectTransparent = $derived(format === 'svg');
@@ -55,13 +49,6 @@
 		}
 	});
 
-	// Reset scope to "all" if selected rack becomes unavailable
-	$effect(() => {
-		if (!canSelectRack && scope === 'selected') {
-			scope = 'all';
-		}
-	});
-
 	// Reset export mode to quick when switching to SVG
 	$effect(() => {
 		if (!canUseBundled && exportMode === 'bundled') {
@@ -73,8 +60,8 @@
 		if (exportMode === 'bundled') {
 			const options: BundledExportOptions = {
 				format,
-				scope,
-				includeNames,
+				scope: 'all',
+				includeNames: true,
 				includeLegend,
 				background,
 				exportMode: 'bundled',
@@ -84,8 +71,8 @@
 		} else {
 			const options: ExportOptions = {
 				format,
-				scope,
-				includeNames,
+				scope: 'all',
+				includeNames: true,
 				includeLegend,
 				background,
 				exportMode: 'quick'
@@ -147,21 +134,6 @@
 				<span class="help-text">Include the .rackarr.zip file for editing later</span>
 			</div>
 		{/if}
-
-		<div class="form-group">
-			<label for="export-scope">Scope</label>
-			<select id="export-scope" bind:value={scope}>
-				<option value="all">All racks</option>
-				<option value="selected" disabled={!canSelectRack}>Selected rack</option>
-			</select>
-		</div>
-
-		<div class="form-group checkbox-group">
-			<label>
-				<input type="checkbox" bind:checked={includeNames} />
-				Include rack names
-			</label>
-		</div>
 
 		<div class="form-group checkbox-group">
 			<label>

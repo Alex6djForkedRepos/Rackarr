@@ -69,8 +69,7 @@ describe('EditPanel Visual Hierarchy', () => {
 			const infoSection = container.querySelector('.info-section');
 			expect(infoSection).toBeInTheDocument();
 
-			// Should show Position and Devices labels
-			expect(screen.getByText('Position')).toBeInTheDocument();
+			// Should show Devices label
 			expect(screen.getByText('Devices')).toBeInTheDocument();
 		});
 
@@ -259,7 +258,7 @@ describe('EditPanel Visual Hierarchy', () => {
 
 			// Info rows should exist
 			const infoRows = container.querySelectorAll('.info-row');
-			expect(infoRows.length).toBeGreaterThanOrEqual(2);
+			expect(infoRows.length).toBeGreaterThanOrEqual(1);
 		});
 	});
 });
