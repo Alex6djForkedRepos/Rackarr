@@ -273,3 +273,23 @@ textarea {
 .error-shake {
 	animation: shake var(--duration-normal) var(--ease-out);
 }
+
+/* ==========================================================================
+   Reduced Motion Support (Accessibility)
+   ========================================================================== */
+
+/**
+ * Respects user's prefers-reduced-motion system setting.
+ * Disables all animations and transitions when reduced motion is preferred.
+ * WCAG 2.1 Success Criterion 2.3.3: Animation from Interactions
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

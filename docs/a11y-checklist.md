@@ -29,7 +29,7 @@ This document tracks accessibility compliance for the Rackarr application.
 
 - [x] Color is not the sole indicator of state (icons/text accompany colors)
 - [x] Contrast ratios meet WCAG AA (verified via automated tests)
-- [ ] Reduced motion preference is respected (implemented in 6.2)
+- [x] Reduced motion preference is respected (CSS media query + JS utilities)
 
 ### Contrast Ratios (Dark Theme on #09090b)
 
