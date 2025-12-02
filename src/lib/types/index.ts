@@ -62,6 +62,11 @@ export type FormFactor =
 	| 'wall-cabinet-vertical';
 
 /**
+ * Display mode for devices in rack visualization
+ */
+export type DisplayMode = 'label' | 'image';
+
+/**
  * Device images - front and rear image paths
  */
 export interface DeviceImages {
@@ -153,6 +158,12 @@ export interface Rack {
 export interface LayoutSettings {
 	/** Current theme */
 	theme: 'dark' | 'light';
+	/** Global view state (default: front) */
+	view?: RackView;
+	/** Display mode for devices (default: label) */
+	displayMode?: DisplayMode;
+	/** Show labels overlaid on device images (default: false) */
+	showLabelsOnImages?: boolean;
 }
 
 /**

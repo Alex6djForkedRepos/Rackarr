@@ -23,7 +23,10 @@ export function createLayout(name: string = 'Untitled Layout'): Layout {
 		created: now,
 		modified: now,
 		settings: {
-			theme: 'dark'
+			theme: 'dark',
+			view: 'front',
+			displayMode: 'label',
+			showLabelsOnImages: false
 		},
 		deviceLibrary: getStarterLibrary(),
 		racks: []

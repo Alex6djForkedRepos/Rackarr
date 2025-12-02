@@ -38,6 +38,21 @@ describe('Layout Serialization', () => {
 			expect(layout.settings.theme).toBe('dark');
 		});
 
+		it('initializes with default view setting', () => {
+			const layout = createLayout('My Layout');
+			expect(layout.settings.view).toBe('front');
+		});
+
+		it('initializes with default displayMode setting', () => {
+			const layout = createLayout('My Layout');
+			expect(layout.settings.displayMode).toBe('label');
+		});
+
+		it('initializes with default showLabelsOnImages setting', () => {
+			const layout = createLayout('My Layout');
+			expect(layout.settings.showLabelsOnImages).toBe(false);
+		});
+
 		it('initializes with empty racks array', () => {
 			const layout = createLayout('My Layout');
 			expect(layout.racks).toEqual([]);

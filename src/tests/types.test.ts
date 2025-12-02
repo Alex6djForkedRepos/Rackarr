@@ -4,13 +4,15 @@ import type {
 	PlacedDevice,
 	Rack,
 	Layout,
+	LayoutSettings,
 	DeviceCategory,
 	RackView,
 	DeviceFace,
 	Airflow,
 	WeightUnit,
 	DeviceImages,
-	FormFactor
+	FormFactor,
+	DisplayMode
 } from '$lib/types';
 import {
 	CATEGORY_COLOURS,
@@ -399,6 +401,64 @@ describe('Types', () => {
 			expect(layout.deviceLibrary).toHaveLength(1);
 			expect(layout.racks).toHaveLength(1);
 			expect(layout.settings.theme).toBe('light');
+		});
+
+		it('accepts layout with all settings fields', () => {
+			const layout: Layout = {
+				version: '1.0',
+				name: 'My Homelab',
+				created: '2025-01-15T10:30:00Z',
+				modified: '2025-01-15T14:45:00Z',
+				settings: {
+					theme: 'dark',
+					view: 'front',
+					displayMode: 'label',
+					showLabelsOnImages: false
+				},
+				deviceLibrary: [],
+				racks: []
+			};
+
+			expect(layout.settings.view).toBe('front');
+			expect(layout.settings.displayMode).toBe('label');
+			expect(layout.settings.showLabelsOnImages).toBe(false);
+		});
+	});
+
+	describe('LayoutSettings interface', () => {
+		it('works with just theme (backwards compatible)', () => {
+			const settings: LayoutSettings = {
+				theme: 'dark'
+			};
+
+			expect(settings.theme).toBe('dark');
+			expect(settings.view).toBeUndefined();
+			expect(settings.displayMode).toBeUndefined();
+			expect(settings.showLabelsOnImages).toBeUndefined();
+		});
+
+		it('accepts all optional fields', () => {
+			const settings: LayoutSettings = {
+				theme: 'light',
+				view: 'rear',
+				displayMode: 'image',
+				showLabelsOnImages: true
+			};
+
+			expect(settings.theme).toBe('light');
+			expect(settings.view).toBe('rear');
+			expect(settings.displayMode).toBe('image');
+			expect(settings.showLabelsOnImages).toBe(true);
+		});
+	});
+
+	describe('DisplayMode type', () => {
+		it('accepts label and image values', () => {
+			const modes: DisplayMode[] = ['label', 'image'];
+
+			expect(modes).toHaveLength(2);
+			expect(modes).toContain('label');
+			expect(modes).toContain('image');
 		});
 	});
 });
