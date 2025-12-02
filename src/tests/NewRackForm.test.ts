@@ -118,7 +118,12 @@ describe('NewRackForm Component', () => {
 			const submitBtn = screen.getByRole('button', { name: /create/i });
 			await fireEvent.click(submitBtn);
 
-			expect(onCreate).toHaveBeenCalledWith({ name: 'My New Rack', height: 24, width: 19 });
+			expect(onCreate).toHaveBeenCalledWith({
+				name: 'My New Rack',
+				height: 24,
+				width: 19,
+				form_factor: '4-post-cabinet'
+			});
 		});
 
 		it('dispatches create event with custom height', async () => {
@@ -136,7 +141,12 @@ describe('NewRackForm Component', () => {
 			const submitBtn = screen.getByRole('button', { name: /create/i });
 			await fireEvent.click(submitBtn);
 
-			expect(onCreate).toHaveBeenCalledWith({ name: 'Custom Rack', height: 50, width: 19 });
+			expect(onCreate).toHaveBeenCalledWith({
+				name: 'Custom Rack',
+				height: 50,
+				width: 19,
+				form_factor: '4-post-cabinet'
+			});
 		});
 	});
 
@@ -168,7 +178,12 @@ describe('NewRackForm Component', () => {
 			// Default selection is 42U, so just submit
 			await fireEvent.keyDown(nameInput, { key: 'Enter' });
 
-			expect(onCreate).toHaveBeenCalledWith({ name: 'Enter Test Rack', height: 42, width: 19 });
+			expect(onCreate).toHaveBeenCalledWith({
+				name: 'Enter Test Rack',
+				height: 42,
+				width: 19,
+				form_factor: '4-post-cabinet'
+			});
 		});
 
 		it('Escape key cancels form', async () => {
@@ -242,6 +257,63 @@ describe('NewRackForm Component', () => {
 			await fireEvent.click(submitBtn);
 
 			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ width: 19 }));
+		});
+	});
+
+	describe('Form factor selection', () => {
+		it('shows form factor dropdown', () => {
+			render(NewRackForm, { props: { open: true } });
+			expect(screen.getByLabelText(/form factor/i)).toBeInTheDocument();
+		});
+
+		it('has 4-post-cabinet selected by default', () => {
+			render(NewRackForm, { props: { open: true } });
+			const select = screen.getByLabelText(/form factor/i) as HTMLSelectElement;
+			expect(select.value).toBe('4-post-cabinet');
+		});
+
+		it('shows all 7 form factor options', () => {
+			render(NewRackForm, { props: { open: true } });
+			const select = screen.getByLabelText(/form factor/i);
+			const options = select.querySelectorAll('option');
+			expect(options).toHaveLength(7);
+		});
+
+		it('can select different form factor', async () => {
+			render(NewRackForm, { props: { open: true } });
+			const select = screen.getByLabelText(/form factor/i) as HTMLSelectElement;
+			await fireEvent.change(select, { target: { value: 'wall-cabinet' } });
+			expect(select.value).toBe('wall-cabinet');
+		});
+
+		it('includes form_factor in create event data', async () => {
+			const onCreate = vi.fn();
+			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
+
+			// Select a different form factor
+			const select = screen.getByLabelText(/form factor/i);
+			await fireEvent.change(select, { target: { value: '2-post-frame' } });
+
+			// Submit form
+			const submitBtn = screen.getByRole('button', { name: /create/i });
+			await fireEvent.click(submitBtn);
+
+			expect(onCreate).toHaveBeenCalledWith(
+				expect.objectContaining({ form_factor: '2-post-frame' })
+			);
+		});
+
+		it('defaults to 4-post-cabinet in create event data', async () => {
+			const onCreate = vi.fn();
+			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
+
+			// Submit form without changing form factor
+			const submitBtn = screen.getByRole('button', { name: /create/i });
+			await fireEvent.click(submitBtn);
+
+			expect(onCreate).toHaveBeenCalledWith(
+				expect.objectContaining({ form_factor: '4-post-cabinet' })
+			);
 		});
 	});
 });

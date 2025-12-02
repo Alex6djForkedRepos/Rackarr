@@ -3,7 +3,7 @@
  * Central state management for the application using Svelte 5 runes
  */
 
-import type { Layout, Rack, Device, DeviceCategory } from '$lib/types';
+import type { FormFactor, Layout, Rack, Device, DeviceCategory } from '$lib/types';
 import { DEFAULT_DEVICE_FACE, MAX_RACKS } from '$lib/types/constants';
 import { createLayout } from '$lib/utils/serialization';
 import { createRack, duplicateRack as duplicateRackUtil } from '$lib/utils/rack';
@@ -123,14 +123,20 @@ function loadLayout(layoutData: Layout): number {
  * @param name - Rack name
  * @param height - Rack height in U
  * @param width - Rack width in inches (10 or 19)
+ * @param form_factor - Rack form factor
  * @returns The created rack, or null if max racks reached
  */
-function addRack(name: string, height: number, width?: number): Rack | null {
+function addRack(
+	name: string,
+	height: number,
+	width?: number,
+	form_factor?: FormFactor
+): Rack | null {
 	if (layout.racks.length >= MAX_RACKS) {
 		return null;
 	}
 
-	const rack = createRack(name, height, undefined, width);
+	const rack = createRack(name, height, undefined, width, form_factor);
 	rack.position = layout.racks.length;
 
 	layout.racks = [...layout.racks, rack];

@@ -3,7 +3,7 @@
  * Pure functions for rack operations
  */
 
-import type { Device, Rack, RackView } from '$lib/types';
+import type { Device, FormFactor, Rack, RackView } from '$lib/types';
 import {
 	MIN_RACK_HEIGHT,
 	MAX_RACK_HEIGHT,
@@ -16,7 +16,13 @@ import { generateId } from './device';
 /**
  * Create a new rack with sensible defaults
  */
-export function createRack(name: string, height: number, view?: RackView, width?: number): Rack {
+export function createRack(
+	name: string,
+	height: number,
+	view?: RackView,
+	width?: number,
+	form_factor?: FormFactor
+): Rack {
 	return {
 		id: generateId(),
 		name,
@@ -25,7 +31,7 @@ export function createRack(name: string, height: number, view?: RackView, width?
 		position: 0,
 		view: view ?? DEFAULT_RACK_VIEW,
 		devices: [],
-		form_factor: '4-post-cabinet',
+		form_factor: form_factor ?? '4-post-cabinet',
 		desc_units: false,
 		starting_unit: 1
 	};

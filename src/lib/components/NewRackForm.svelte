@@ -11,11 +11,28 @@
 		STANDARD_RACK_WIDTH,
 		ALLOWED_RACK_WIDTHS
 	} from '$lib/types/constants';
+	import type { FormFactor } from '$lib/types';
+
+	// Form factor display names
+	const FORM_FACTOR_OPTIONS: { value: FormFactor; label: string }[] = [
+		{ value: '4-post-cabinet', label: '4-Post Cabinet' },
+		{ value: '4-post-frame', label: '4-Post Open Frame' },
+		{ value: '2-post-frame', label: '2-Post Frame' },
+		{ value: 'wall-cabinet', label: 'Wall Cabinet' },
+		{ value: 'wall-frame', label: 'Wall Frame' },
+		{ value: 'wall-frame-vertical', label: 'Wall Frame (Vertical)' },
+		{ value: 'wall-cabinet-vertical', label: 'Wall Cabinet (Vertical)' }
+	];
 
 	interface Props {
 		open: boolean;
 		rackCount?: number;
-		oncreate?: (data: { name: string; height: number; width: number }) => void;
+		oncreate?: (data: {
+			name: string;
+			height: number;
+			width: number;
+			form_factor: FormFactor;
+		}) => void;
 		oncancel?: () => void;
 	}
 
@@ -27,6 +44,7 @@
 	let isCustomHeight = $state(false);
 	let customHeight = $state(42);
 	let selectedWidth = $state(STANDARD_RACK_WIDTH);
+	let selectedFormFactor = $state<FormFactor>('4-post-cabinet');
 
 	// Validation errors
 	let nameError = $state('');
@@ -40,6 +58,7 @@
 			isCustomHeight = false;
 			customHeight = 42;
 			selectedWidth = STANDARD_RACK_WIDTH;
+			selectedFormFactor = '4-post-cabinet';
 			nameError = '';
 			heightError = '';
 		}
@@ -81,7 +100,12 @@
 
 	function handleSubmit() {
 		if (validate()) {
-			oncreate?.({ name: name.trim(), height: getCurrentHeight(), width: selectedWidth });
+			oncreate?.({
+				name: name.trim(),
+				height: getCurrentHeight(),
+				width: selectedWidth,
+				form_factor: selectedFormFactor
+			});
 		}
 	}
 
@@ -174,6 +198,15 @@
 					</label>
 				{/each}
 			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="form-factor">Form Factor</label>
+			<select id="form-factor" class="input-field" bind:value={selectedFormFactor}>
+				{#each FORM_FACTOR_OPTIONS as option (option.value)}
+					<option value={option.value}>{option.label}</option>
+				{/each}
+			</select>
 		</div>
 
 		<div class="form-actions">
