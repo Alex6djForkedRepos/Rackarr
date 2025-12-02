@@ -53,6 +53,19 @@ npm run build
 
 Access the app at `http://localhost:5173`
 
+### Docker
+
+```bash
+# One-liner
+docker run -d -p 8080:80 ghcr.io/ggfevans/rackarr:latest
+
+# Or with docker compose
+curl -O https://raw.githubusercontent.com/ggfevans/rackarr/main/docker-compose.yml
+docker compose up -d
+```
+
+Access the app at `http://localhost:8080`
+
 ## Keyboard Shortcuts
 
 | Key                    | Action                          |
