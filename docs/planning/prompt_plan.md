@@ -1,6 +1,6 @@
-# Rackarr v0.4 Implementation Prompt Plan
+# Rackarr v0.2 Implementation Prompt Plan
 
-This document contains a series of prompts for implementing the v0.4 data schema changes in a test-driven manner. Each prompt builds on the previous ones, ensuring incremental progress with strong testing.
+This document contains a series of prompts for implementing the v0.2 data schema changes in a test-driven manner. Each prompt builds on the previous ones, ensuring incremental progress with strong testing.
 
 ---
 
@@ -18,7 +18,7 @@ This document contains a series of prompts for implementing the v0.4 data schema
 
 ### Prerequisites
 
-- Read `docs/planning/v0.4-implementation-spec.md` for full specification
+- Read `docs/planning/v0.2-implementation-spec.md` for full specification
 - Read `docs/planning/data-schema-spec.md` for schema decisions
 - Current tests should be passing before starting
 
@@ -60,7 +60,7 @@ Do not modify any existing code yet - just add the dependency and verify it work
 ```text
 Create slug generation and validation utilities following TDD.
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 6, Task 1.2
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 6, Task 1.2
 
 Create `src/lib/utils/slug.ts` with the following functions:
 - `slugify(input: string): string` - Convert any string to a valid slug
@@ -112,11 +112,11 @@ Run tests, watch them fail, then implement to make them pass.
 ### Prompt 3: Create New Type Definitions
 
 ```text
-Create the new v0.4 type definitions alongside existing types (don't modify existing yet).
+Create the new v0.2 type definitions alongside existing types (don't modify existing yet).
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 4.1
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 4.1
 
-Create `src/lib/types/v04.ts` with the new interfaces:
+Create `src/lib/types/v02.ts` with the new interfaces:
 
 1. DeviceType interface (renamed from Device):
    - slug: string (required)
@@ -145,27 +145,27 @@ Create `src/lib/types/v04.ts` with the new interfaces:
    - rack: Rack (singular, not racks[])
    - device_types: DeviceType[] (not deviceLibrary)
 
-Write a type test file `src/lib/types/v04.test.ts` that:
+Write a type test file `src/lib/types/v02.test.ts` that:
 - Creates sample objects of each type
 - Verifies type assignments compile correctly
 - Documents the expected structure
 
 This is a parallel types file - existing code continues to use old types.
-Export types with 'V04' suffix to avoid conflicts: DeviceTypeV04, DeviceV04, etc.
+Export types with 'V02' suffix to avoid conflicts: DeviceTypeV02, DeviceV02, etc.
 ```
 
 ---
 
 ## Phase 2: Schemas
 
-### Prompt 4: Create v0.4 Zod Schemas
+### Prompt 4: Create v0.2 Zod Schemas
 
 ```text
-Create Zod validation schemas for the v0.4 data structures.
+Create Zod validation schemas for the v0.2 data structures.
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 4.2
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 4.2
 
-Create `src/lib/schemas/v04.ts` with:
+Create `src/lib/schemas/v02.ts` with:
 
 1. SlugSchema - validates slug format with regex
 2. DeviceCategorySchema - enum of all categories
@@ -180,7 +180,7 @@ Create `src/lib/schemas/v04.ts` with:
 11. LayoutSettingsSchema - display settings
 12. LayoutSchema - complete layout validation
 
-Write tests FIRST in `src/lib/schemas/v04.test.ts`:
+Write tests FIRST in `src/lib/schemas/v02.test.ts`:
 
 Test DeviceTypeSchema:
 - Valid device type passes
@@ -220,9 +220,9 @@ Run tests, implement schemas to pass.
 ````text
 Add a helper function to validate slug uniqueness within a layout.
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 4.2
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 4.2
 
-Add to `src/lib/schemas/v04.ts`:
+Add to `src/lib/schemas/v02.ts`:
 
 ```typescript
 function validateSlugUniqueness(device_types: { slug: string }[]): string[]
@@ -234,7 +234,7 @@ This function:
 - Returns array of duplicate slugs (empty if all unique)
 - Used before save to catch duplicates
 
-Write tests FIRST in `src/lib/schemas/v04.test.ts`:
+Write tests FIRST in `src/lib/schemas/v02.test.ts`:
 
 Test validateSlugUniqueness:
 
@@ -267,17 +267,17 @@ Run tests, implement to pass.
 ```text
 Create YAML serialization utilities for layouts.
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 6, Task 2.1
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 6, Task 2.1
 
 Create `src/lib/utils/yaml.ts` with:
 
-1. `serializeToYaml(layout: LayoutV04): string`
+1. `serializeToYaml(layout: LayoutV02): string`
    - Convert layout to YAML string
    - Exclude runtime-only fields (view)
    - Use 2-space indentation
    - Preserve field order (don't sort keys)
 
-2. `parseYaml(yamlString: string): LayoutV04`
+2. `parseYaml(yamlString: string): LayoutV02`
    - Parse YAML string to layout object
    - Validate with LayoutSchema
    - Add runtime defaults (view: 'front')
@@ -316,17 +316,17 @@ Run tests, implement to pass.
 ```text
 Create utilities for saving layouts as folder structure (inside ZIP for browser download).
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 5
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 5
 
 Create `src/lib/utils/folder.ts` with:
 
-1. `createFolderArchive(layout: LayoutV04, images: Map<string, DeviceImages>): Promise<Blob>`
+1. `createFolderArchive(layout: LayoutV02, images: Map<string, DeviceImages>): Promise<Blob>`
    - Creates a ZIP containing folder structure
    - Structure: [name]/[name].yaml + [name]/assets/[slug]/[face].[ext]
    - Uses JSZip (already a dependency)
    - Sanitizes folder name using slugify
 
-2. `extractFolderArchive(blob: Blob): Promise<{ layout: LayoutV04, images: Map<string, DeviceImages> }>`
+2. `extractFolderArchive(blob: Blob): Promise<{ layout: LayoutV02, images: Map<string, DeviceImages> }>`
    - Extracts ZIP with folder structure
    - Finds .yaml file in root folder
    - Loads images from assets subfolder
@@ -410,18 +410,18 @@ Run tests, implement to pass.
 ### Prompt 9: Create Layout Migration Utility
 
 ```text
-Create migration utility to convert v0.1-v0.3 layouts to v0.4 format.
+Create migration utility to convert v0.1-v0.3 layouts to v0.2 format.
 
-Reference: `docs/planning/v0.4-implementation-spec.md` Section 8
+Reference: `docs/planning/v0.2-implementation-spec.md` Section 8
 
-Create `src/lib/utils/migrate-v04.ts` with:
+Create `src/lib/utils/migrate-v02.ts` with:
 
-1. `migrateToV04(legacy: LegacyLayout): LayoutV04`
+1. `migrateToV02(legacy: LegacyLayout): LayoutV02`
    - Converts old format to new format
    - Generates slugs for all devices
    - Maps libraryId references to slugs
    - Takes first rack only (single-rack mode)
-   - Sets version to "0.4.0"
+   - Sets version to "0.2.0"
 
 2. Define `LegacyLayout` interface matching v0.3 structure:
    - deviceLibrary: LegacyDevice[]
@@ -432,10 +432,10 @@ Create `src/lib/utils/migrate-v04.ts` with:
    - Returns version string or 'unknown'
    - Handles missing version field
 
-Write tests FIRST in `src/lib/utils/migrate-v04.test.ts`:
+Write tests FIRST in `src/lib/utils/migrate-v02.test.ts`:
 
-Test migrateToV04:
-- Sets version to "0.4.0"
+Test migrateToV02:
+- Sets version to "0.2.0"
 - Converts deviceLibrary to device_types
 - Renames height to u_height
 - Generates valid slugs for all devices
@@ -469,22 +469,22 @@ Create utility to migrate images from old naming to new structure.
 
 Reference: Old format uses `device-{uuid}-{face}.{ext}`, new uses `{slug}/{face}.{ext}`
 
-Add to `src/lib/utils/migrate-v04.ts`:
+Add to `src/lib/utils/migrate-v02.ts`:
 
 1. `migrateImages(oldImages: Map<string, DeviceImages>, idToSlugMap: Map<string, string>): Map<string, DeviceImages>`
    - Converts UUID-keyed image map to slug-keyed
    - Uses idToSlugMap from layout migration
    - Preserves image data, just changes keys
 
-2. Update `migrateToV04` to also return the idToSlugMap:
+2. Update `migrateToV02` to also return the idToSlugMap:
    ```typescript
-   function migrateToV04(legacy: LegacyLayout): {
-     layout: LayoutV04,
+   function migrateToV02(legacy: LegacyLayout): {
+     layout: LayoutV02,
      idToSlugMap: Map<string, string>
    }
 ````
 
-Write tests FIRST (add to `src/lib/utils/migrate-v04.test.ts`):
+Write tests FIRST (add to `src/lib/utils/migrate-v02.test.ts`):
 
 Test migrateImages:
 
@@ -496,7 +496,7 @@ Test migrateImages:
 
 Test integration:
 
-- migrateToV04 returns valid idToSlugMap
+- migrateToV02 returns valid idToSlugMap
 - Map contains entry for each device
 - Map values are valid slugs matching device_types
 
@@ -508,30 +508,30 @@ Run tests, implement to pass.
 
 ## Phase 5: Store Updates
 
-### Prompt 11: Create v0.4 Layout Store Helpers
+### Prompt 11: Create v0.2 Layout Store Helpers
 
 ```text
-Create helper functions for the layout store that work with v0.4 types.
+Create helper functions for the layout store that work with v0.2 types.
 
 These are new functions that will be used alongside existing store - no modifications yet.
 
-Create `src/lib/stores/layout-helpers-v04.ts` with:
+Create `src/lib/stores/layout-helpers-v02.ts` with:
 
-1. `createDeviceType(data: { name: string, u_height: number, category: DeviceCategory, colour: string, ... }): DeviceTypeV04`
+1. `createDeviceType(data: { name: string, u_height: number, category: DeviceCategory, colour: string, ... }): DeviceTypeV02`
    - Creates a new device type with auto-generated slug
    - Ensures slug is valid format
 
-2. `createDevice(device_type: string, position: number, face: DeviceFace, name?: string): DeviceV04`
+2. `createDevice(device_type: string, position: number, face: DeviceFace, name?: string): DeviceV02`
    - Creates a placed device referencing a device type by slug
 
-3. `findDeviceType(device_types: DeviceTypeV04[], slug: string): DeviceTypeV04 | undefined`
+3. `findDeviceType(device_types: DeviceTypeV02[], slug: string): DeviceTypeV02 | undefined`
    - Find device type by slug
 
-4. `getDeviceDisplayName(device: DeviceV04, device_types: DeviceTypeV04[]): string`
+4. `getDeviceDisplayName(device: DeviceV02, device_types: DeviceTypeV02[]): string`
    - Returns device.name if set
    - Falls back to device type's model or slug
 
-Write tests FIRST in `src/lib/stores/layout-helpers-v04.test.ts`:
+Write tests FIRST in `src/lib/stores/layout-helpers-v02.test.ts`:
 
 Test createDeviceType:
 - Generates valid slug from name
@@ -556,33 +556,33 @@ Run tests, implement to pass.
 
 ---
 
-### Prompt 12: Create Parallel v0.4 Store Functions
+### Prompt 12: Create Parallel v0.2 Store Functions
 
 ```text
-Create v0.4 versions of core store operations as separate functions.
+Create v0.2 versions of core store operations as separate functions.
 
-These functions work with v0.4 types and will replace existing ones later.
+These functions work with v0.2 types and will replace existing ones later.
 
-Add to `src/lib/stores/layout-helpers-v04.ts`:
+Add to `src/lib/stores/layout-helpers-v02.ts`:
 
-1. `addDeviceTypeToLayout(layout: LayoutV04, deviceType: DeviceTypeV04): LayoutV04`
+1. `addDeviceTypeToLayout(layout: LayoutV02, deviceType: DeviceTypeV02): LayoutV02`
    - Immutably adds device type to layout
    - Validates slug uniqueness
    - Throws if duplicate slug
 
-2. `removeDeviceTypeFromLayout(layout: LayoutV04, slug: string): LayoutV04`
+2. `removeDeviceTypeFromLayout(layout: LayoutV02, slug: string): LayoutV02`
    - Removes device type by slug
    - Also removes all placed devices referencing it
 
-3. `placeDeviceInRack(layout: LayoutV04, device: DeviceV04): LayoutV04`
+3. `placeDeviceInRack(layout: LayoutV02, device: DeviceV02): LayoutV02`
    - Adds device to rack
    - Validates device_type exists
    - Does NOT check collisions (caller responsibility)
 
-4. `removeDeviceFromRack(layout: LayoutV04, index: number): LayoutV04`
+4. `removeDeviceFromRack(layout: LayoutV02, index: number): LayoutV02`
    - Removes device at index from rack
 
-Write tests FIRST (add to `src/lib/stores/layout-helpers-v04.test.ts`):
+Write tests FIRST (add to `src/lib/stores/layout-helpers-v02.test.ts`):
 
 Test addDeviceTypeToLayout:
 - Adds device type to empty layout
@@ -611,12 +611,12 @@ Run tests, implement to pass.
 ### Prompt 13: Update Layout Store Types
 
 ```text
-Update the layout store to use v0.4 types internally.
+Update the layout store to use v0.2 types internally.
 
 This is the main refactoring of `src/lib/stores/layout.svelte.ts`.
 
 Changes:
-1. Import v0.4 types instead of old types
+1. Import v0.2 types instead of old types
 2. Rename internal functions:
    - addDeviceToLibrary → addDeviceType
    - updateDeviceInLibrary → updateDeviceType
@@ -626,14 +626,14 @@ Changes:
    - height → u_height
    - libraryId → device_type
 4. Update placeDevice to use device_type slug
-5. Use helper functions from layout-helpers-v04.ts
+5. Use helper functions from layout-helpers-v02.ts
 
 Write/update tests in `src/lib/stores/layout.svelte.test.ts`:
 
 Update existing tests:
 - Change field names in assertions
 - Change function names in calls
-- Update test data to use v0.4 structure
+- Update test data to use v0.2 structure
 
 New tests:
 - addDeviceType generates valid slug
@@ -658,7 +658,7 @@ Update store implementation to pass tests.
 ### Prompt 14: Update Type Imports Across Components
 
 ```text
-Update all components to import v0.4 types.
+Update all components to import v0.2 types.
 
 Files to update (imports only, not logic yet):
 - src/lib/components/DevicePalette.svelte
@@ -669,7 +669,7 @@ Files to update (imports only, not logic yet):
 - src/App.svelte
 
 For each file:
-1. Update type imports to use v0.4 types
+1. Update type imports to use v0.2 types
 2. TypeScript will show errors for mismatched field names
 3. Do NOT fix the errors yet - just update imports
 
@@ -693,7 +693,7 @@ Do not run tests yet - they will fail until components are updated.
 ### Prompt 15: Update DevicePalette Component
 
 ```text
-Update DevicePalette.svelte to work with v0.4 types.
+Update DevicePalette.svelte to work with v0.2 types.
 
 Reference the type errors from Prompt 14.
 
@@ -709,7 +709,7 @@ Update the component:
 - Display logic for device info
 
 Write/update tests in `src/lib/components/DevicePalette.test.ts`:
-- Test rendering with v0.4 device types
+- Test rendering with v0.2 device types
 - Test slug-based identification
 - Test display of u_height
 
@@ -722,7 +722,7 @@ Verify no TypeScript errors in this component.
 ### Prompt 16: Update Rack Component
 
 ```text
-Update Rack.svelte to work with v0.4 types.
+Update Rack.svelte to work with v0.2 types.
 
 Changes needed:
 1. Use Device (placed) instead of PlacedDevice
@@ -737,7 +737,7 @@ Key logic changes:
 - Height: use deviceType.u_height
 
 Update tests in `src/lib/components/Rack.test.ts`:
-- Use v0.4 test data
+- Use v0.2 test data
 - Test device lookup by slug
 - Test display name fallback logic
 - Test u_height rendering
@@ -750,7 +750,7 @@ Run tests after changes.
 ### Prompt 17: Update EditPanel Component
 
 ```text
-Update EditPanel.svelte to work with v0.4 types.
+Update EditPanel.svelte to work with v0.2 types.
 
 Changes needed:
 1. Device type editing uses slug
@@ -763,7 +763,7 @@ If EditPanel allows editing device type properties:
 - Show warning if slug change would break references
 
 Write/update tests in `src/lib/components/EditPanel.test.ts`:
-- Test editing device with v0.4 structure
+- Test editing device with v0.2 structure
 - Test slug validation
 - Test device name editing
 
@@ -775,7 +775,7 @@ Run tests after changes.
 ### Prompt 18: Update AddDeviceForm and App Component
 
 ````text
-Update AddDeviceForm.svelte and App.svelte to work with v0.4 types.
+Update AddDeviceForm.svelte and App.svelte to work with v0.2 types.
 
 AddDeviceForm changes:
 1. Form creates DeviceType (not Device)
@@ -824,8 +824,8 @@ handleSave:
 handleLoad:
 1. Use detectFileFormat to identify format
 2. For 'folder-archive': use extractFolderArchive
-3. For 'legacy-archive': use extractArchive + migrateToV04
-4. For 'legacy-json': use readLayoutFile + migrateToV04
+3. For 'legacy-archive': use extractArchive + migrateToV02
+4. For 'legacy-json': use readLayoutFile + migrateToV02
 5. Migrate images using migrateImages when loading legacy
 6. Show appropriate toast messages
 
@@ -848,11 +848,11 @@ Run type check: `npm run check`
 ### Prompt 20: E2E Tests and Final Verification
 
 ````text
-Create/update E2E tests for the complete v0.4 flow.
+Create/update E2E tests for the complete v0.2 flow.
 
 Create test fixtures in `e2e/fixtures/`:
 1. `legacy-v0.3.rackarr.zip` - Old format archive
-2. `valid-v0.4/` folder with valid v0.4 structure
+2. `valid-v0.2/` folder with valid v0.2 structure
 
 Update E2E tests in `e2e/`:
 
@@ -915,8 +915,8 @@ All tests should pass. Application should:
 |---|--------|--------|------------|
 | 1 | Add js-yaml dependency | ⬜ | ⬜ |
 | 2 | Create slug utilities | ⬜ | ⬜ |
-| 3 | Create v0.4 type definitions | ⬜ | ⬜ |
-| 4 | Create v0.4 Zod schemas | ⬜ | ⬜ |
+| 3 | Create v0.2 type definitions | ⬜ | ⬜ |
+| 4 | Create v0.2 Zod schemas | ⬜ | ⬜ |
 | 5 | Add slug uniqueness validation | ⬜ | ⬜ |
 | 6 | Create YAML serialization | ⬜ | ⬜ |
 | 7 | Create folder-based save | ⬜ | ⬜ |
@@ -940,7 +940,7 @@ All tests should pass. Application should:
 
 ### If tests fail after a prompt:
 
-1. Check if test expectations need updating (v0.3 → v0.4 structure)
+1. Check if test expectations need updating (v0.3 → v0.2 structure)
 2. Check for missing type imports
 3. Check for field name mismatches
 4. Revert to last known good state if stuck
@@ -949,7 +949,7 @@ All tests should pass. Application should:
 
 1. Run `npm run check` for full error list
 2. Focus on one file at a time
-3. Ensure all imports use v0.4 types
+3. Ensure all imports use v0.2 types
 4. Check for stale type references
 
 ### If E2E tests fail:

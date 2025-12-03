@@ -1,8 +1,8 @@
-# Rackarr v0.4 Implementation Checklist
+# Rackarr v0.2 Implementation Checklist
 
-**Target Version:** v0.4.0
-**Start Date:** ****\_\_\_****
-**Completion Date:** ****\_\_\_****
+**Target Version:** v0.2.0
+**Start Date:** \***\*\_\_\_\*\***
+**Completion Date:** \***\*\_\_\_\*\***
 
 ---
 
@@ -43,7 +43,7 @@
 
 ### 1.3 Type Definitions
 
-- [ ] Create `src/lib/types/v04.ts`
+- [ ] Create `src/lib/types/v02.ts`
 - [ ] Define `DeviceType` interface
   - [ ] slug (required)
   - [ ] u_height (required)
@@ -71,8 +71,8 @@
   - [ ] device_types array
   - [ ] settings
 - [ ] Create type test file
-- [ ] Export types with V04 suffix
-- [ ] Commit: "feat: add v0.4 type definitions"
+- [ ] Export types with V02 suffix
+- [ ] Commit: "feat: add v0.2 type definitions"
 
 ---
 
@@ -80,7 +80,7 @@
 
 ### 2.1 Zod Schemas
 
-- [ ] Create `src/lib/schemas/v04.ts`
+- [ ] Create `src/lib/schemas/v02.ts`
 - [ ] Define `SlugSchema`
   - [ ] Min length 1
   - [ ] Max length 100
@@ -103,7 +103,7 @@
   - [ ] Valid data passes
   - [ ] Invalid data fails with message
 - [ ] All tests pass
-- [ ] Commit: "feat: add v0.4 Zod schemas"
+- [ ] Commit: "feat: add v0.2 Zod schemas"
 
 ### 2.2 Slug Uniqueness Validation
 
@@ -183,15 +183,15 @@
 
 ### 4.1 Layout Migration
 
-- [ ] Create `src/lib/utils/migrate-v04.ts`
+- [ ] Create `src/lib/utils/migrate-v02.ts`
 - [ ] Define `LegacyLayout` interface
-- [ ] Implement `migrateToV04()`
+- [ ] Implement `migrateToV02()`
   - [ ] Convert deviceLibrary → device_types
   - [ ] Generate slugs for devices
   - [ ] Handle duplicate names
   - [ ] Map libraryId → device_type
   - [ ] Take first rack only
-  - [ ] Set version to "0.4.0"
+  - [ ] Set version to "0.2.0"
   - [ ] Return idToSlugMap
 - [ ] Implement `detectLayoutVersion()`
 - [ ] Write tests
@@ -201,7 +201,7 @@
   - [ ] Reference mapping
   - [ ] Edge cases
 - [ ] All tests pass
-- [ ] Commit: "feat: add layout migration to v0.4"
+- [ ] Commit: "feat: add layout migration to v0.2"
 
 ### 4.2 Image Migration
 
@@ -223,14 +223,14 @@
 
 ### 5.1 Store Helper Functions
 
-- [ ] Create `src/lib/stores/layout-helpers-v04.ts`
+- [ ] Create `src/lib/stores/layout-helpers-v02.ts`
 - [ ] Implement `createDeviceType()`
 - [ ] Implement `createDevice()`
 - [ ] Implement `findDeviceType()`
 - [ ] Implement `getDeviceDisplayName()`
 - [ ] Write tests for all helpers
 - [ ] All tests pass
-- [ ] Commit: "feat: add v0.4 store helpers"
+- [ ] Commit: "feat: add v0.2 store helpers"
 
 ### 5.2 Store Operations
 
@@ -244,11 +244,11 @@
   - [ ] Immutability
   - [ ] Error cases
 - [ ] All tests pass
-- [ ] Commit: "feat: add v0.4 store operations"
+- [ ] Commit: "feat: add v0.2 store operations"
 
 ### 5.3 Layout Store Refactor
 
-- [ ] Update imports to v0.4 types
+- [ ] Update imports to v0.2 types
 - [ ] Rename functions
   - [ ] addDeviceToLibrary → addDeviceType
   - [ ] updateDeviceInLibrary → updateDeviceType
@@ -259,7 +259,7 @@
   - [ ] libraryId → device_type
 - [ ] Update existing tests
 - [ ] All tests pass
-- [ ] Commit: "refactor: update layout store to v0.4 types"
+- [ ] Commit: "refactor: update layout store to v0.2 types"
 
 ---
 
@@ -283,7 +283,7 @@
 - [ ] Update slug-based identification
 - [ ] Update/write tests
 - [ ] All tests pass
-- [ ] Commit: "refactor: update DevicePalette to v0.4"
+- [ ] Commit: "refactor: update DevicePalette to v0.2"
 
 ### 6.3 Rack Component
 
@@ -293,7 +293,7 @@
 - [ ] Support device.name display
 - [ ] Update/write tests
 - [ ] All tests pass
-- [ ] Commit: "refactor: update Rack to v0.4"
+- [ ] Commit: "refactor: update Rack to v0.2"
 
 ### 6.4 EditPanel Component
 
@@ -302,7 +302,7 @@
 - [ ] Support device.name editing
 - [ ] Update/write tests
 - [ ] All tests pass
-- [ ] Commit: "refactor: update EditPanel to v0.4"
+- [ ] Commit: "refactor: update EditPanel to v0.2"
 
 ### 6.5 AddDeviceForm Component
 
@@ -311,7 +311,7 @@
 - [ ] Use u_height
 - [ ] Update/write tests
 - [ ] All tests pass
-- [ ] Commit: "refactor: update AddDeviceForm to v0.4"
+- [ ] Commit: "refactor: update AddDeviceForm to v0.2"
 
 ### 6.6 App Component
 
@@ -319,7 +319,7 @@
 - [ ] Use addDeviceType function
 - [ ] Update save/load handlers
 - [ ] All tests pass
-- [ ] Commit: "refactor: update App to v0.4"
+- [ ] Commit: "refactor: update App to v0.2"
 
 ---
 
@@ -339,19 +339,19 @@
   - [ ] Migrate images
 - [ ] Write integration tests
 - [ ] All tests pass
-- [ ] Commit: "feat: integrate v0.4 file operations"
+- [ ] Commit: "feat: integrate v0.2 file operations"
 
 ### 7.2 E2E Tests
 
 - [ ] Create test fixtures
   - [ ] legacy-v0.3.rackarr.zip
-  - [ ] valid-v0.4 folder
+  - [ ] valid-v0.2 folder
 - [ ] Test: Create and save new layout
 - [ ] Test: Load legacy v0.3 file
 - [ ] Test: Round-trip preservation
 - [ ] Test: Slug uniqueness
 - [ ] All E2E tests pass
-- [ ] Commit: "test: add v0.4 E2E tests"
+- [ ] Commit: "test: add v0.2 E2E tests"
 
 ### 7.3 Final Verification
 
@@ -366,7 +366,7 @@
   - [ ] Save layout
   - [ ] Load layout
   - [ ] Load legacy file
-- [ ] Commit: "chore: v0.4 final verification"
+- [ ] Commit: "chore: v0.2 final verification"
 
 ---
 
@@ -376,22 +376,22 @@
 
 - [ ] Update CLAUDE.md version number
 - [ ] Update any outdated comments
-- [ ] Remove v04.ts suffix files (merge into main types)
+- [ ] Remove v02.ts suffix files (merge into main types)
 - [ ] Update README if needed
 
 ### Type Cleanup
 
-- [ ] Remove V04 suffix from types
+- [ ] Remove V02 suffix from types
 - [ ] Update all imports to use main types
 - [ ] Delete temporary parallel files
-- [ ] Commit: "refactor: finalize v0.4 type naming"
+- [ ] Commit: "refactor: finalize v0.2 type naming"
 
 ### Version Bump
 
-- [ ] Update package.json version to 0.4.0
+- [ ] Update package.json version to 0.2.0
 - [ ] Update version constant if any
-- [ ] Create git tag v0.4.0
-- [ ] Commit: "chore: bump version to 0.4.0"
+- [ ] Create git tag v0.2.0
+- [ ] Commit: "chore: bump version to 0.2.0"
 
 ---
 

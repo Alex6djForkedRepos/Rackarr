@@ -1,8 +1,8 @@
-# Data Schema Specification v0.4
+# Data Schema Specification v0.2
 
 **Status:** Approved
 **Date:** 2025-12-03
-**Target Version:** v0.4.0
+**Target Version:** v0.2.0
 
 ---
 
@@ -337,7 +337,7 @@ rackarr:
 
 ```yaml
 # homelab-rack/homelab-rack.yaml
-version: '0.4.0'
+version: '0.2.0'
 name: Homelab Rack
 
 rack:
@@ -450,7 +450,7 @@ interface Rack {
 interface Layout {
 	version: string;
 	name: string;
-	rack: Rack; // Single rack (v0.4)
+	rack: Rack; // Single rack (v0.2)
 	device_types: DeviceType[];
 	settings: LayoutSettings;
 }

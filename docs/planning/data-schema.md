@@ -59,8 +59,8 @@ slug: synology-ds920-plus # For deduplication
 u_height: 2
 is_full_depth: true
 airflow: front-to-rear # v0.2+
-weight: 2.34 # v0.4+
-weight_unit: kg # v0.4+
+weight: 2.34 # v0.2+
+weight_unit: kg # v0.2+
 front_image: true # Future
 rear_image: true # Future
 comments: '4-bay NAS'
