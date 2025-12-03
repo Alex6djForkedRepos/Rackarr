@@ -2,8 +2,21 @@
  * Export utilities for generating images from rack layouts
  */
 
-import type { Rack, Device, ExportOptions, ExportFormat, ExportMetadata, Layout } from '$lib/types';
+import type { Rack, Device, ExportOptions, ExportFormat, ExportMetadata } from '$lib/types';
 import JSZip from 'jszip';
+
+// Interface for layout metadata (supports both Layout and LayoutV02)
+interface LayoutLike {
+	version: string;
+	name: string;
+}
+
+// Interface for rack metadata (supports both Rack and RackV02)
+interface RackLike {
+	name: string;
+	height: number;
+	devices: { length: number };
+}
 
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
@@ -443,8 +456,8 @@ export function generateExportFilename(layoutName: string, format: ExportFormat)
  * Generate metadata for bundled export
  */
 export function generateExportMetadata(
-	layout: Layout,
-	rack: Rack,
+	layout: LayoutLike,
+	rack: RackLike,
 	options: ExportOptions,
 	includeSource: boolean
 ): ExportMetadata {
@@ -482,8 +495,8 @@ export function generateBundledExportFilename(layoutName: string, _format: Expor
  */
 export async function createBundledExport(
 	imageBlob: Blob,
-	layout: Layout,
-	rack: Rack,
+	layout: LayoutLike,
+	rack: RackLike,
 	options: ExportOptions,
 	includeSource: boolean,
 	sourceBlob?: Blob

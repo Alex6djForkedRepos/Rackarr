@@ -17,7 +17,8 @@ describe('Rack Visual Enhancements', () => {
 
 		layoutStore = getLayoutStore();
 		const rack = layoutStore.addRack('Test Rack', 42);
-		testRack = rack!;
+		// Ensure view is set for type compatibility
+		testRack = { ...rack!, view: rack!.view ?? 'front' };
 	});
 
 	describe('Alternating Row Shading', () => {

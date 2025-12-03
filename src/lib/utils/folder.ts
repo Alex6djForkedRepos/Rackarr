@@ -108,8 +108,8 @@ export async function extractFolderArchive(
 		throw new Error('No YAML file found in archive');
 	}
 
-	// Get the first YAML file
-	const yamlPath = yamlFiles[0];
+	// Get the first YAML file (we already checked length > 0)
+	const yamlPath = yamlFiles[0]!;
 	const yamlFile = zip.file(yamlPath);
 	if (!yamlFile) {
 		throw new Error('Could not read YAML file from archive');
@@ -120,7 +120,7 @@ export async function extractFolderArchive(
 	const layout = parseLayoutYaml(yamlContent);
 
 	// Find the folder name (parent of the YAML file)
-	const folderName = yamlPath.split('/')[0];
+	const folderName = yamlPath.split('/')[0] ?? 'layout';
 
 	// Extract images from assets folder
 	const images: ImageStoreMap = new Map();
@@ -145,9 +145,11 @@ export async function extractFolderArchive(
 
 		const deviceSlug = parts[0];
 		const filename = parts[1];
+		if (!deviceSlug || !filename) continue;
+
 		const faceMatch = filename.match(/^(front|rear)\.\w+$/);
 
-		if (!faceMatch || !deviceSlug) continue;
+		if (!faceMatch) continue;
 
 		const face = faceMatch[1] as 'front' | 'rear';
 		const imageFile = zip.file(imagePath);
@@ -183,4 +185,45 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 		reader.onerror = () => reject(new Error('Failed to read blob'));
 		reader.readAsDataURL(blob);
 	});
+}
+
+/**
+ * Generate a safe archive filename from layout
+ * @param layout - The layout to generate filename for
+ * @returns Filename with .rackarr.zip extension
+ */
+export function generateArchiveFilenameV02(layout: LayoutV02): string {
+	const safeName = slugify(layout.name) || 'untitled';
+	return `${safeName}.rackarr.zip`;
+}
+
+/**
+ * Download a v0.2 layout as a folder-based ZIP archive
+ * @param layout - The layout to save
+ * @param images - Map of device images
+ * @param filename - Optional custom filename
+ */
+export async function downloadArchiveV02(
+	layout: LayoutV02,
+	images: ImageStoreMap,
+	filename?: string
+): Promise<void> {
+	// Create the folder archive
+	const blob = await createFolderArchive(layout, images);
+
+	// Create object URL for the blob
+	const url = URL.createObjectURL(blob);
+
+	try {
+		// Create a temporary anchor element
+		const anchor = document.createElement('a');
+		anchor.href = url;
+		anchor.download = filename ?? generateArchiveFilenameV02(layout);
+
+		// Trigger the download
+		anchor.click();
+	} finally {
+		// Clean up the object URL
+		URL.revokeObjectURL(url);
+	}
 }

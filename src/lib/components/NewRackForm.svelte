@@ -43,8 +43,8 @@
 	// Reset height when width changes if current selection isn't available
 	$effect(() => {
 		if (!isCustomHeight && !availableHeights.includes(selectedHeight)) {
-			// Select the largest available height as default
-			selectedHeight = availableHeights[availableHeights.length - 1];
+			// Select the largest available height as default (array is never empty)
+			selectedHeight = availableHeights[availableHeights.length - 1]!;
 		}
 	});
 
