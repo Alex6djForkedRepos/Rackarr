@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import JSZip from 'jszip';
 import {
 	downloadLayout,
 	downloadArchive,
@@ -6,7 +7,8 @@ import {
 	generateFilename,
 	generateArchiveFilename,
 	parseLayoutJson,
-	detectFileFormat
+	detectFileFormat,
+	detectFileFormatAsync
 } from '$lib/utils/file';
 import { createLayout, serializeLayout } from '$lib/utils/serialization';
 import type { ImageStoreMap } from '$lib/types/images';
@@ -344,25 +346,126 @@ describe('File Utilities', () => {
 	// Note: readLayoutFile is tested via E2E tests since it requires real FileReader
 	// The core parsing logic is tested in parseLayoutJson tests above
 
-	describe('detectFileFormat', () => {
+	describe('detectFileFormat (sync)', () => {
 		it('identifies .rackarr.zip as archive format', () => {
 			const file = new File([''], 'test.rackarr.zip', { type: 'application/zip' });
 			expect(detectFileFormat(file)).toBe('archive');
 		});
 
-		it('identifies .rackarr.json as json format', () => {
+		it('identifies .rackarr.json as legacy-json format', () => {
 			const file = new File([''], 'test.rackarr.json', { type: 'application/json' });
-			expect(detectFileFormat(file)).toBe('json');
+			expect(detectFileFormat(file)).toBe('legacy-json');
 		});
 
-		it('identifies plain .json as json format', () => {
+		it('identifies plain .json as legacy-json format', () => {
 			const file = new File([''], 'test.json', { type: 'application/json' });
-			expect(detectFileFormat(file)).toBe('json');
+			expect(detectFileFormat(file)).toBe('legacy-json');
 		});
 
 		it('handles uppercase extensions', () => {
 			const file = new File([''], 'TEST.RACKARR.ZIP', { type: 'application/zip' });
 			expect(detectFileFormat(file)).toBe('archive');
+		});
+
+		it('returns unknown for unsupported extensions', () => {
+			const file = new File([''], 'test.txt', { type: 'text/plain' });
+			expect(detectFileFormat(file)).toBe('unknown');
+		});
+	});
+
+	describe('detectFileFormatAsync', () => {
+		beforeEach(() => {
+			// JSZip requires real timers for async operations
+			vi.useRealTimers();
+		});
+
+		it('identifies folder-archive from ZIP with YAML file', async () => {
+			const zip = new JSZip();
+			const folder = zip.folder('my-layout');
+			folder?.file('my-layout.yaml', 'version: "0.2.0"\nname: Test');
+
+			const blob = await zip.generateAsync({ type: 'blob' });
+			const file = new File([blob], 'test.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('folder-archive');
+		});
+
+		it('identifies legacy-archive from ZIP with layout.json', async () => {
+			const zip = new JSZip();
+			zip.file('layout.json', '{"version": "0.1.0"}');
+
+			const blob = await zip.generateAsync({ type: 'blob' });
+			const file = new File([blob], 'test.rackarr.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('legacy-archive');
+		});
+
+		it('identifies legacy-json for .rackarr.json files', async () => {
+			const file = new File(['{}'], 'test.rackarr.json', { type: 'application/json' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('legacy-json');
+		});
+
+		it('identifies legacy-json for plain .json files', async () => {
+			const file = new File(['{}'], 'test.json', { type: 'application/json' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('legacy-json');
+		});
+
+		it('returns unknown for unrecognized files', async () => {
+			const file = new File(['hello'], 'test.txt', { type: 'text/plain' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('unknown');
+		});
+
+		it('returns unknown for ZIP without recognized structure', async () => {
+			const zip = new JSZip();
+			zip.file('random.txt', 'some content');
+
+			const blob = await zip.generateAsync({ type: 'blob' });
+			const file = new File([blob], 'test.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('unknown');
+		});
+
+		it('returns unknown for corrupted ZIP', async () => {
+			const file = new File(['not a zip'], 'test.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('unknown');
+		});
+
+		it('handles nested folder structure in folder-archive', async () => {
+			const zip = new JSZip();
+			const folder = zip.folder('homelab-rack');
+			folder?.file('homelab-rack.yaml', 'version: "0.2.0"');
+			const assets = folder?.folder('assets');
+			assets?.folder('my-device');
+
+			const blob = await zip.generateAsync({ type: 'blob' });
+			const file = new File([blob], 'test.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('folder-archive');
+		});
+
+		it('prefers folder-archive if both YAML and layout.json exist', async () => {
+			const zip = new JSZip();
+			zip.file('layout.json', '{}');
+			const folder = zip.folder('test');
+			folder?.file('test.yaml', 'version: "0.2.0"');
+
+			const blob = await zip.generateAsync({ type: 'blob' });
+			const file = new File([blob], 'test.zip', { type: 'application/zip' });
+
+			const format = await detectFileFormatAsync(file);
+			expect(format).toBe('folder-archive');
 		});
 	});
 

@@ -2,26 +2,76 @@
  * File utilities for saving and loading layouts
  */
 
+import JSZip from 'jszip';
 import { serializeLayout, deserializeLayout } from './serialization';
 import { createArchive } from './archive';
 import type { Layout } from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
 import { ARCHIVE_EXTENSION, LEGACY_JSON_EXTENSION } from '$lib/types/constants';
 
-/** File format type */
-export type FileFormat = 'archive' | 'json';
+/** File format types */
+export type FileFormat = 'archive' | 'legacy-json' | 'unknown';
+export type FileFormatDetailed = 'folder-archive' | 'legacy-archive' | 'legacy-json' | 'unknown';
 
 /**
- * Detect file format from file extension
+ * Detect file format from file extension (sync, basic detection)
  * @param file - File to check
- * @returns 'archive' for .rackarr.zip, 'json' for .rackarr.json or other JSON
+ * @returns 'archive' for .zip files, 'legacy-json' for .json files, 'unknown' otherwise
  */
 export function detectFileFormat(file: File): FileFormat {
 	const name = file.name.toLowerCase();
-	if (name.endsWith(ARCHIVE_EXTENSION.toLowerCase())) {
+	if (name.endsWith('.zip')) {
 		return 'archive';
 	}
-	return 'json';
+	if (name.endsWith('.json')) {
+		return 'legacy-json';
+	}
+	return 'unknown';
+}
+
+/**
+ * Detect file format by inspecting content (async, detailed detection)
+ * For ZIP files, peeks inside to distinguish folder-archive from legacy-archive
+ * @param file - File to check
+ * @returns Detailed format type
+ */
+export async function detectFileFormatAsync(file: File): Promise<FileFormatDetailed> {
+	const name = file.name.toLowerCase();
+
+	// Check for JSON files first
+	if (name.endsWith('.json')) {
+		return 'legacy-json';
+	}
+
+	// Check for ZIP files - need to peek inside
+	if (name.endsWith('.zip')) {
+		try {
+			const zip = await JSZip.loadAsync(file);
+			const filenames = Object.keys(zip.files);
+
+			// Check for folder-archive format (has .yaml file in subfolder)
+			const hasYamlFile = filenames.some((f) => f.endsWith('.yaml') && !f.endsWith('/'));
+
+			if (hasYamlFile) {
+				return 'folder-archive';
+			}
+
+			// Check for legacy-archive format (has layout.json at root)
+			const hasLayoutJson = filenames.some((f) => f === 'layout.json');
+
+			if (hasLayoutJson) {
+				return 'legacy-archive';
+			}
+
+			// ZIP without recognized structure
+			return 'unknown';
+		} catch {
+			// Invalid/corrupted ZIP
+			return 'unknown';
+		}
+	}
+
+	return 'unknown';
 }
 
 /**
