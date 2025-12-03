@@ -1,31 +1,74 @@
 /**
- * Layout Store
+ * Layout Store (v0.2)
  * Central state management for the application using Svelte 5 runes
+ * Uses v0.2 types with slug-based device identification
  */
 
-import type { FormFactor, Layout, Rack, Device, DeviceCategory } from '$lib/types';
-import { DEFAULT_DEVICE_FACE, MAX_RACKS } from '$lib/types/constants';
-import { createLayout } from '$lib/utils/serialization';
-import { createRack, duplicateRack as duplicateRackUtil } from '$lib/utils/rack';
-import { generateId } from '$lib/utils/device';
-import { canPlaceDevice, findCollisions } from '$lib/utils/collision';
+import type { FormFactor, DeviceCategory, Layout, Device } from '$lib/types';
+import type {
+	LayoutV02,
+	RackV02,
+	DeviceTypeV02,
+	DeviceV02,
+	DeviceFaceV02,
+	RackView
+} from '$lib/types/v02';
+import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
+import { createLayoutV02, createRackV02 } from '$lib/utils/serialization-v02';
+import {
+	createDeviceType as createDeviceTypeHelper,
+	findDeviceType,
+	addDeviceTypeToLayout,
+	removeDeviceTypeFromLayout,
+	placeDeviceInRack,
+	removeDeviceFromRack as removeDeviceFromRackHelper,
+	type CreateDeviceTypeInput
+} from '$lib/stores/layout-helpers-v02';
+import { migrateToV02 } from '$lib/utils/migrate-v02';
 import { migrateLayout } from '$lib/utils/migration';
 
 // Module-level state (using $state rune)
-let layout = $state<Layout>(createLayout('Untitled'));
+let layout = $state<LayoutV02>(createLayoutV02('Untitled'));
 let isDirty = $state(false);
 
 // Derived values (using $derived rune)
-const racks = $derived(layout.racks);
-const deviceLibrary = $derived(layout.deviceLibrary);
-const rackCount = $derived(layout.racks.length);
-const canAddRack = $derived(layout.racks.length < MAX_RACKS);
+const rack = $derived(layout.rack);
+const device_types = $derived(layout.device_types);
+const hasRack = $derived(layout.rack.devices !== undefined);
+
+// Compatibility getters for transition period
+// TODO: Remove after all components are updated
+const racks = $derived([
+	{
+		...layout.rack,
+		id: 'rack-0', // Synthetic ID for compatibility
+		view: layout.rack.view ?? 'front', // Ensure view is always defined
+		// Map v0.2 devices to legacy PlacedDevice format
+		devices: layout.rack.devices.map((d) => ({
+			libraryId: d.device_type,
+			position: d.position,
+			face: d.face
+		}))
+	}
+]);
+const deviceLibrary = $derived(
+	layout.device_types.map((dt) => ({
+		id: dt.slug,
+		name: dt.model ?? dt.slug,
+		height: dt.u_height,
+		category: dt.rackarr.category,
+		colour: dt.rackarr.colour,
+		notes: dt.comments
+	}))
+);
+const rackCount = $derived(1); // Always 1 in v0.2
+const canAddRack = $derived(false); // No multi-rack in v0.2
 
 /**
  * Reset the store to initial state (primarily for testing)
  */
 export function resetLayoutStore(): void {
-	layout = createLayout('Untitled');
+	layout = createLayoutV02('Untitled');
 	isDirty = false;
 }
 
@@ -35,13 +78,25 @@ export function resetLayoutStore(): void {
  */
 export function getLayoutStore() {
 	return {
-		// State getters
+		// State getters (v0.2)
 		get layout() {
 			return layout;
 		},
 		get isDirty() {
 			return isDirty;
 		},
+		get rack() {
+			return rack;
+		},
+		get device_types() {
+			return device_types;
+		},
+		get hasRack() {
+			return hasRack;
+		},
+
+		// Compatibility getters (for transition period)
+		// TODO: Remove after all components are updated
 		get racks() {
 			return racks;
 		},
@@ -58,17 +113,24 @@ export function getLayoutStore() {
 		// Layout actions
 		createNewLayout,
 		loadLayout,
+		loadLayoutV02,
 		resetLayout: resetLayoutStore,
 
-		// Rack actions
+		// Rack actions (simplified for single rack)
 		addRack,
 		updateRack,
 		updateRackView,
 		deleteRack,
-		reorderRacks,
-		duplicateRack,
+		reorderRacks, // No-op in v0.2
+		duplicateRack, // Not supported in v0.2
 
-		// Device library actions
+		// Device type actions (v0.2 naming)
+		addDeviceType,
+		updateDeviceType,
+		deleteDeviceType,
+
+		// Legacy device library actions (compatibility)
+		// TODO: Remove after all components are updated
 		addDeviceToLibrary,
 		updateDeviceInLibrary,
 		deleteDeviceFromLibrary,
@@ -95,42 +157,63 @@ export function getLayoutStore() {
  * @param name - Layout name
  */
 function createNewLayout(name: string): void {
-	layout = createLayout(name);
+	layout = createLayoutV02(name);
 	isDirty = false;
 }
 
 /**
- * Load an existing layout
- * Automatically migrates from older versions
- * v0.1.1: Loads only first rack from multi-rack files
- * @param layoutData - Layout to load
+ * Load a v0.2 layout directly
+ * @param layoutData - v0.2 layout to load
+ */
+function loadLayoutV02(layoutData: LayoutV02): void {
+	// Ensure runtime view is set
+	layout = {
+		...layoutData,
+		rack: {
+			...layoutData.rack,
+			view: layoutData.rack.view ?? 'front'
+		}
+	};
+	isDirty = false;
+}
+
+/**
+ * Load an existing layout (legacy format)
+ * Automatically migrates from older versions to v0.2
+ * @param layoutData - Legacy layout to load
  * @returns Number of racks that were in the original file (for toast display)
  */
 function loadLayout(layoutData: Layout): number {
+	// First apply legacy migrations (v0.1.0 → v0.3.0)
 	const migrated = migrateLayout(layoutData);
 	const originalRackCount = migrated.racks.length;
 
-	// Single-rack mode: only load first rack
-	const singleRackData = {
-		...migrated,
-		racks: migrated.racks.slice(0, 1)
-	};
+	// Then migrate to v0.2
+	const { layout: v02Layout } = migrateToV02(migrated);
 
-	layout = singleRackData;
+	// Ensure runtime view is set
+	layout = {
+		...v02Layout,
+		rack: {
+			...v02Layout.rack,
+			view: 'front'
+		}
+	};
 	isDirty = false;
 
 	return originalRackCount;
 }
 
 /**
- * Add a new rack to the layout
+ * Add a new rack to the layout (replaces existing in v0.2)
+ * In v0.2, there's only one rack, so this replaces it
  * @param name - Rack name
  * @param height - Rack height in U
  * @param width - Rack width in inches (10 or 19)
  * @param form_factor - Rack form factor
  * @param desc_units - Whether units are numbered top-down
  * @param starting_unit - First U number
- * @returns The created rack, or null if max racks reached
+ * @returns The created rack object (with id for compatibility)
  */
 function addRack(
 	name: string,
@@ -139,38 +222,42 @@ function addRack(
 	form_factor?: FormFactor,
 	desc_units?: boolean,
 	starting_unit?: number
-): Rack | null {
-	if (layout.racks.length >= MAX_RACKS) {
-		return null;
-	}
+): (RackV02 & { id: string }) | null {
+	const newRack = createRackV02(
+		name,
+		height,
+		(width as 10 | 19) ?? 19,
+		form_factor ?? '4-post-cabinet',
+		desc_units ?? false,
+		starting_unit ?? 1
+	);
 
-	const rack = createRack(name, height, undefined, width, form_factor, desc_units, starting_unit);
-	rack.position = layout.racks.length;
-
-	layout.racks = [...layout.racks, rack];
-
-	// Single-rack mode: sync layout name with rack name for file save
-	layout.name = name;
-
+	layout = {
+		...layout,
+		name, // Sync layout name with rack name
+		rack: newRack
+	};
 	isDirty = true;
 
-	return rack;
+	// Return with synthetic id for compatibility
+	return { ...newRack, id: 'rack-0' };
 }
 
 /**
  * Update a rack's properties
- * @param id - Rack ID
+ * In v0.2, there's only one rack, so id is ignored
+ * @param _id - Rack ID (ignored in v0.2)
  * @param updates - Properties to update
  */
-function updateRack(id: string, updates: Partial<Rack>): void {
-	const index = layout.racks.findIndex((r) => r.id === id);
-	if (index === -1) return;
+function updateRack(_id: string, updates: Partial<RackV02>): void {
+	layout = {
+		...layout,
+		rack: { ...layout.rack, ...updates }
+	};
 
-	layout.racks = layout.racks.map((rack) => (rack.id === id ? { ...rack, ...updates } : rack));
-
-	// Single-rack mode: sync layout name with rack name for file save
+	// Sync layout name with rack name
 	if (updates.name !== undefined) {
-		layout.name = updates.name;
+		layout = { ...layout, name: updates.name };
 	}
 
 	isDirty = true;
@@ -178,110 +265,98 @@ function updateRack(id: string, updates: Partial<Rack>): void {
 
 /**
  * Update a rack's view (front/rear)
- * @param id - Rack ID
+ * @param _id - Rack ID (ignored in v0.2)
  * @param view - New view
  */
-function updateRackView(id: string, view: 'front' | 'rear'): void {
-	updateRack(id, { view });
+function updateRackView(_id: string, view: RackView): void {
+	updateRack(_id, { view });
 }
 
 /**
  * Delete a rack from the layout
- * @param id - Rack ID
+ * In v0.2, this resets the rack to empty
+ * @param _id - Rack ID (ignored in v0.2)
  */
-function deleteRack(id: string): void {
-	const index = layout.racks.findIndex((r) => r.id === id);
-	if (index === -1) return;
-
-	// Remove the rack and update positions of remaining racks
-	layout.racks = layout.racks
-		.filter((r) => r.id !== id)
-		.map((rack, idx) => ({
-			...rack,
-			position: idx
-		}));
+function deleteRack(_id: string): void {
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: []
+		}
+	};
 	isDirty = true;
 }
 
 /**
  * Reorder racks by swapping positions
- * @param fromIndex - Source position
- * @param toIndex - Target position
+ * No-op in v0.2 (single rack only)
  */
-function reorderRacks(fromIndex: number, toIndex: number): void {
-	if (
-		fromIndex < 0 ||
-		fromIndex >= layout.racks.length ||
-		toIndex < 0 ||
-		toIndex >= layout.racks.length
-	) {
-		return;
-	}
-
-	// Sort racks by position first
-	const sortedRacks = [...layout.racks].sort((a, b) => a.position - b.position);
-
-	// Get the racks at the two positions
-	const rackAtFrom = sortedRacks[fromIndex];
-	const rackAtTo = sortedRacks[toIndex];
-
-	if (!rackAtFrom || !rackAtTo) return;
-
-	// Swap positions by updating the position property
-	layout.racks = layout.racks.map((rack) => {
-		if (rack.id === rackAtFrom.id) {
-			return { ...rack, position: toIndex };
-		}
-		if (rack.id === rackAtTo.id) {
-			return { ...rack, position: fromIndex };
-		}
-		return rack;
-	});
-
-	isDirty = true;
+function reorderRacks(_fromIndex: number, _toIndex: number): void {
+	// No-op in v0.2 - single rack only
 }
 
 /**
  * Duplicate a rack with all its devices
- * @param id - Rack ID to duplicate
- * @returns Success object or error message
+ * Not supported in v0.2 (single rack only)
+ * @param _id - Rack ID
+ * @returns Error message
  */
-function duplicateRack(id: string): { error?: string } {
-	// Check max racks limit
-	if (layout.racks.length >= MAX_RACKS) {
-		return { error: `Maximum of ${MAX_RACKS} rack${MAX_RACKS === 1 ? '' : 's'} allowed` };
-	}
-
-	// Find the rack to duplicate
-	const originalRack = layout.racks.find((r) => r.id === id);
-	if (!originalRack) {
-		return { error: 'Rack not found' };
-	}
-
-	// Create duplicate using utility function
-	const duplicate = duplicateRackUtil(originalRack);
-
-	// Insert duplicate after original and update positions
-	const insertPosition = originalRack.position + 1;
-	const updatedRacks = layout.racks.map((rack) => {
-		// Shift positions of racks after the insertion point
-		if (rack.position >= insertPosition) {
-			return { ...rack, position: rack.position + 1 };
-		}
-		return rack;
-	});
-
-	// Add the duplicate at the insertion position
-	layout.racks = [...updatedRacks, { ...duplicate, position: insertPosition }];
-	isDirty = true;
-
-	return {};
+function duplicateRack(_id: string): { error?: string } {
+	return { error: 'Maximum of 1 rack allowed' };
 }
 
 /**
- * Add a device to the library
- * @param deviceData - Device data without ID
- * @returns The created device
+ * Add a device type to the library
+ * @param data - Device type data
+ * @returns The created device type
+ */
+function addDeviceType(data: CreateDeviceTypeInput): DeviceTypeV02 {
+	const deviceType = createDeviceTypeHelper(data);
+
+	try {
+		layout = addDeviceTypeToLayout(layout, deviceType);
+		isDirty = true;
+		return deviceType;
+	} catch {
+		// Slug collision - try with modified slug
+		const modifiedData = { ...data, name: `${data.name} (copy)` };
+		const modifiedDeviceType = createDeviceTypeHelper(modifiedData);
+		layout = addDeviceTypeToLayout(layout, modifiedDeviceType);
+		isDirty = true;
+		return modifiedDeviceType;
+	}
+}
+
+/**
+ * Update a device type in the library
+ * @param slug - Device type slug
+ * @param updates - Properties to update
+ */
+function updateDeviceType(slug: string, updates: Partial<DeviceTypeV02>): void {
+	layout = {
+		...layout,
+		device_types: layout.device_types.map((dt) => (dt.slug === slug ? { ...dt, ...updates } : dt))
+	};
+	isDirty = true;
+}
+
+/**
+ * Delete a device type from the library
+ * Also removes all placed devices referencing it
+ * @param slug - Device type slug
+ */
+function deleteDeviceType(slug: string): void {
+	layout = removeDeviceTypeFromLayout(layout, slug);
+	isDirty = true;
+}
+
+// Legacy device library actions (compatibility wrappers)
+// TODO: Remove after all components are updated
+
+/**
+ * Add a device to the library (legacy compatibility)
+ * @deprecated Use addDeviceType instead
  */
 function addDeviceToLibrary(deviceData: {
 	name: string;
@@ -290,119 +365,161 @@ function addDeviceToLibrary(deviceData: {
 	colour: string;
 	notes?: string;
 }): Device {
-	const device: Device = {
-		id: generateId(),
+	const deviceType = addDeviceType({
 		name: deviceData.name,
-		height: deviceData.height,
+		u_height: deviceData.height,
 		category: deviceData.category,
 		colour: deviceData.colour,
-		notes: deviceData.notes
+		comments: deviceData.notes,
+		model: deviceData.name // Store name as model for lookup compatibility
+	});
+
+	// Return legacy format for compatibility
+	return {
+		id: deviceType.slug,
+		name: deviceType.model ?? deviceType.slug,
+		height: deviceType.u_height,
+		category: deviceType.rackarr.category,
+		colour: deviceType.rackarr.colour,
+		notes: deviceType.comments
 	};
-
-	layout.deviceLibrary = [...layout.deviceLibrary, device];
-	isDirty = true;
-
-	return device;
 }
 
 /**
- * Update a device in the library
- * @param id - Device ID
- * @param updates - Properties to update
+ * Update a device in the library (legacy compatibility)
+ * @deprecated Use updateDeviceType instead
  */
 function updateDeviceInLibrary(id: string, updates: Partial<Device>): void {
-	layout.deviceLibrary = layout.deviceLibrary.map((device) =>
-		device.id === id ? { ...device, ...updates } : device
-	);
-	isDirty = true;
+	const typeUpdates: Partial<DeviceTypeV02> = {};
+
+	if (updates.height !== undefined) {
+		typeUpdates.u_height = updates.height;
+	}
+	if (updates.notes !== undefined) {
+		typeUpdates.comments = updates.notes;
+	}
+	if (updates.colour !== undefined || updates.category !== undefined) {
+		const existing = findDeviceType(layout.device_types, id);
+		if (existing) {
+			typeUpdates.rackarr = {
+				...existing.rackarr,
+				...(updates.colour !== undefined && { colour: updates.colour }),
+				...(updates.category !== undefined && { category: updates.category })
+			};
+		}
+	}
+
+	updateDeviceType(id, typeUpdates);
 }
 
 /**
- * Delete a device from the library
- * @param id - Device ID
+ * Delete a device from the library (legacy compatibility)
+ * @deprecated Use deleteDeviceType instead
  */
 function deleteDeviceFromLibrary(id: string): void {
-	layout.deviceLibrary = layout.deviceLibrary.filter((d) => d.id !== id);
-	isDirty = true;
+	deleteDeviceType(id);
 }
 
 /**
- * Place a device from the library into a rack
- * @param rackId - Target rack ID
- * @param libraryId - Device library ID
+ * Place a device from the library into the rack
+ * @param _rackId - Target rack ID (ignored in v0.2)
+ * @param deviceTypeSlug - Device type slug (or legacy libraryId)
  * @param position - U position (bottom of device)
  * @param face - Optional face assignment (defaults to DEFAULT_DEVICE_FACE)
  * @returns true if placed successfully, false otherwise
  */
 function placeDevice(
-	rackId: string,
-	libraryId: string,
+	_rackId: string,
+	deviceTypeSlug: string,
 	position: number,
-	face: 'front' | 'rear' | 'both' = DEFAULT_DEVICE_FACE
+	face: DeviceFaceV02 = DEFAULT_DEVICE_FACE
 ): boolean {
-	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
-	if (rackIndex === -1) return false;
+	const deviceType = findDeviceType(layout.device_types, deviceTypeSlug);
+	if (!deviceType) return false;
 
-	const rack = layout.racks[rackIndex]!;
-	const device = layout.deviceLibrary.find((d) => d.id === libraryId);
-	if (!device) return false;
-
-	// Check if placement is valid
-	if (!canPlaceDevice(rack, layout.deviceLibrary, device.height, position)) {
+	// Check bounds
+	if (position < 1 || position + deviceType.u_height - 1 > layout.rack.height) {
 		return false;
 	}
 
-	// Add device to rack
-	const updatedRack = {
-		...rack,
-		devices: [...rack.devices, { libraryId, position, face }]
+	// Check for collisions
+	for (const existingDevice of layout.rack.devices) {
+		const existingType = findDeviceType(layout.device_types, existingDevice.device_type);
+		if (!existingType) continue;
+
+		const existingStart = existingDevice.position;
+		const existingEnd = existingDevice.position + existingType.u_height - 1;
+		const newStart = position;
+		const newEnd = position + deviceType.u_height - 1;
+
+		if (newStart <= existingEnd && newEnd >= existingStart) {
+			return false; // Collision
+		}
+	}
+
+	// Create the device placement
+	const device: DeviceV02 = {
+		device_type: deviceTypeSlug,
+		position,
+		face
 	};
 
-	layout.racks = layout.racks.map((r) => (r.id === rackId ? updatedRack : r));
-	isDirty = true;
-
-	return true;
+	try {
+		layout = placeDeviceInRack(layout, device);
+		isDirty = true;
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /**
- * Move a device within the same rack
- * @param rackId - Rack ID
+ * Move a device within the rack
+ * @param _rackId - Rack ID (ignored in v0.2)
  * @param deviceIndex - Index of device in rack's devices array
  * @param newPosition - New U position
  * @returns true if moved successfully, false otherwise
  */
-function moveDevice(rackId: string, deviceIndex: number, newPosition: number): boolean {
-	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
-	if (rackIndex === -1) return false;
+function moveDevice(_rackId: string, deviceIndex: number, newPosition: number): boolean {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return false;
 
-	const rack = layout.racks[rackIndex]!;
-	if (deviceIndex < 0 || deviceIndex >= rack.devices.length) return false;
-
-	const placedDevice = rack.devices[deviceIndex]!;
-	const device = layout.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
-	if (!device) return false;
-
-	// Check for collisions (excluding the device being moved)
-	const collisions = findCollisions(
-		rack,
-		layout.deviceLibrary,
-		device.height,
-		newPosition,
-		deviceIndex
-	);
-	if (collisions.length > 0) return false;
+	const device = layout.rack.devices[deviceIndex]!;
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	if (!deviceType) return false;
 
 	// Check bounds
-	if (newPosition < 1 || newPosition + device.height - 1 > rack.height) {
+	if (newPosition < 1 || newPosition + deviceType.u_height - 1 > layout.rack.height) {
 		return false;
 	}
 
-	// Update device position
-	const updatedDevices = rack.devices.map((d, idx) =>
-		idx === deviceIndex ? { ...d, position: newPosition } : d
-	);
+	// Check for collisions (excluding the device being moved)
+	for (let i = 0; i < layout.rack.devices.length; i++) {
+		if (i === deviceIndex) continue;
 
-	layout.racks = layout.racks.map((r) => (r.id === rackId ? { ...r, devices: updatedDevices } : r));
+		const existingDevice = layout.rack.devices[i]!;
+		const existingType = findDeviceType(layout.device_types, existingDevice.device_type);
+		if (!existingType) continue;
+
+		const existingStart = existingDevice.position;
+		const existingEnd = existingDevice.position + existingType.u_height - 1;
+		const newStart = newPosition;
+		const newEnd = newPosition + deviceType.u_height - 1;
+
+		if (newStart <= existingEnd && newEnd >= existingStart) {
+			return false; // Collision
+		}
+	}
+
+	// Update device position
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, idx) =>
+				idx === deviceIndex ? { ...d, position: newPosition } : d
+			)
+		}
+	};
 	isDirty = true;
 
 	return true;
@@ -410,12 +527,7 @@ function moveDevice(rackId: string, deviceIndex: number, newPosition: number): b
 
 /**
  * Move a device from one rack to another
- * v0.1.1: Cross-rack moves disabled in single-rack mode
- * @param fromRackId - Source rack ID
- * @param deviceIndex - Index of device in source rack
- * @param toRackId - Target rack ID
- * @param newPosition - Position in target rack
- * @returns true if moved successfully, false otherwise (cross-rack always false)
+ * In v0.2, this just delegates to moveDevice (single rack)
  */
 function moveDeviceToRack(
 	fromRackId: string,
@@ -423,55 +535,42 @@ function moveDeviceToRack(
 	toRackId: string,
 	newPosition: number
 ): boolean {
-	// Same rack? Use moveDevice instead
-	if (fromRackId === toRackId) {
-		return moveDevice(fromRackId, deviceIndex, newPosition);
+	// In v0.2, there's only one rack
+	if (fromRackId !== toRackId) {
+		console.debug('Cross-rack move blocked in single-rack mode');
+		return false;
 	}
-
-	// Cross-rack moves blocked in single-rack mode (v0.1.1)
-	// This code path should never be reached with MAX_RACKS=1,
-	// but we block explicitly for safety
-	console.debug('Cross-rack move blocked in single-rack mode');
-	return false;
+	return moveDevice(fromRackId, deviceIndex, newPosition);
 }
 
 /**
- * Remove a device from a rack
- * @param rackId - Rack ID
+ * Remove a device from the rack
+ * @param _rackId - Rack ID (ignored in v0.2)
  * @param deviceIndex - Index of device in rack's devices array
  */
-function removeDeviceFromRack(rackId: string, deviceIndex: number): void {
-	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
-	if (rackIndex === -1) return;
+function removeDeviceFromRack(_rackId: string, deviceIndex: number): void {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
 
-	const rack = layout.racks[rackIndex]!;
-	if (deviceIndex < 0 || deviceIndex >= rack.devices.length) return;
-
-	const updatedDevices = rack.devices.filter((_, idx) => idx !== deviceIndex);
-	layout.racks = layout.racks.map((r) => (r.id === rackId ? { ...r, devices: updatedDevices } : r));
+	layout = removeDeviceFromRackHelper(layout, deviceIndex);
 	isDirty = true;
 }
 
 /**
  * Update a device's face property
- * @param rackId - Rack ID
+ * @param _rackId - Rack ID (ignored in v0.2)
  * @param deviceIndex - Index of device in rack's devices array
- * @param face - New face value ('front' | 'rear' | 'both')
+ * @param face - New face value
  */
-function updateDeviceFace(
-	rackId: string,
-	deviceIndex: number,
-	face: 'front' | 'rear' | 'both'
-): void {
-	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
-	if (rackIndex === -1) return;
+function updateDeviceFace(_rackId: string, deviceIndex: number, face: DeviceFaceV02): void {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
 
-	const rack = layout.racks[rackIndex]!;
-	if (deviceIndex < 0 || deviceIndex >= rack.devices.length) return;
-
-	const updatedDevices = rack.devices.map((d, idx) => (idx === deviceIndex ? { ...d, face } : d));
-
-	layout.racks = layout.racks.map((r) => (r.id === rackId ? { ...r, devices: updatedDevices } : r));
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, idx) => (idx === deviceIndex ? { ...d, face } : d))
+		}
+	};
 	isDirty = true;
 }
 
@@ -494,7 +593,10 @@ function markClean(): void {
  * @param mode - Display mode to set ('label' or 'image')
  */
 function updateDisplayMode(mode: 'label' | 'image'): void {
-	layout.settings = { ...layout.settings, displayMode: mode };
+	layout = {
+		...layout,
+		settings: { ...layout.settings, display_mode: mode }
+	};
 	isDirty = true;
 }
 
@@ -503,6 +605,9 @@ function updateDisplayMode(mode: 'label' | 'image'): void {
  * @param value - Boolean value to set
  */
 function updateShowLabelsOnImages(value: boolean): void {
-	layout.settings = { ...layout.settings, showLabelsOnImages: value };
+	layout = {
+		...layout,
+		settings: { ...layout.settings, show_labels_on_images: value }
+	};
 	isDirty = true;
 }

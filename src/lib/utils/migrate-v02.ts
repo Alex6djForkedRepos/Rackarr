@@ -132,7 +132,7 @@ export function migrateToV02(legacy: Layout): MigrationResult {
 	// Convert first rack (or create default)
 	let rack: RackV02;
 	if (legacy.racks.length > 0) {
-		const legacyRack = legacy.racks[0];
+		const legacyRack = legacy.racks[0]!;
 
 		// Convert placed devices, skipping unknown references
 		const devices: DeviceV02[] = [];

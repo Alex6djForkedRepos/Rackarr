@@ -1,22 +1,24 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
-import { CURRENT_VERSION } from '$lib/types/constants';
-import type { Device, Layout } from '$lib/types';
+import type { Layout } from '$lib/types';
+import type { LayoutV02 } from '$lib/types/v02';
 
-describe('Layout Store', () => {
+describe('Layout Store (v0.2)', () => {
 	beforeEach(() => {
 		// Reset the store before each test
 		resetLayoutStore();
 	});
 
 	describe('initial state', () => {
-		it('initializes with a default layout', () => {
+		it('initializes with a v0.2 layout', () => {
 			const store = getLayoutStore();
 			expect(store.layout.name).toBe('Untitled');
-			expect(store.layout.version).toBe(CURRENT_VERSION);
-			expect(store.layout.racks).toEqual([]);
-			// Now includes starter library (27 devices)
-			expect(store.layout.deviceLibrary.length).toBe(27);
+			expect(store.layout.version).toBe('0.2.0');
+			// v0.2 has a single rack, not an array
+			expect(store.layout.rack).toBeDefined();
+			expect(store.layout.rack.devices).toEqual([]);
+			// Starter library has 27 device types
+			expect(store.layout.device_types.length).toBe(27);
 		});
 
 		it('initializes isDirty as false', () => {
@@ -24,14 +26,25 @@ describe('Layout Store', () => {
 			expect(store.isDirty).toBe(false);
 		});
 
-		it('initializes rackCount as 0', () => {
+		it('initializes hasRack as true', () => {
 			const store = getLayoutStore();
-			expect(store.rackCount).toBe(0);
+			expect(store.hasRack).toBe(true);
 		});
 
-		it('initializes canAddRack as true', () => {
+		it('compatibility: rackCount is 1', () => {
 			const store = getLayoutStore();
-			expect(store.canAddRack).toBe(true);
+			expect(store.rackCount).toBe(1);
+		});
+
+		it('compatibility: canAddRack is false', () => {
+			const store = getLayoutStore();
+			expect(store.canAddRack).toBe(false);
+		});
+
+		it('compatibility: racks returns single rack in array', () => {
+			const store = getLayoutStore();
+			expect(store.racks).toHaveLength(1);
+			expect(store.racks[0].name).toBe('Untitled');
 		});
 	});
 
@@ -42,19 +55,25 @@ describe('Layout Store', () => {
 			expect(store.layout.name).toBe('My Lab');
 		});
 
-		it('resets racks to empty array', () => {
+		it('initializes with default rack', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
 			store.createNewLayout('New Layout');
-			expect(store.racks).toEqual([]);
+			// v0.2 always has a rack, but devices should be empty
+			expect(store.layout.rack.devices).toEqual([]);
 		});
 
-		it('resets deviceLibrary to starter library', () => {
+		it('resets device_types to starter library', () => {
 			const store = getLayoutStore();
-			store.addDeviceToLibrary({ name: 'Test', height: 1, category: 'server', colour: '#4A90D9' });
+			store.addDeviceType({
+				name: 'Test',
+				u_height: 1,
+				category: 'server',
+				colour: '#4A90D9'
+			});
 			store.createNewLayout('New Layout');
-			// Starter library has 27 devices
-			expect(store.deviceLibrary.length).toBe(27);
+			// Starter library has 27 device types
+			expect(store.device_types.length).toBe(27);
 		});
 
 		it('sets isDirty to false', () => {
@@ -66,11 +85,65 @@ describe('Layout Store', () => {
 		});
 	});
 
-	describe('loadLayout', () => {
-		it('replaces the current layout with the provided one', () => {
+	describe('loadLayoutV02', () => {
+		it('loads a v0.2 layout directly', () => {
 			const store = getLayoutStore();
-			const newLayout = {
-				version: '1.0',
+			const v02Layout: LayoutV02 = {
+				version: '0.2.0',
+				name: 'Test Layout',
+				rack: {
+					name: 'Test Rack',
+					height: 24,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
+				},
+				device_types: [],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: false
+				}
+			};
+			store.loadLayoutV02(v02Layout);
+			expect(store.layout.name).toBe('Test Layout');
+			expect(store.layout.rack.height).toBe(24);
+		});
+
+		it('sets isDirty to false', () => {
+			const store = getLayoutStore();
+			store.markDirty();
+			expect(store.isDirty).toBe(true);
+			store.loadLayoutV02({
+				version: '0.2.0',
+				name: 'Test',
+				rack: {
+					name: 'Test',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
+				},
+				device_types: [],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: false
+				}
+			});
+			expect(store.isDirty).toBe(false);
+		});
+	});
+
+	describe('loadLayout (legacy)', () => {
+		it('migrates legacy layout to v0.2', () => {
+			const store = getLayoutStore();
+			const legacyLayout = {
+				version: '0.2.0',
 				name: 'Loaded Layout',
 				created: '2025-01-01T00:00:00.000Z',
 				modified: '2025-01-01T00:00:00.000Z',
@@ -78,9 +151,9 @@ describe('Layout Store', () => {
 				deviceLibrary: [],
 				racks: []
 			};
-			store.loadLayout(newLayout);
+			store.loadLayout(legacyLayout);
 			expect(store.layout.name).toBe('Loaded Layout');
-			expect(store.layout.settings.theme).toBe('light');
+			expect(store.layout.version).toBe('0.2.0');
 		});
 
 		it('sets isDirty to false', () => {
@@ -99,7 +172,7 @@ describe('Layout Store', () => {
 			expect(store.isDirty).toBe(false);
 		});
 
-		it('migrates v0.1 layout by adding view property to racks', () => {
+		it('migrates v0.1 layout by adding view property', () => {
 			const store = getLayoutStore();
 			const v01Layout = {
 				version: '0.1.0',
@@ -120,7 +193,7 @@ describe('Layout Store', () => {
 				]
 			} as unknown as Layout;
 			store.loadLayout(v01Layout);
-			expect(store.racks[0]?.view).toBe('front');
+			expect(store.layout.rack.view).toBe('front');
 		});
 
 		it('migrates v0.1 layout by adding face property to placed devices', () => {
@@ -131,7 +204,15 @@ describe('Layout Store', () => {
 				created: '2025-01-01T00:00:00.000Z',
 				modified: '2025-01-01T00:00:00.000Z',
 				settings: { theme: 'dark' as const },
-				deviceLibrary: [],
+				deviceLibrary: [
+					{
+						id: 'device-1',
+						name: 'Test Server',
+						height: 2,
+						category: 'server',
+						colour: '#4A90D9'
+					}
+				],
 				racks: [
 					{
 						id: 'rack-1',
@@ -144,22 +225,7 @@ describe('Layout Store', () => {
 				]
 			} as unknown as Layout;
 			store.loadLayout(v01Layout);
-			expect(store.racks[0]?.devices[0]?.face).toBe('front');
-		});
-
-		it('updates version to current version after migration', () => {
-			const store = getLayoutStore();
-			const v01Layout = {
-				version: '0.1.0',
-				name: 'Old Layout',
-				created: '2025-01-01T00:00:00.000Z',
-				modified: '2025-01-01T00:00:00.000Z',
-				settings: { theme: 'dark' as const },
-				deviceLibrary: [],
-				racks: []
-			} as unknown as Layout;
-			store.loadLayout(v01Layout);
-			expect(store.layout.version).toBe(CURRENT_VERSION);
+			expect(store.layout.rack.devices[0]?.face).toBe('front');
 		});
 
 		it('loads only first rack from multi-rack file', () => {
@@ -189,23 +255,14 @@ describe('Layout Store', () => {
 						position: 1,
 						view: 'front' as const,
 						devices: []
-					},
-					{
-						id: 'rack-3',
-						name: 'Third Rack',
-						height: 18,
-						width: 19,
-						position: 2,
-						view: 'front' as const,
-						devices: []
 					}
 				]
 			};
 
 			store.loadLayout(multiRackLayout);
 
-			expect(store.racks).toHaveLength(1);
-			expect(store.racks[0]!.name).toBe('First Rack');
+			// v0.2 has single rack
+			expect(store.layout.rack.name).toBe('First Rack');
 		});
 
 		it('returns original rack count from multi-rack file', () => {
@@ -277,52 +334,14 @@ describe('Layout Store', () => {
 						position: 0,
 						view: 'front' as const,
 						devices: []
-					},
-					{
-						id: 'rack-2',
-						name: 'Rack 2',
-						height: 24,
-						width: 19,
-						position: 1,
-						view: 'front' as const,
-						devices: []
 					}
 				]
 			};
 
 			store.loadLayout(multiRackLayout);
 
-			// All library devices preserved even though only first rack loaded
-			expect(store.deviceLibrary).toHaveLength(2);
-		});
-
-		it('loads single-rack file normally', () => {
-			const store = getLayoutStore();
-			const singleRackLayout = {
-				version: '0.2.0',
-				name: 'Single Rack',
-				created: new Date().toISOString(),
-				modified: new Date().toISOString(),
-				settings: { theme: 'dark' as const },
-				deviceLibrary: [],
-				racks: [
-					{
-						id: 'rack-1',
-						name: 'Only Rack',
-						height: 42,
-						width: 19,
-						position: 0,
-						view: 'front' as const,
-						devices: []
-					}
-				]
-			};
-
-			const originalCount = store.loadLayout(singleRackLayout);
-
-			expect(store.racks).toHaveLength(1);
-			expect(store.racks[0]!.name).toBe('Only Rack');
-			expect(originalCount).toBe(1);
+			// All device types preserved (migrated from deviceLibrary)
+			expect(store.device_types).toHaveLength(2);
 		});
 	});
 
@@ -335,26 +354,25 @@ describe('Layout Store', () => {
 			expect(rack!.height).toBe(42);
 			expect(rack!.width).toBe(19);
 			expect(rack!.devices).toEqual([]);
-			expect(rack!.id).toMatch(/^[0-9a-f-]{36}$/);
+			// v0.2 uses synthetic id for compatibility
+			expect(rack!.id).toBe('rack-0');
 		});
 
-		it('adds rack to racks array', () => {
+		it('updates the rack in layout', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
-			expect(store.racks).toHaveLength(1);
-			expect(store.rackCount).toBe(1);
+			expect(store.layout.rack.name).toBe('Test Rack');
+			expect(store.layout.rack.height).toBe(42);
 		});
 
-		// Note: Position test removed - single-rack mode (v0.1.1) only allows 1 rack
-		// This test will be restored in v0.3 when multi-rack is re-enabled
-
-		it('returns null when 1 rack exists (single-rack mode)', () => {
+		it('always succeeds in v0.2 (replaces existing rack)', () => {
 			const store = getLayoutStore();
 			store.addRack('First Rack', 42);
-			expect(store.canAddRack).toBe(false);
-			const result = store.addRack('Second', 42);
-			expect(result).toBeNull();
-			expect(store.rackCount).toBe(1);
+			const result = store.addRack('Second', 24);
+			// In v0.2, addRack replaces the rack
+			expect(result).not.toBeNull();
+			expect(store.layout.rack.name).toBe('Second');
+			expect(store.layout.rack.height).toBe(24);
 		});
 
 		it('sets isDirty to true', () => {
@@ -368,78 +386,119 @@ describe('Layout Store', () => {
 	describe('updateRack', () => {
 		it('modifies rack properties', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('Original', 42);
-			store.updateRack(rack!.id, { name: 'Updated', height: 24 });
-			expect(store.racks[0]!.name).toBe('Updated');
-			expect(store.racks[0]!.height).toBe(24);
+			store.addRack('Original', 42);
+			store.updateRack('rack-0', { name: 'Updated', height: 24 });
+			expect(store.layout.rack.name).toBe('Updated');
+			expect(store.layout.rack.height).toBe(24);
 		});
 
 		it('does not affect other rack properties', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('Original', 42);
-			store.updateRack(rack!.id, { name: 'Updated' });
-			expect(store.racks[0]!.height).toBe(42);
-			expect(store.racks[0]!.width).toBe(19);
+			store.addRack('Original', 42);
+			store.updateRack('rack-0', { name: 'Updated' });
+			expect(store.layout.rack.height).toBe(42);
+			expect(store.layout.rack.width).toBe(19);
 		});
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('Test', 42);
+			store.addRack('Test', 42);
 			store.markClean();
-			store.updateRack(rack!.id, { name: 'Updated' });
+			store.updateRack('rack-0', { name: 'Updated' });
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
 	describe('deleteRack', () => {
-		it('removes rack from layout', () => {
+		it('clears devices from rack in v0.2', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('To Delete', 42);
-			expect(store.rackCount).toBe(1);
-			store.deleteRack(rack!.id);
-			expect(store.rackCount).toBe(0);
+			store.addRack('To Delete', 42);
+			const device = store.addDeviceType({
+				name: 'Test',
+				u_height: 1,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', device.slug, 5);
+			expect(store.layout.rack.devices).toHaveLength(1);
+			store.deleteRack('rack-0');
+			expect(store.layout.rack.devices).toHaveLength(0);
 		});
-
-		// Note: Multi-rack position test removed - single-rack mode (v0.1.1) only allows 1 rack
-		// This test will be restored in v0.3 when multi-rack is re-enabled
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('Test', 42);
+			store.addRack('Test', 42);
 			store.markClean();
-			store.deleteRack(rack!.id);
+			store.deleteRack('rack-0');
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
-	// Note: reorderRacks tests removed - single-rack mode (v0.1.1) only allows 1 rack
-	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('reorderRacks', () => {
-		it('is a no-op with single rack', () => {
+		it('is a no-op in v0.2 (single rack)', () => {
 			const store = getLayoutStore();
 			store.addRack('Only Rack', 42);
 			store.markClean();
 			store.reorderRacks(0, 1); // No-op - only one rack
-			expect(store.racks).toHaveLength(1);
-			// isDirty unchanged since no actual reorder happened
+			// isDirty should not change since no actual reorder happened
+			expect(store.isDirty).toBe(false);
 		});
 	});
 
-	describe('addDeviceToLibrary', () => {
-		it('generates ID and adds device', () => {
+	describe('addDeviceType', () => {
+		it('generates slug and adds device type', () => {
 			const store = getLayoutStore();
-			const initialCount = store.deviceLibrary.length; // 27 from starter library
+			const initialCount = store.device_types.length;
+			const deviceType = store.addDeviceType({
+				name: 'Test Server',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			expect(deviceType.slug).toBe('test-server');
+			expect(store.device_types).toHaveLength(initialCount + 1);
+			const addedType = store.device_types.find((dt) => dt.slug === deviceType.slug);
+			expect(addedType?.u_height).toBe(2);
+		});
+
+		it('preserves all provided properties', () => {
+			const store = getLayoutStore();
+			const deviceType = store.addDeviceType({
+				name: 'Test Server',
+				u_height: 2,
+				category: 'server',
+				colour: '#FF0000',
+				comments: 'Test notes'
+			});
+			expect(deviceType.rackarr.colour).toBe('#FF0000');
+			expect(deviceType.comments).toBe('Test notes');
+		});
+
+		it('sets isDirty to true', () => {
+			const store = getLayoutStore();
+			store.addDeviceType({
+				name: 'Test',
+				u_height: 1,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			expect(store.isDirty).toBe(true);
+		});
+	});
+
+	describe('addDeviceToLibrary (legacy compatibility)', () => {
+		it('generates slug and adds device', () => {
+			const store = getLayoutStore();
+			const initialCount = store.deviceLibrary.length;
 			const device = store.addDeviceToLibrary({
 				name: 'Test Server',
 				height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			expect(device.id).toMatch(/^[0-9a-f-]{36}$/);
+			// ID is now a slug
+			expect(device.id).toBe('test-server');
 			expect(store.deviceLibrary).toHaveLength(initialCount + 1);
-			// New device is added at the end
-			const addedDevice = store.deviceLibrary.find((d) => d.id === device.id);
-			expect(addedDevice?.name).toBe('Test Server');
 		});
 
 		it('preserves all provided properties', () => {
@@ -454,254 +513,323 @@ describe('Layout Store', () => {
 			expect(device.colour).toBe('#FF0000');
 			expect(device.notes).toBe('Test notes');
 		});
-
-		it('sets isDirty to true', () => {
-			const store = getLayoutStore();
-			store.addDeviceToLibrary({
-				name: 'Test',
-				height: 1,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			expect(store.isDirty).toBe(true);
-		});
 	});
 
-	describe('updateDeviceInLibrary', () => {
-		it('modifies device properties', () => {
+	describe('updateDeviceType', () => {
+		it('modifies device type properties', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
+			const deviceType = store.addDeviceType({
 				name: 'Original',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			store.updateDeviceInLibrary(device.id, { name: 'Updated', height: 2 });
-			const updatedDevice = store.deviceLibrary.find((d) => d.id === device.id);
-			expect(updatedDevice?.name).toBe('Updated');
-			expect(updatedDevice?.height).toBe(2);
+			store.updateDeviceType(deviceType.slug, { u_height: 2 });
+			const updated = store.device_types.find((dt) => dt.slug === deviceType.slug);
+			expect(updated?.u_height).toBe(2);
 		});
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
+			const deviceType = store.addDeviceType({
 				name: 'Test',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
 			store.markClean();
-			store.updateDeviceInLibrary(device.id, { name: 'Updated' });
+			store.updateDeviceType(deviceType.slug, { u_height: 2 });
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
-	describe('deleteDeviceFromLibrary', () => {
-		it('removes device from library', () => {
+	describe('deleteDeviceType', () => {
+		it('removes device type from library', () => {
 			const store = getLayoutStore();
-			const initialCount = store.deviceLibrary.length; // 27 from starter library
-			const device = store.addDeviceToLibrary({
+			const initialCount = store.device_types.length;
+			const deviceType = store.addDeviceType({
 				name: 'To Delete',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			expect(store.deviceLibrary).toHaveLength(initialCount + 1);
-			store.deleteDeviceFromLibrary(device.id);
-			expect(store.deviceLibrary).toHaveLength(initialCount);
+			expect(store.device_types).toHaveLength(initialCount + 1);
+			store.deleteDeviceType(deviceType.slug);
+			expect(store.device_types).toHaveLength(initialCount);
+		});
+
+		it('also removes placed devices referencing the type', () => {
+			const store = getLayoutStore();
+			store.addRack('Test', 42);
+			const deviceType = store.addDeviceType({
+				name: 'To Delete',
+				u_height: 1,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5);
+			expect(store.layout.rack.devices).toHaveLength(1);
+			store.deleteDeviceType(deviceType.slug);
+			expect(store.layout.rack.devices).toHaveLength(0);
 		});
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
+			const deviceType = store.addDeviceType({
 				name: 'Test',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
 			store.markClean();
-			store.deleteDeviceFromLibrary(device.id);
+			store.deleteDeviceType(deviceType.slug);
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
 	describe('placeDevice', () => {
-		let store: ReturnType<typeof getLayoutStore>;
-		let device: Device;
-		let rackId: string;
-
 		beforeEach(() => {
-			store = getLayoutStore();
-			device = store.addDeviceToLibrary({
-				name: 'Test Server',
-				height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			const rack = store.addRack('Test Rack', 42);
-			rackId = rack!.id;
-			store.markClean();
+			resetLayoutStore();
 		});
 
 		it('adds device to rack at position', () => {
-			const result = store.placeDevice(rackId, device.id, 5);
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test Server',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.markClean();
+
+			const result = store.placeDevice('rack-0', deviceType.slug, 5);
 			expect(result).toBe(true);
-			expect(store.racks[0]!.devices).toHaveLength(1);
-			expect(store.racks[0]!.devices[0]!.libraryId).toBe(device.id);
-			expect(store.racks[0]!.devices[0]!.position).toBe(5);
+			expect(store.layout.rack.devices).toHaveLength(1);
+			expect(store.layout.rack.devices[0]!.device_type).toBe(deviceType.slug);
+			expect(store.layout.rack.devices[0]!.position).toBe(5);
 		});
 
 		it('places device with default front face', () => {
-			const result = store.placeDevice(rackId, device.id, 5);
-			expect(result).toBe(true);
-			expect(store.racks[0]!.devices[0]!.face).toBe('front');
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5);
+			expect(store.layout.rack.devices[0]!.face).toBe('front');
 		});
 
 		it('places device with specified rear face', () => {
-			const result = store.placeDevice(rackId, device.id, 5, 'rear');
-			expect(result).toBe(true);
-			expect(store.racks[0]!.devices[0]!.face).toBe('rear');
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5, 'rear');
+			expect(store.layout.rack.devices[0]!.face).toBe('rear');
 		});
 
 		it('places device with specified both face', () => {
-			const result = store.placeDevice(rackId, device.id, 5, 'both');
-			expect(result).toBe(true);
-			expect(store.racks[0]!.devices[0]!.face).toBe('both');
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5, 'both');
+			expect(store.layout.rack.devices[0]!.face).toBe('both');
 		});
 
 		it('returns false for invalid position (collision)', () => {
-			store.placeDevice(rackId, device.id, 5);
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5);
 
-			const device2 = store.addDeviceToLibrary({
-				name: 'Another Server',
-				height: 2,
+			const deviceType2 = store.addDeviceType({
+				name: 'Another',
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
 
 			// device at 5 occupies 5,6. Position 6 would collide.
-			const result = store.placeDevice(rackId, device2.id, 6);
+			const result = store.placeDevice('rack-0', deviceType2.slug, 6);
 			expect(result).toBe(false);
-			expect(store.racks[0]!.devices).toHaveLength(1);
+			expect(store.layout.rack.devices).toHaveLength(1);
 		});
 
 		it('returns false for invalid position (exceeds rack)', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
 			// 2U device at position 42 would occupy 42,43 but rack only has 42
-			const result = store.placeDevice(rackId, device.id, 42);
+			const result = store.placeDevice('rack-0', deviceType.slug, 42);
 			expect(result).toBe(false);
 		});
 
 		it('returns false for position less than 1', () => {
-			const result = store.placeDevice(rackId, device.id, 0);
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			const result = store.placeDevice('rack-0', deviceType.slug, 0);
 			expect(result).toBe(false);
 		});
 
 		it('sets isDirty to true on success', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.markClean();
 			expect(store.isDirty).toBe(false);
-			store.placeDevice(rackId, device.id, 5);
+			store.placeDevice('rack-0', deviceType.slug, 5);
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
 	describe('moveDevice', () => {
-		let store: ReturnType<typeof getLayoutStore>;
-		let device: Device;
-		let rackId: string;
-
 		beforeEach(() => {
-			store = getLayoutStore();
-			device = store.addDeviceToLibrary({
-				name: 'Test Server',
-				height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			const rack = store.addRack('Test Rack', 42);
-			rackId = rack!.id;
-			store.placeDevice(rackId, device.id, 5);
-			store.markClean();
+			resetLayoutStore();
 		});
 
 		it('updates device position within rack', () => {
-			const result = store.moveDevice(rackId, 0, 10);
-			expect(result).toBe(true);
-			expect(store.racks[0]!.devices[0]!.position).toBe(10);
-		});
-
-		it('returns false for collision', () => {
-			const device2 = store.addDeviceToLibrary({
-				name: 'Another',
-				height: 1,
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			store.placeDevice(rackId, device2.id, 10);
+			store.placeDevice('rack-0', deviceType.slug, 5);
+			store.markClean();
+
+			const result = store.moveDevice('rack-0', 0, 10);
+			expect(result).toBe(true);
+			expect(store.layout.rack.devices[0]!.position).toBe(10);
+		});
+
+		it('returns false for collision', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5);
+
+			const deviceType2 = store.addDeviceType({
+				name: 'Another',
+				u_height: 1,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType2.slug, 10);
 
 			// Try to move first device to 10 (would collide with second device)
-			const result = store.moveDevice(rackId, 0, 10);
+			const result = store.moveDevice('rack-0', 0, 10);
 			expect(result).toBe(false);
-			expect(store.racks[0]!.devices[0]!.position).toBe(5);
+			expect(store.layout.rack.devices[0]!.position).toBe(5);
 		});
 
 		it('sets isDirty to true on success', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			store.placeDevice('rack-0', deviceType.slug, 5);
+			store.markClean();
 			expect(store.isDirty).toBe(false);
-			store.moveDevice(rackId, 0, 10);
+			store.moveDevice('rack-0', 0, 10);
 			expect(store.isDirty).toBe(true);
 		});
 	});
 
-	// Note: Cross-rack move tests removed - single-rack mode (v0.1.1) only allows 1 rack
-	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('moveDeviceToRack', () => {
 		it('delegates to moveDevice for same-rack moves', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
-				name: 'Test Server',
-				height: 2,
+			store.addRack('Only Rack', 42);
+			const deviceType = store.addDeviceType({
+				name: 'Test',
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			const rack = store.addRack('Only Rack', 42);
-			store.placeDevice(rack!.id, device.id, 5);
+			store.placeDevice('rack-0', deviceType.slug, 5);
 			store.markClean();
 
 			// Same rack move should work (delegates to moveDevice)
-			const result = store.moveDeviceToRack(rack!.id, 0, rack!.id, 10);
+			const result = store.moveDeviceToRack('rack-0', 0, 'rack-0', 10);
 			expect(result).toBe(true);
-			expect(store.racks[0]!.devices[0]!.position).toBe(10);
+			expect(store.layout.rack.devices[0]!.position).toBe(10);
 		});
 	});
 
 	describe('removeDeviceFromRack', () => {
 		it('removes device from rack', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
 				name: 'Test',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			const rack = store.addRack('Test Rack', 42);
-			store.placeDevice(rack!.id, device.id, 5);
+			store.placeDevice('rack-0', deviceType.slug, 5);
 
-			expect(store.racks[0]!.devices).toHaveLength(1);
-			store.removeDeviceFromRack(rack!.id, 0);
-			expect(store.racks[0]!.devices).toHaveLength(0);
+			expect(store.layout.rack.devices).toHaveLength(1);
+			store.removeDeviceFromRack('rack-0', 0);
+			expect(store.layout.rack.devices).toHaveLength(0);
 		});
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
+			store.addRack('Test Rack', 42);
+			const deviceType = store.addDeviceType({
 				name: 'Test',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			const rack = store.addRack('Test Rack', 42);
-			store.placeDevice(rack!.id, device.id, 5);
+			store.placeDevice('rack-0', deviceType.slug, 5);
 			store.markClean();
 
-			store.removeDeviceFromRack(rack!.id, 0);
+			store.removeDeviceFromRack('rack-0', 0);
 			expect(store.isDirty).toBe(true);
 		});
 	});
@@ -723,19 +851,12 @@ describe('Layout Store', () => {
 		});
 	});
 
-	// Note: duplicateRack multi-rack test removed - single-rack mode (v0.1.1) only allows 1 rack
-	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('duplicateRack', () => {
-		it('returns error when 1 rack exists (single-rack mode)', () => {
+		it('returns error in v0.2 (single rack mode)', () => {
 			const store = getLayoutStore();
-			// Create 1 rack (maximum allowed in single-rack mode)
 			store.addRack('First Rack', 42);
-			expect(store.racks).toHaveLength(1);
-
-			// Try to duplicate when at max - should fail
-			const result = store.duplicateRack(store.racks[0]!.id);
+			const result = store.duplicateRack('rack-0');
 			expect(result.error).toBe('Maximum of 1 rack allowed');
-			expect(store.racks).toHaveLength(1);
 		});
 	});
 
@@ -743,9 +864,9 @@ describe('Layout Store', () => {
 		it('resets to initial state', () => {
 			const store = getLayoutStore();
 			store.addRack('Test', 42);
-			store.addDeviceToLibrary({
+			store.addDeviceType({
 				name: 'Test',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
@@ -754,10 +875,28 @@ describe('Layout Store', () => {
 			const freshStore = getLayoutStore();
 
 			expect(freshStore.layout.name).toBe('Untitled');
-			expect(freshStore.racks).toEqual([]);
-			// Starter library has 27 devices
-			expect(freshStore.deviceLibrary.length).toBe(27);
+			expect(freshStore.layout.rack.devices).toEqual([]);
+			// Starter library has 27 device types
+			expect(freshStore.device_types.length).toBe(27);
 			expect(freshStore.isDirty).toBe(false);
+		});
+	});
+
+	describe('settings', () => {
+		it('updateDisplayMode updates display_mode', () => {
+			const store = getLayoutStore();
+			expect(store.layout.settings.display_mode).toBe('label');
+			store.updateDisplayMode('image');
+			expect(store.layout.settings.display_mode).toBe('image');
+			expect(store.isDirty).toBe(true);
+		});
+
+		it('updateShowLabelsOnImages updates show_labels_on_images', () => {
+			const store = getLayoutStore();
+			expect(store.layout.settings.show_labels_on_images).toBe(false);
+			store.updateShowLabelsOnImages(true);
+			expect(store.layout.settings.show_labels_on_images).toBe(true);
+			expect(store.isDirty).toBe(true);
 		});
 	});
 });

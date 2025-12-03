@@ -29,10 +29,11 @@ describe('App Component', () => {
 			expect(screen.getByRole('button', { name: /new rack/i })).toBeInTheDocument();
 		});
 
-		it('renders canvas with welcome screen when no racks', () => {
+		it('renders canvas with rack (v0.2 always has a rack)', () => {
 			const { container } = render(App);
-			// Canvas shows welcome screen when no racks
-			expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
+			// v0.2: Canvas always shows rack, not welcome screen
+			expect(container.querySelector('.rack-container')).toBeInTheDocument();
+			expect(container.querySelector('.welcome-screen')).not.toBeInTheDocument();
 		});
 
 		it('renders with correct layout structure', () => {
@@ -210,44 +211,56 @@ describe('App Component', () => {
 	});
 
 	describe('New Rack Action', () => {
-		it('new rack button opens form dialog', async () => {
+		it('new rack button opens replace dialog (v0.2 always has a rack)', async () => {
 			render(App);
 
-			// Click the "New Rack" button in toolbar (primary button when no racks)
+			// Click the "New Rack" button in toolbar
 			const newRackBtn = screen.getByRole('button', { name: /new rack/i });
 			expect(newRackBtn).toBeInTheDocument();
 			await fireEvent.click(newRackBtn);
 
-			// Should open the new rack form dialog
+			// v0.2: Since there's always a rack, clicking New Rack opens replace dialog first
 			const dialog = screen.getByRole('dialog');
 			expect(dialog).toBeInTheDocument();
-			// The dialog title should be "New Rack"
-			expect(dialog.querySelector('.dialog-title')).toHaveTextContent('New Rack');
+			// The dialog asks to replace or save first
+			expect(dialog.textContent).toMatch(/replace/i);
 		});
 
-		it('new rack form creates a rack when submitted', async () => {
+		it('replace flow opens new rack form (v0.2)', async () => {
 			const layoutStore = getLayoutStore();
 
 			render(App);
 
-			// Initially no racks
-			expect(layoutStore.rackCount).toBe(0);
+			// v0.2: always has 1 rack
+			expect(layoutStore.rackCount).toBe(1);
+			const originalName = layoutStore.racks[0]?.name;
 
 			// Click the "New Rack" button in toolbar
 			const newRackBtn = screen.getByRole('button', { name: /new rack/i });
 			await fireEvent.click(newRackBtn);
 
+			// Click "Replace" in the confirmation dialog
+			const replaceBtn = screen.getByRole('button', { name: /^replace$/i });
+			await fireEvent.click(replaceBtn);
+
+			// Now the NewRackForm dialog should be open
+			await waitFor(() => {
+				const dialog = screen.getByRole('dialog');
+				expect(dialog.querySelector('.dialog-title')).toHaveTextContent('New Rack');
+			});
+
 			// Fill out the form
-			const nameInput = screen.getByLabelText(/name/i);
+			const nameInput = screen.getByLabelText(/rack name/i);
 			await fireEvent.input(nameInput, { target: { value: 'Test Rack' } });
 
 			// Submit the form
 			const createBtn = screen.getByRole('button', { name: /create/i });
 			await fireEvent.click(createBtn);
 
-			// Should have created a rack
+			// v0.2: rack is replaced, still 1 rack
 			expect(layoutStore.rackCount).toBe(1);
 			expect(layoutStore.racks[0]?.name).toBe('Test Rack');
+			expect(layoutStore.racks[0]?.name).not.toBe(originalName);
 		});
 	});
 
@@ -278,18 +291,25 @@ describe('App Component', () => {
 			expect(dialog.querySelector('.dialog-title')).toHaveTextContent('Delete Rack');
 		});
 
-		it('delete confirmation removes selected rack', async () => {
+		it('delete confirmation clears rack devices (v0.2 cannot remove the only rack)', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 
-			// Add a rack
+			// Add a rack with a device
 			layoutStore.addRack('Test Rack', 42);
 			const rack = layoutStore.racks[0];
+			// Add a device to the rack
+			const device = layoutStore.device_types[0];
+			if (device) {
+				layoutStore.placeDevice(rack!.id, device.slug, 1);
+			}
 			selectionStore.selectRack(rack!.id);
 
 			render(App);
 
+			// v0.2: always has 1 rack
 			expect(layoutStore.rackCount).toBe(1);
+			expect(layoutStore.rack.devices.length).toBeGreaterThan(0);
 
 			// Click delete button in toolbar
 			const toolbarDeleteBtn = document.querySelector(
@@ -303,8 +323,9 @@ describe('App Component', () => {
 			expect(confirmBtn).toBeInTheDocument();
 			await fireEvent.click(confirmBtn);
 
-			// Rack should be deleted
-			expect(layoutStore.rackCount).toBe(0);
+			// v0.2: rack is not deleted, but devices are cleared
+			expect(layoutStore.rackCount).toBe(1);
+			expect(layoutStore.rack.devices.length).toBe(0);
 		});
 	});
 });

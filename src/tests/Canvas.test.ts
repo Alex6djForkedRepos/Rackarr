@@ -14,21 +14,25 @@ describe('Canvas Component', () => {
 		resetCanvasStore();
 	});
 
-	describe('Empty State', () => {
-		it('shows WelcomeScreen when no racks exist', () => {
+	// Note: v0.2 always has a rack, so WelcomeScreen is not shown by default
+	describe('Initial State (v0.2)', () => {
+		it('shows rack immediately after reset (v0.2 always has a rack)', () => {
 			const { container } = render(Canvas);
 
-			// WelcomeScreen shows ghost rack background
-			expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
-			expect(container.querySelector('.ghost-rack')).toBeInTheDocument();
+			// v0.2: rack is always present
+			const rackContainer = container.querySelector('.rack-container');
+			expect(rackContainer).toBeInTheDocument();
+			// WelcomeScreen should not be visible
+			expect(container.querySelector('.welcome-screen')).not.toBeInTheDocument();
 		});
 
-		it('WelcomeScreen has ghost rack with 42U grid lines', () => {
-			const { container } = render(Canvas);
+		it('default rack has 42U height', () => {
+			const layoutStore = getLayoutStore();
 
-			// 43 grid lines for 42U rack (one line at each U boundary)
-			const unitLines = container.querySelectorAll('.rack-line');
-			expect(unitLines.length).toBe(43);
+			render(Canvas);
+
+			// Default rack is 42U
+			expect(layoutStore.rack.height).toBe(42);
 		});
 	});
 
@@ -54,15 +58,7 @@ describe('Canvas Component', () => {
 			expect(screen.getByText('My Server Rack')).toBeInTheDocument();
 		});
 
-		it('hides WelcomeScreen when rack exists', () => {
-			const layoutStore = getLayoutStore();
-			layoutStore.addRack('Test Rack', 12);
-
-			const { container } = render(Canvas);
-
-			// WelcomeScreen should not be visible
-			expect(container.querySelector('.welcome-screen')).not.toBeInTheDocument();
-		});
+		// Note: v0.2 always has a rack, so WelcomeScreen check is moved to 'Initial State' describe block
 	});
 
 	// Note: Layout tests updated for single-rack mode (v0.1.1)
