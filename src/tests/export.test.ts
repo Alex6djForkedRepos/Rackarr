@@ -451,6 +451,101 @@ describe('Bundled Export Utilities', () => {
 	});
 });
 
+describe('Device Positioning in Export', () => {
+	// Constants matching Rack.svelte dimensions
+	const U_HEIGHT = 22;
+	const RACK_PADDING = 4;
+	const RAIL_WIDTH = 17;
+
+	it('positions devices at correct Y coordinate including rail offset', () => {
+		const devices: Device[] = [
+			{
+				id: 'device-1',
+				name: 'Test Server',
+				height: 2,
+				colour: '#4A90D9',
+				category: 'server'
+			}
+		];
+
+		const racks: Rack[] = [
+			{
+				id: 'rack-1',
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				position: 0,
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
+			}
+		];
+
+		const options: ExportOptions = {
+			format: 'png',
+			scope: 'all',
+			includeNames: false,
+			includeLegend: false,
+			background: 'dark'
+		};
+
+		const svg = generateExportSVG(racks, devices, options);
+
+		// Find the device rect by its colour
+		const deviceRect = svg.querySelector('rect[fill="#4A90D9"]');
+		expect(deviceRect).not.toBeNull();
+
+		// Calculate expected Y position
+		// Device at position 1 (bottom) in 42U rack with height 2
+		// Y = (rackHeight - position - deviceHeight + 1) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 1 (the +1 is from deviceY + 1)
+		// Y = (42 - 1 - 2 + 1) * 22 + 4 + 17 + 1 = 40 * 22 + 22 = 880 + 22 = 902
+		const expectedY = (42 - 1 - 2 + 1) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 1;
+		expect(deviceRect?.getAttribute('y')).toBe(String(expectedY));
+	});
+
+	it('positions device at top of rack correctly', () => {
+		const devices: Device[] = [
+			{
+				id: 'device-1',
+				name: 'Top Server',
+				height: 1,
+				colour: '#7B68EE',
+				category: 'server'
+			}
+		];
+
+		const racks: Rack[] = [
+			{
+				id: 'rack-1',
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				position: 0,
+				view: 'front',
+				devices: [{ libraryId: 'device-1', position: 42, face: 'front' }]
+			}
+		];
+
+		const options: ExportOptions = {
+			format: 'png',
+			scope: 'all',
+			includeNames: false,
+			includeLegend: false,
+			background: 'dark'
+		};
+
+		const svg = generateExportSVG(racks, devices, options);
+
+		// Find the device rect by its colour
+		const deviceRect = svg.querySelector('rect[fill="#7B68EE"]');
+		expect(deviceRect).not.toBeNull();
+
+		// Device at position 42 (top) in 42U rack with height 1
+		// Y = (42 - 42 - 1 + 1) * 22 + 4 + 17 + 1 = 0 * 22 + 22 = 22
+		const expectedY = (42 - 42 - 1 + 1) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 1;
+		expect(deviceRect?.getAttribute('y')).toBe(String(expectedY));
+	});
+});
+
 describe('Export Legend', () => {
 	// These tests will be for the legend component if created separately
 	// For now, we test that legend content is included in SVG when enabled

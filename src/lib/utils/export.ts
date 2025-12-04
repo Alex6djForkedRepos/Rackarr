@@ -219,8 +219,11 @@ export function generateExportSVG(
 			const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
 			if (!device) continue;
 
+			// Device Y position matches Rack.svelte: includes RACK_PADDING + RAIL_WIDTH offset
 			const deviceY =
-				(rack.height - placedDevice.position - device.height + 1) * U_HEIGHT + RACK_PADDING;
+				(rack.height - placedDevice.position - device.height + 1) * U_HEIGHT +
+				RACK_PADDING +
+				RAIL_WIDTH;
 			const deviceHeight = device.height * U_HEIGHT - 2;
 			const deviceWidth = RACK_WIDTH - RAIL_WIDTH * 2 - 4;
 

@@ -7,23 +7,29 @@ import {
 	findValidDropPositions,
 	snapToNearestValidPosition
 } from '$lib/utils/collision';
-import type { Device, Rack } from '$lib/types';
+import type { Device, Rack, DeviceFace } from '$lib/types';
 
 // Helper to create test devices
-function createTestDevice(id: string, height: number): Device {
+function createTestDevice(
+	id: string,
+	height: number,
+	options?: { is_full_depth?: boolean; face?: DeviceFace }
+): Device {
 	return {
 		id,
 		name: `Test Device ${id}`,
 		height,
 		colour: '#4A90D9',
-		category: 'server'
+		category: 'server',
+		...(options?.is_full_depth !== undefined && { is_full_depth: options.is_full_depth }),
+		...(options?.face !== undefined && { face: options.face })
 	};
 }
 
 // Helper to create test rack
 function createTestRack(
 	height: number,
-	devices: { libraryId: string; position: number }[] = []
+	devices: { libraryId: string; position: number; face?: DeviceFace }[] = []
 ): Rack {
 	return {
 		id: 'rack-1',
@@ -32,7 +38,7 @@ function createTestRack(
 		width: 19,
 		position: 0,
 		view: 'front',
-		devices: devices.map((d) => ({ ...d, face: 'front' as const }))
+		devices: devices.map((d) => ({ ...d, face: d.face ?? ('front' as const) }))
 	};
 }
 
@@ -234,6 +240,111 @@ describe('Collision Detection', () => {
 
 			const result = snapToNearestValidPosition(rack, devices, 1, 50, uHeight);
 			expect(result).toBeNull();
+		});
+	});
+});
+
+describe('Face Independence', () => {
+	describe('canPlaceDevice with face parameter', () => {
+		it('allows placing device on rear when front is occupied at same position', () => {
+			// Device mounted on front at position 5
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Should be able to place a 2U device on rear at same position
+			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'rear')).toBe(true);
+		});
+
+		it('allows placing device on front when rear is occupied at same position', () => {
+			// Device mounted on rear at position 5
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'rear' }]);
+
+			// Should be able to place a 2U device on front at same position
+			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front')).toBe(true);
+		});
+
+		it('blocks placement on same face at overlapping position', () => {
+			// Device mounted on front at position 5
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Should NOT be able to place on front at same position
+			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front')).toBe(false);
+		});
+
+		it('blocks rear placement when existing device is full-depth', () => {
+			// Full-depth device occupies both faces
+			const device = createTestDevice('device-1', 2, { is_full_depth: true });
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'both' }]);
+
+			// Should NOT be able to place on rear at same position
+			expect(canPlaceDevice(rack, [device], 1, 5, undefined, 'rear')).toBe(false);
+		});
+
+		it('blocks front placement when existing device is full-depth', () => {
+			// Full-depth device occupies both faces
+			const device = createTestDevice('device-1', 2, { is_full_depth: true });
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'both' }]);
+
+			// Should NOT be able to place on front at same position
+			expect(canPlaceDevice(rack, [device], 1, 5, undefined, 'front')).toBe(false);
+		});
+
+		it('blocks placement when new device is full-depth and position is occupied', () => {
+			// Half-depth device on front
+			const existingDevice = createTestDevice('device-1', 2, { is_full_depth: false });
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Placing a full-depth device ('both') should be blocked
+			expect(canPlaceDevice(rack, [existingDevice], 2, 5, undefined, 'both')).toBe(false);
+		});
+
+		it('allows adjacent positions regardless of face', () => {
+			// Device on front at position 5-6
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Should be able to place on front at position 7 (adjacent, no overlap)
+			expect(canPlaceDevice(rack, [device], 2, 7, undefined, 'front')).toBe(true);
+			// Should also work for rear
+			expect(canPlaceDevice(rack, [device], 2, 7, undefined, 'rear')).toBe(true);
+		});
+	});
+
+	describe('findCollisions with face awareness', () => {
+		it('does not report collision when devices are on different faces', () => {
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Checking for collisions on rear should find none
+			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'rear');
+			expect(collisions).toEqual([]);
+		});
+
+		it('reports collision when devices are on same face', () => {
+			const device = createTestDevice('device-1', 2);
+			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+
+			// Checking for collisions on front should find the device
+			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'front');
+			expect(collisions).toHaveLength(1);
+		});
+	});
+
+	describe('findValidDropPositions with face awareness', () => {
+		it('returns all positions when placing on opposite face', () => {
+			const device = createTestDevice('device-1', 2);
+			// Front is fully occupied from position 1-10
+			const placedDevices = [];
+			for (let i = 1; i <= 9; i += 2) {
+				placedDevices.push({ libraryId: 'device-1', position: i, face: 'front' as DeviceFace });
+			}
+			const rack = createTestRack(10, placedDevices);
+
+			// Rear should have all positions available
+			const positions = findValidDropPositions(rack, [device], 2, 'rear');
+			expect(positions).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		});
 	});
 });

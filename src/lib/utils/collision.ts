@@ -3,7 +3,7 @@
  * Functions for device placement validation
  */
 
-import type { Device, PlacedDevice, Rack } from '$lib/types';
+import type { Device, DeviceFace, PlacedDevice, Rack } from '$lib/types';
 
 /**
  * Range of U positions occupied by a device
@@ -39,12 +39,28 @@ export function doRangesOverlap(rangeA: URange, rangeB: URange): boolean {
 }
 
 /**
+ * Check if two device faces would collide
+ * @param faceA - First device face ('front', 'rear', or 'both')
+ * @param faceB - Second device face ('front', 'rear', or 'both')
+ * @returns true if devices on these faces would collide
+ */
+export function doFacesCollide(faceA: DeviceFace, faceB: DeviceFace): boolean {
+	// 'both' collides with everything
+	if (faceA === 'both' || faceB === 'both') {
+		return true;
+	}
+	// Same face collides
+	return faceA === faceB;
+}
+
+/**
  * Check if a device can be placed at a given position
  * @param rack - The rack to check
  * @param deviceLibrary - The device library
  * @param deviceHeight - Height of device to place
  * @param targetPosition - Target bottom U position
  * @param excludeIndex - Optional index in rack.devices to exclude (for move operations)
+ * @param targetFace - Optional face to place device on (default: 'front')
  * @returns true if placement is valid
  */
 export function canPlaceDevice(
@@ -52,7 +68,8 @@ export function canPlaceDevice(
 	deviceLibrary: Device[],
 	deviceHeight: number,
 	targetPosition: number,
-	excludeIndex?: number
+	excludeIndex?: number,
+	targetFace: DeviceFace = 'front'
 ): boolean {
 	// Position must be >= 1
 	if (targetPosition < 1) {
@@ -78,7 +95,11 @@ export function canPlaceDevice(
 		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
 		if (device) {
 			const existingRange = getDeviceURange(placedDevice.position, device.height);
-			if (doRangesOverlap(newRange, existingRange)) {
+			// Check both U range overlap AND face collision
+			if (
+				doRangesOverlap(newRange, existingRange) &&
+				doFacesCollide(targetFace, placedDevice.face)
+			) {
 				return false;
 			}
 		}
@@ -94,6 +115,7 @@ export function canPlaceDevice(
  * @param newDeviceHeight - Height of new device
  * @param newPosition - Target position
  * @param excludeIndex - Optional index in rack.devices to exclude (for move operations)
+ * @param targetFace - Optional face to place device on (default: 'front')
  * @returns Array of colliding PlacedDevices
  */
 export function findCollisions(
@@ -101,7 +123,8 @@ export function findCollisions(
 	deviceLibrary: Device[],
 	newDeviceHeight: number,
 	newPosition: number,
-	excludeIndex?: number
+	excludeIndex?: number,
+	targetFace: DeviceFace = 'front'
 ): PlacedDevice[] {
 	const collisions: PlacedDevice[] = [];
 	const newRange = getDeviceURange(newPosition, newDeviceHeight);
@@ -115,7 +138,11 @@ export function findCollisions(
 		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
 		if (device) {
 			const existingRange = getDeviceURange(placedDevice.position, device.height);
-			if (doRangesOverlap(newRange, existingRange)) {
+			// Check both U range overlap AND face collision
+			if (
+				doRangesOverlap(newRange, existingRange) &&
+				doFacesCollide(targetFace, placedDevice.face)
+			) {
 				collisions.push(placedDevice);
 			}
 		}
@@ -129,19 +156,21 @@ export function findCollisions(
  * @param rack - The rack to check
  * @param deviceLibrary - The device library
  * @param deviceHeight - Height of device to place
+ * @param targetFace - Optional face to place device on (default: 'front')
  * @returns Array of valid bottom U positions, sorted ascending
  */
 export function findValidDropPositions(
 	rack: Rack,
 	deviceLibrary: Device[],
-	deviceHeight: number
+	deviceHeight: number,
+	targetFace: DeviceFace = 'front'
 ): number[] {
 	const validPositions: number[] = [];
 
 	// Check each possible position from 1 to (rack.height - deviceHeight + 1)
 	const maxPosition = rack.height - deviceHeight + 1;
 	for (let position = 1; position <= maxPosition; position++) {
-		if (canPlaceDevice(rack, deviceLibrary, deviceHeight, position)) {
+		if (canPlaceDevice(rack, deviceLibrary, deviceHeight, position, undefined, targetFace)) {
 			validPositions.push(position);
 		}
 	}
