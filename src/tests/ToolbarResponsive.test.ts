@@ -1,0 +1,117 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render } from '@testing-library/svelte';
+import Toolbar from '$lib/components/Toolbar.svelte';
+import { resetLayoutStore } from '$lib/stores/layout.svelte';
+import { resetSelectionStore } from '$lib/stores/selection.svelte';
+import { resetUIStore } from '$lib/stores/ui.svelte';
+import { resetCanvasStore } from '$lib/stores/canvas.svelte';
+import { resetHistoryStore } from '$lib/stores/history.svelte';
+
+describe('Toolbar Responsive Structure', () => {
+	beforeEach(() => {
+		resetHistoryStore();
+		resetLayoutStore();
+		resetSelectionStore();
+		resetUIStore();
+		resetCanvasStore();
+	});
+
+	describe('Button text structure', () => {
+		it('toolbar action buttons contain span elements for text labels', () => {
+			const { container } = render(Toolbar);
+
+			const actionButtons = container.querySelectorAll('.toolbar-action-btn');
+			expect(actionButtons.length).toBeGreaterThan(0);
+
+			// Each action button should have a span for the text label
+			actionButtons.forEach((btn) => {
+				const span = btn.querySelector('span');
+				expect(span).toBeInTheDocument();
+			});
+		});
+
+		it('button spans contain text content', () => {
+			const { container } = render(Toolbar);
+
+			const spans = container.querySelectorAll('.toolbar-action-btn span');
+			const textsFound = Array.from(spans).map((span) => span.textContent?.trim());
+
+			// Should contain expected button labels
+			expect(textsFound).toContain('New Rack');
+			expect(textsFound).toContain('Save');
+			expect(textsFound).toContain('Export');
+			expect(textsFound).toContain('Help');
+		});
+	});
+
+	describe('Brand structure', () => {
+		it('brand section contains brand-name element', () => {
+			const { container } = render(Toolbar);
+
+			const brandName = container.querySelector('.brand-name');
+			expect(brandName).toBeInTheDocument();
+			expect(brandName?.textContent).toBe('Rackarr');
+		});
+
+		it('brand section contains brand-tagline element', () => {
+			const { container } = render(Toolbar);
+
+			const tagline = container.querySelector('.brand-tagline');
+			expect(tagline).toBeInTheDocument();
+			expect(tagline?.textContent).toContain('Homelabbers');
+		});
+
+		it('brand section contains logo icon', () => {
+			const { container } = render(Toolbar);
+
+			// Logo is an SVG inside toolbar-brand
+			const brand = container.querySelector('.toolbar-brand');
+			const svg = brand?.querySelector('svg');
+			expect(svg).toBeInTheDocument();
+		});
+	});
+
+	describe('CSS class structure for responsive targeting', () => {
+		it('toolbar-action-btn class exists on all action buttons', () => {
+			const { container } = render(Toolbar);
+
+			const buttons = container.querySelectorAll('button.toolbar-action-btn');
+			// Should have multiple action buttons
+			expect(buttons.length).toBeGreaterThanOrEqual(8);
+		});
+
+		it('toolbar-brand class exists for branding section', () => {
+			const { container } = render(Toolbar);
+
+			const brand = container.querySelector('.toolbar-brand');
+			expect(brand).toBeInTheDocument();
+		});
+
+		it('toolbar-center class exists for center section', () => {
+			const { container } = render(Toolbar);
+
+			const center = container.querySelector('.toolbar-center');
+			expect(center).toBeInTheDocument();
+		});
+
+		it('separator class exists for visual dividers', () => {
+			const { container } = render(Toolbar);
+
+			const separators = container.querySelectorAll('.separator');
+			expect(separators.length).toBeGreaterThan(0);
+		});
+	});
+
+	describe('Icon presence', () => {
+		it('each action button contains an SVG icon', () => {
+			const { container } = render(Toolbar);
+
+			const actionButtons = container.querySelectorAll('.toolbar-action-btn');
+
+			actionButtons.forEach((btn) => {
+				const svg = btn.querySelector('svg');
+				expect(svg).toBeInTheDocument();
+			});
+		});
+	});
+});

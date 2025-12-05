@@ -41,10 +41,44 @@ Work through each top level heading one by one, mark with x only once complete.
 
 - [x] change Fit All button to Reset View (and update tooltip)
 
-- [] current layout is not tolerant of small screens or responsive context
-  - [] help me brainstorm approaches to make the app responsive and capable of handling smaller screens
+- [x] current layout is not tolerant of small screens or responsive context
+  - [x] responsive quick-wins implemented (icon-only toolbar, narrow sidebar, overflow handling)
+  - See `docs/planning/responsive-quick-wins-spec.md` for details
 
 ## Planned
+
+---
+
+## Medium-Term Responsive (before v1.0)
+
+The following responsive improvements are planned for implementation before v1.0:
+
+### Tab-Based Mobile Layout (<768px)
+
+For phone screens, switch to a tab-based interface:
+
+- Bottom tab bar: `Library | Canvas | Edit`
+- Only one view visible at a time
+- Device library becomes full-screen overlay
+- Edit panel becomes full-screen overlay
+- Canvas takes full width when active
+
+### Bottom Sheet Patterns
+
+Mobile-friendly UI patterns:
+
+- Bottom sheet for device library (swipe up to reveal)
+- Bottom sheet for edit panel
+- Two-tap device placement: tap device → tap rack slot
+- Gesture-based interactions
+
+### Min-Width Warning
+
+For unsupported narrow viewports:
+
+- Display warning banner at <500px viewport
+- Suggest rotating to landscape or using larger device
+- Graceful degradation rather than broken layout
 
 ---
 
@@ -177,6 +211,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-01 | v0.2.1 released (accessibility & design polish) |
 | 2025-12-02 | Consolidated spec; single-rack permanent scope  |
 | 2025-12-03 | v0.3.0 released (YAML archive format)           |
+| 2025-12-05 | Responsive quick-wins implemented               |
 
 ---
 

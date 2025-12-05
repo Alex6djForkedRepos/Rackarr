@@ -193,7 +193,7 @@
 	--drawer-bg: var(--neutral-900);
 
 	/* Sidebar (fixed) */
-	--sidebar-width: 300px;
+	--sidebar-width: 280px;
 
 	/* Form Inputs */
 	--input-bg: var(--neutral-800);
@@ -300,4 +300,15 @@
 	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.12), 0 2px 4px -2px rgb(0 0 0 / 0.08);
 	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.18), 0 8px 10px -6px rgb(0 0 0 / 0.12);
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* Medium screens: narrower sidebar */
+@media (max-width: 1000px) {
+	:root {
+		--sidebar-width: 200px;
+	}
 }
