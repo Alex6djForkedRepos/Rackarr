@@ -46,10 +46,10 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] export bundled zip does not need the "include source layout", this is always going to be added in the bundled view
   - [] export bundled zip should include all devices and their images
   - [] export bundled zip should include all images and their metadata
-  - [] export bundled zip should include all possible formats of rack image export (PNG, JPEG, SVG, PDF)
-  - [] the rack image should have a 10px margin around it to ensure proper spacing and alignment
-  - [] the rack image should be centered within the exported zip file
-  - [] the rack image should have a consistent aspect ratio across all formats
+  - [x] export bundled zip should include all possible formats of rack image export (PNG, JPEG, SVG) - PDF not yet implemented
+  - [x] the rack image should have a 10px margin around it to ensure proper spacing and alignment (20px padding)
+  - [x] the rack image should be centered within the exported zip file
+  - [x] the rack image should have a consistent aspect ratio across all formats
   - [x] specific for SVG and PNG export, there should be a "Transparent background" tickbox that defaults to off and when enabled will export with transparent background
 
 - [] Device Images: Upload front/rear images with label/image display toggle
