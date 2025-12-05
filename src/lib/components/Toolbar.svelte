@@ -371,4 +371,41 @@
 	.checkbox-label {
 		user-select: none;
 	}
+
+	/* Responsive: Medium screens - icon-only buttons */
+	@media (max-width: 1000px) {
+		.toolbar-action-btn span {
+			display: none;
+		}
+
+		.toolbar-action-btn {
+			padding: var(--space-2);
+		}
+
+		.checkbox-toggle .checkbox-label {
+			display: none;
+		}
+
+		.separator {
+			margin: 0 var(--space-1);
+		}
+	}
+
+	/* Responsive: Narrower screens - hide tagline */
+	@media (max-width: 900px) {
+		.brand-tagline {
+			display: none;
+		}
+	}
+
+	/* Responsive: Small screens - icon-only branding */
+	@media (max-width: 600px) {
+		.brand-name {
+			display: none;
+		}
+
+		.toolbar-brand {
+			padding: var(--space-2);
+		}
+	}
 </style>
