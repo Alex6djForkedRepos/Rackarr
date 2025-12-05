@@ -25,6 +25,13 @@ interface RackLike {
 	devices: { length: number };
 }
 
+// Interface for multi-format export blobs
+export interface ExportImageBlobs {
+	png: Blob;
+	jpeg: Blob;
+	svg: Blob;
+}
+
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
 const RACK_WIDTH = 220;
@@ -888,10 +895,10 @@ export function generateBundledExportFilename(layoutName: string, _format: Expor
 }
 
 /**
- * Create a bundled export ZIP containing image, metadata, and optionally source
+ * Create a bundled export ZIP containing all image formats, metadata, and optionally source
  */
 export async function createBundledExport(
-	imageBlob: Blob,
+	imageBlobs: ExportImageBlobs,
 	layout: LayoutLike,
 	rack: RackLike,
 	options: ExportOptions,
@@ -900,9 +907,10 @@ export async function createBundledExport(
 ): Promise<Blob> {
 	const zip = new JSZip();
 
-	// Add image file
-	const imageFilename = `rack.${options.format}`;
-	zip.file(imageFilename, imageBlob);
+	// Add all image formats
+	zip.file('rack.png', imageBlobs.png);
+	zip.file('rack.jpg', imageBlobs.jpeg);
+	zip.file('rack.svg', imageBlobs.svg);
 
 	// Generate and add metadata
 	const metadata = generateExportMetadata(layout, rack, options, includeSource);

@@ -377,11 +377,15 @@ describe('Bundled Export Utilities', () => {
 			vi.useRealTimers();
 		});
 
-		it('creates ZIP with image and metadata', async () => {
+		it('creates ZIP with all image formats and metadata', async () => {
 			const { createBundledExport } = await import('$lib/utils/export');
 			const JSZip = (await import('jszip')).default;
 
-			const imageBlob = new Blob(['fake-png-data'], { type: 'image/png' });
+			const imageBlobs = {
+				png: new Blob(['fake-png-data'], { type: 'image/png' }),
+				jpeg: new Blob(['fake-jpeg-data'], { type: 'image/jpeg' }),
+				svg: new Blob(['<svg></svg>'], { type: 'image/svg+xml' })
+			};
 			const options: ExportOptions = {
 				format: 'png',
 				scope: 'all',
@@ -390,14 +394,16 @@ describe('Bundled Export Utilities', () => {
 				background: 'dark'
 			};
 
-			const zipBlob = await createBundledExport(imageBlob, mockLayout, mockRack, options, false);
+			const zipBlob = await createBundledExport(imageBlobs, mockLayout, mockRack, options, false);
 
 			expect(zipBlob).toBeInstanceOf(Blob);
 			expect(zipBlob.type).toBe('application/zip');
 
-			// Verify ZIP contents
+			// Verify ZIP contains all formats
 			const zip = await JSZip.loadAsync(zipBlob);
 			expect(zip.file('rack.png')).not.toBeNull();
+			expect(zip.file('rack.jpg')).not.toBeNull();
+			expect(zip.file('rack.svg')).not.toBeNull();
 			expect(zip.file('metadata.json')).not.toBeNull();
 		});
 
@@ -405,7 +411,11 @@ describe('Bundled Export Utilities', () => {
 			const { createBundledExport } = await import('$lib/utils/export');
 			const JSZip = (await import('jszip')).default;
 
-			const imageBlob = new Blob(['fake-png-data'], { type: 'image/png' });
+			const imageBlobs = {
+				png: new Blob(['fake-png-data'], { type: 'image/png' }),
+				jpeg: new Blob(['fake-jpeg-data'], { type: 'image/jpeg' }),
+				svg: new Blob(['<svg></svg>'], { type: 'image/svg+xml' })
+			};
 			const sourceBlob = new Blob(['fake-source-data'], { type: 'application/zip' });
 			const options: ExportOptions = {
 				format: 'png',
@@ -416,7 +426,7 @@ describe('Bundled Export Utilities', () => {
 			};
 
 			const zipBlob = await createBundledExport(
-				imageBlob,
+				imageBlobs,
 				mockLayout,
 				mockRack,
 				options,
@@ -429,24 +439,44 @@ describe('Bundled Export Utilities', () => {
 			expect(zip.file('source.rackarr.zip')).not.toBeNull();
 		});
 
-		it('uses correct image filename for format', async () => {
+		it('includes all three image formats in bundled export', async () => {
 			const { createBundledExport } = await import('$lib/utils/export');
 			const JSZip = (await import('jszip')).default;
 
-			const imageBlob = new Blob(['fake-jpeg-data'], { type: 'image/jpeg' });
+			const imageBlobs = {
+				png: new Blob(['png-content'], { type: 'image/png' }),
+				jpeg: new Blob(['jpeg-content'], { type: 'image/jpeg' }),
+				svg: new Blob(['<svg>svg-content</svg>'], { type: 'image/svg+xml' })
+			};
 			const options: ExportOptions = {
-				format: 'jpeg',
+				format: 'png',
 				scope: 'all',
 				includeNames: true,
 				includeLegend: false,
 				background: 'dark'
 			};
 
-			const zipBlob = await createBundledExport(imageBlob, mockLayout, mockRack, options, false);
+			const zipBlob = await createBundledExport(imageBlobs, mockLayout, mockRack, options, false);
 
 			const zip = await JSZip.loadAsync(zipBlob);
-			expect(zip.file('rack.jpeg')).not.toBeNull();
-			expect(zip.file('rack.png')).toBeNull();
+
+			// Verify all three formats are included
+			const pngFile = zip.file('rack.png');
+			const jpgFile = zip.file('rack.jpg');
+			const svgFile = zip.file('rack.svg');
+
+			expect(pngFile).not.toBeNull();
+			expect(jpgFile).not.toBeNull();
+			expect(svgFile).not.toBeNull();
+
+			// Verify content
+			const pngContent = await pngFile!.async('string');
+			const jpgContent = await jpgFile!.async('string');
+			const svgContent = await svgFile!.async('string');
+
+			expect(pngContent).toBe('png-content');
+			expect(jpgContent).toBe('jpeg-content');
+			expect(svgContent).toBe('<svg>svg-content</svg>');
 		});
 	});
 });

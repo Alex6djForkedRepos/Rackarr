@@ -41,7 +41,8 @@
 		downloadBlob,
 		generateExportFilename,
 		createBundledExport,
-		generateBundledExportFilename
+		generateBundledExportFilename,
+		type ExportImageBlobs
 	} from '$lib/utils/export';
 	import type { ExportOptions, BundledExportOptions } from '$lib/types';
 
@@ -249,7 +250,25 @@
 			// Check if bundled export
 			const isBundled = options.exportMode === 'bundled';
 
-			// Export based on format and mode
+			// Handle bundled export - generates all formats
+			if (isBundled) {
+				// Generate all three formats
+				const svgString = exportAsSVG(svg);
+				const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+				const pngBlob = await exportAsPNG(svg);
+				const jpegBlob = await exportAsJPEG(svg);
+
+				const imageBlobs: ExportImageBlobs = {
+					png: pngBlob,
+					jpeg: jpegBlob,
+					svg: svgBlob
+				};
+
+				await handleBundledExport(imageBlobs, options as BundledExportOptions);
+				return;
+			}
+
+			// Single format export
 			if (options.format === 'svg') {
 				const svgString = exportAsSVG(svg);
 				const blob = new Blob([svgString], { type: 'image/svg+xml' });
@@ -258,22 +277,14 @@
 				toastStore.showToast('SVG exported successfully', 'success');
 			} else if (options.format === 'png') {
 				const imageBlob = await exportAsPNG(svg);
-				if (isBundled) {
-					await handleBundledExport(imageBlob, rack, options as BundledExportOptions);
-				} else {
-					const filename = generateExportFilename(layoutStore.layout.name, options.format);
-					downloadBlob(imageBlob, filename);
-					toastStore.showToast('PNG exported successfully', 'success');
-				}
+				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				downloadBlob(imageBlob, filename);
+				toastStore.showToast('PNG exported successfully', 'success');
 			} else if (options.format === 'jpeg') {
 				const imageBlob = await exportAsJPEG(svg);
-				if (isBundled) {
-					await handleBundledExport(imageBlob, rack, options as BundledExportOptions);
-				} else {
-					const filename = generateExportFilename(layoutStore.layout.name, options.format);
-					downloadBlob(imageBlob, filename);
-					toastStore.showToast('JPEG exported successfully', 'success');
-				}
+				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				downloadBlob(imageBlob, filename);
+				toastStore.showToast('JPEG exported successfully', 'success');
 			} else if (options.format === 'pdf') {
 				// PDF export will be implemented with jspdf library
 				toastStore.showToast('PDF export not yet implemented', 'info');
@@ -284,11 +295,7 @@
 		}
 	}
 
-	async function handleBundledExport(
-		imageBlob: Blob,
-		_rack: import('$lib/types').Rack,
-		options: BundledExportOptions
-	) {
+	async function handleBundledExport(imageBlobs: ExportImageBlobs, options: BundledExportOptions) {
 		// Get source layout if requested (use v0.2 folder archive)
 		let sourceBlob: Blob | undefined;
 		if (options.includeSource) {
@@ -296,9 +303,9 @@
 			sourceBlob = await createFolderArchive(layoutStore.layout, images);
 		}
 
-		// Create bundled export (layout and rack satisfy the interface requirements)
+		// Create bundled export with all formats
 		const zipBlob = await createBundledExport(
-			imageBlob,
+			imageBlobs,
 			layoutStore.layout,
 			layoutStore.rack,
 			options,
