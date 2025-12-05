@@ -875,7 +875,7 @@ export function generateExportMetadata(
  */
 export function generateBundledExportFilename(layoutName: string, _format: ExportFormat): string {
 	if (!layoutName || layoutName.trim() === '') {
-		return 'rackarr-export.zip';
+		return 'rackarr.rackarr.zip';
 	}
 
 	// Sanitize the layout name for filename
@@ -884,7 +884,7 @@ export function generateBundledExportFilename(layoutName: string, _format: Expor
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 
-	return `${sanitized || 'rackarr'}-export.zip`;
+	return `${sanitized || 'rackarr'}.rackarr.zip`;
 }
 
 /**

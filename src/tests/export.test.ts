@@ -361,14 +361,14 @@ describe('Bundled Export Utilities', () => {
 			const { generateBundledExportFilename } = await import('$lib/utils/export');
 
 			const filename = generateBundledExportFilename('My Layout', 'png');
-			expect(filename).toBe('my-layout-export.zip');
+			expect(filename).toBe('my-layout.rackarr.zip');
 		});
 
 		it('handles empty layout name', async () => {
 			const { generateBundledExportFilename } = await import('$lib/utils/export');
 
 			const filename = generateBundledExportFilename('', 'png');
-			expect(filename).toBe('rackarr-export.zip');
+			expect(filename).toBe('rackarr.rackarr.zip');
 		});
 	});
 
