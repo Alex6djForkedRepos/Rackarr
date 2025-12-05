@@ -275,7 +275,7 @@
 		align-items: center;
 		gap: var(--space-2);
 		color: var(--colour-text);
-		padding: var(--space-2) var(--space-4) var(--space-2) 6px;
+		padding: var(--space-2) var(--space-4) var(--space-2) 0;
 	}
 
 	.brand-name {
