@@ -53,7 +53,7 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] device images per device type (library item), shown when image view toggled on
   - [x] device images shown in canvas view with correct front/rear faces
   - [x] device images included in save/load (.rackarr.zip) and import successfully
-  - [ ] TODO: device images in PNG/JPEG/SVG export (currently exports show labels only)
+  - [x] device images in PNG/JPEG/SVG export (when display mode is "image")
 
 ## Planned
 

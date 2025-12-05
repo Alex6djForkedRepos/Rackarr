@@ -238,8 +238,20 @@
 				return;
 			}
 
-			// Generate the SVG
-			const svg = generateExportSVG(racksToExport, layoutStore.deviceLibrary, options);
+			// Add current display mode to export options
+			const exportOptions = {
+				...options,
+				displayMode: uiStore.displayMode
+			};
+
+			// Generate the SVG with images if in image mode
+			const images = imageStore.getAllImages();
+			const svg = generateExportSVG(
+				racksToExport,
+				layoutStore.deviceLibrary,
+				exportOptions,
+				images
+			);
 
 			// Export based on selected format
 			if (options.format === 'svg') {

@@ -148,6 +148,106 @@ describe('Export Utilities', () => {
 			expect(svgString).toContain('Main Rack');
 			expect(svgString).toContain('Secondary Rack');
 		});
+
+		describe('Device Image Export', () => {
+			const mockImageData = {
+				blob: new Blob(['test'], { type: 'image/png' }),
+				dataUrl: 'data:image/png;base64,dGVzdA==',
+				filename: 'test.png'
+			};
+
+			const mockImages = new Map([
+				[
+					'device-1',
+					{
+						front: mockImageData,
+						rear: { ...mockImageData, dataUrl: 'data:image/png;base64,cmVhcg==' }
+					}
+				]
+			]);
+
+			it('renders device labels by default (no displayMode)', () => {
+				const svg = generateExportSVG(mockRacks, mockDeviceLibrary, defaultOptions);
+
+				// Should have device name text but no image elements
+				const svgString = svg.outerHTML;
+				expect(svgString).toContain('Server 1');
+				expect(svg.querySelectorAll('image').length).toBe(0);
+			});
+
+			it('renders device labels when displayMode is label', () => {
+				const options: ExportOptions = { ...defaultOptions, displayMode: 'label' };
+				const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options, mockImages);
+
+				// Should have device name but no image elements even when images provided
+				expect(svg.querySelectorAll('image').length).toBe(0);
+			});
+
+			it('renders device images when displayMode is image and images provided', () => {
+				const options: ExportOptions = { ...defaultOptions, displayMode: 'image' };
+				const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options, mockImages);
+
+				// Should have image element for device-1
+				const images = svg.querySelectorAll('image');
+				expect(images.length).toBeGreaterThan(0);
+
+				// First image should have the front dataUrl
+				const firstImage = images[0];
+				expect(firstImage?.getAttribute('href')).toBe('data:image/png;base64,dGVzdA==');
+			});
+
+			it('falls back to label when device has no image', () => {
+				const options: ExportOptions = { ...defaultOptions, displayMode: 'image' };
+				// device-2 (Switch) has no image in mockImages
+				const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options, mockImages);
+
+				// Should still show Switch device name since it has no image
+				const svgString = svg.outerHTML;
+				expect(svgString).toContain('Switch');
+			});
+
+			it('uses front image for front view', () => {
+				const options: ExportOptions = {
+					...defaultOptions,
+					displayMode: 'image',
+					exportView: 'front'
+				};
+				const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options, mockImages);
+
+				const images = svg.querySelectorAll('image');
+				const hasImage = images.length > 0;
+				if (hasImage) {
+					expect(images[0]?.getAttribute('href')).toBe('data:image/png;base64,dGVzdA==');
+				}
+			});
+
+			it('uses rear image for rear view', () => {
+				// Create rack with rear-facing device
+				const rearRacks: Rack[] = [
+					{
+						id: 'rack-1',
+						name: 'Main Rack',
+						height: 42,
+						width: 19,
+						position: 0,
+						view: 'rear',
+						devices: [{ libraryId: 'device-1', position: 1, face: 'rear' }]
+					}
+				];
+				const options: ExportOptions = {
+					...defaultOptions,
+					displayMode: 'image',
+					exportView: 'rear'
+				};
+				const svg = generateExportSVG(rearRacks, mockDeviceLibrary, options, mockImages);
+
+				const images = svg.querySelectorAll('image');
+				const hasImage = images.length > 0;
+				if (hasImage) {
+					expect(images[0]?.getAttribute('href')).toBe('data:image/png;base64,cmVhcg==');
+				}
+			});
+		});
 	});
 
 	describe('exportAsSVG', () => {

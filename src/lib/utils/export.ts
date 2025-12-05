@@ -3,6 +3,7 @@
  */
 
 import type { Rack, Device, ExportOptions, ExportFormat, DeviceCategory } from '$lib/types';
+import type { ImageStoreMap } from '$lib/types/images';
 
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
@@ -296,13 +297,18 @@ function createCategoryIconElements(
 
 /**
  * Generate an SVG element for export
+ * @param racks - Racks to export
+ * @param deviceLibrary - Device library for device definitions
+ * @param options - Export options including displayMode
+ * @param images - Optional map of device images (required when displayMode is 'image')
  */
 export function generateExportSVG(
 	racks: Rack[],
 	deviceLibrary: Device[],
-	options: ExportOptions
+	options: ExportOptions,
+	images?: ImageStoreMap
 ): SVGElement {
-	const { includeNames, includeLegend, background, exportView } = options;
+	const { includeNames, includeLegend, background, exportView, displayMode = 'label' } = options;
 
 	// Determine if we're doing dual-view export
 	const isDualView = exportView === 'both';
@@ -492,6 +498,7 @@ export function generateExportSVG(
 			const deviceHeight = device.height * U_HEIGHT - 2;
 			const deviceWidth = RACK_WIDTH - RAIL_WIDTH * 2 - 4;
 
+			// Always render device rect as background
 			const deviceRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 			deviceRect.setAttribute('x', String(RAIL_WIDTH + 2));
 			deviceRect.setAttribute('y', String(deviceY + 1));
@@ -502,30 +509,64 @@ export function generateExportSVG(
 			deviceRect.setAttribute('ry', '2');
 			rackGroup.appendChild(deviceRect);
 
-			// Category icon (only for devices tall enough and with a category)
-			if (deviceHeight >= 20 && device.category) {
-				const iconSize = 12;
-				const iconX = RAIL_WIDTH + 6;
-				const iconY = deviceY + (deviceHeight - iconSize) / 2 + 1;
+			// Check if we should show an image
+			const face = faceFilter === 'rear' ? 'rear' : 'front';
+			const deviceImages = images?.get(device.id);
+			const deviceImage = deviceImages?.[face];
+			const showImage = displayMode === 'image' && deviceImage?.dataUrl;
 
-				const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-				iconSvg.setAttribute('x', String(iconX));
-				iconSvg.setAttribute('y', String(iconY));
-				iconSvg.setAttribute('width', String(iconSize));
-				iconSvg.setAttribute('height', String(iconSize));
-				iconSvg.setAttribute('viewBox', '0 0 16 16');
+			if (showImage) {
+				// Render device image
+				const imageEl = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+				imageEl.setAttribute('x', String(RAIL_WIDTH + 2));
+				imageEl.setAttribute('y', String(deviceY + 1));
+				imageEl.setAttribute('width', String(deviceWidth));
+				imageEl.setAttribute('height', String(deviceHeight));
+				imageEl.setAttribute('href', deviceImage.dataUrl);
+				imageEl.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+				rackGroup.appendChild(imageEl);
 
-				// White icon with slight transparency for visibility on coloured backgrounds
-				const iconColor = 'rgba(255, 255, 255, 0.85)';
-				const iconBgColor = device.colour;
-				const iconElements = createCategoryIconElements(device.category, iconColor, iconBgColor);
-				for (const el of iconElements) {
-					iconSvg.appendChild(el);
+				// Clip the image to rounded corners
+				const clipId = `clip-${device.id}-${placedDevice.position}`;
+				const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+				clipPath.setAttribute('id', clipId);
+				const clipRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+				clipRect.setAttribute('x', String(RAIL_WIDTH + 2));
+				clipRect.setAttribute('y', String(deviceY + 1));
+				clipRect.setAttribute('width', String(deviceWidth));
+				clipRect.setAttribute('height', String(deviceHeight));
+				clipRect.setAttribute('rx', '2');
+				clipRect.setAttribute('ry', '2');
+				clipPath.appendChild(clipRect);
+				rackGroup.appendChild(clipPath);
+				imageEl.setAttribute('clip-path', `url(#${clipId})`);
+			} else {
+				// Category icon (only for devices tall enough and with a category)
+				if (deviceHeight >= 20 && device.category) {
+					const iconSize = 12;
+					const iconX = RAIL_WIDTH + 6;
+					const iconY = deviceY + (deviceHeight - iconSize) / 2 + 1;
+
+					const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+					iconSvg.setAttribute('x', String(iconX));
+					iconSvg.setAttribute('y', String(iconY));
+					iconSvg.setAttribute('width', String(iconSize));
+					iconSvg.setAttribute('height', String(iconSize));
+					iconSvg.setAttribute('viewBox', '0 0 16 16');
+
+					// White icon with slight transparency for visibility on coloured backgrounds
+					const iconColor = 'rgba(255, 255, 255, 0.85)';
+					const iconBgColor = device.colour;
+					const iconElements = createCategoryIconElements(device.category, iconColor, iconBgColor);
+					for (const el of iconElements) {
+						iconSvg.appendChild(el);
+					}
+					rackGroup.appendChild(iconSvg);
 				}
-				rackGroup.appendChild(iconSvg);
 			}
 
-			// Device name
+			// Device name (always shown unless image mode without labels)
+			// In image mode, name is still shown as overlay for accessibility
 			const deviceName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 			deviceName.setAttribute('x', String(RACK_WIDTH / 2));
 			deviceName.setAttribute('y', String(deviceY + deviceHeight / 2 + 1));
@@ -534,7 +575,14 @@ export function generateExportSVG(
 			deviceName.setAttribute('text-anchor', 'middle');
 			deviceName.setAttribute('dominant-baseline', 'middle');
 			deviceName.setAttribute('font-family', 'system-ui, sans-serif');
-			deviceName.textContent = device.name;
+			if (showImage) {
+				// Add text shadow for visibility over images
+				deviceName.setAttribute(
+					'style',
+					'text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);'
+				);
+			}
+			deviceName.textContent = placedDevice.name || device.name;
 			rackGroup.appendChild(deviceName);
 		}
 

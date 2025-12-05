@@ -224,4 +224,6 @@ export interface ExportOptions {
 	background: ExportBackground;
 	/** Which view(s) to export - front, rear, or both (optional, defaults to all devices) */
 	exportView?: ExportView;
+	/** Display mode - label or image (optional, defaults to 'label') */
+	displayMode?: DisplayMode;
 }
