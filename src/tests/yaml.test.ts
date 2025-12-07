@@ -381,7 +381,7 @@ settings:
 				{
 					slug: 'device-3',
 					u_height: 3,
-					rackarr: { colour: '#333333', category: 'network' }
+					rackarr: { colour: '#333333', category: 'networking' }
 				}
 			];
 
