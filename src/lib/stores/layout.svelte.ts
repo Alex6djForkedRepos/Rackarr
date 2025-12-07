@@ -65,8 +65,8 @@ const rack = $derived(layout.rack);
 const device_types = $derived(layout.device_types);
 const hasRack = $derived(layout.rack.devices !== undefined);
 
-// Compatibility getters for transition period
-// TODO: Remove after all components are updated
+// Compatibility getters - translate v0.2 format to legacy UI format
+// These are permanent adapters, not temporary code
 const racks = $derived([
 	{
 		...layout.rack,
@@ -131,8 +131,7 @@ export function getLayoutStore() {
 			return hasRack;
 		},
 
-		// Compatibility getters (for transition period)
-		// TODO: Remove after all components are updated
+		// Compatibility getters - translate v0.2 format to legacy UI format
 		get racks() {
 			return racks;
 		},
@@ -167,8 +166,7 @@ export function getLayoutStore() {
 		updateDeviceType,
 		deleteDeviceType,
 
-		// Legacy device library actions (compatibility)
-		// TODO: Remove after all components are updated
+		// Legacy device library actions - translate Device format to DeviceType
 		addDeviceToLibrary,
 		updateDeviceInLibrary,
 		deleteDeviceFromLibrary,
@@ -411,8 +409,8 @@ function deleteDeviceType(slug: string): void {
 	deleteDeviceTypeRecorded(slug);
 }
 
-// Legacy device library actions (compatibility wrappers)
-// TODO: Remove after all components are updated
+// Legacy device library actions - translate Device format to DeviceType format
+// These are permanent adapters used by UI components
 
 /**
  * Add a device to the library (legacy compatibility)
