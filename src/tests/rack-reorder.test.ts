@@ -5,8 +5,7 @@ import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
 import { getSelectionStore, resetSelectionStore } from '$lib/stores/selection.svelte';
 import { resetUIStore } from '$lib/stores/ui.svelte';
 
-// Note: Multi-rack reordering tests removed - single-rack mode (v0.1.1) only allows 1 rack
-// These tests will be restored in v0.3 when multi-rack is re-enabled
+// Note: Multi-rack reordering tests removed - single-rack mode only allows 1 rack
 
 describe('Rack Reordering (Single-Rack Mode)', () => {
 	beforeEach(() => {
@@ -31,10 +30,9 @@ describe('Rack Reordering (Single-Rack Mode)', () => {
 		// This file focuses on reordering behavior which is N/A in single-rack mode
 	});
 
-	describe('Drag Handle Removed (v0.1.1)', () => {
+	describe('Drag Handle Removed', () => {
 		it('drag handle does not exist when rack is selected', () => {
-			// NOTE: Drag handle removed in v0.1.1 (single-rack mode)
-			// Will be restored in v0.3
+			// NOTE: Drag handle removed (single-rack mode)
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 			const rack = layoutStore.addRack('Test Rack', 42);
