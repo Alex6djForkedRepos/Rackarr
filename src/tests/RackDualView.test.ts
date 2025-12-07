@@ -223,7 +223,7 @@ describe('RackDualView Component', () => {
 			await fireEvent.click(frontViewSvg!);
 
 			expect(handleSelect).toHaveBeenCalledTimes(1);
-			expect(handleSelect.mock.calls[0][0].detail.rackId).toBe('rack-1');
+			expect(handleSelect.mock.calls[0]![0].detail.rackId).toBe('rack-1');
 		});
 
 		it('dispatches select event when rear view is clicked', async () => {
@@ -244,7 +244,7 @@ describe('RackDualView Component', () => {
 			await fireEvent.click(rearViewSvg!);
 
 			expect(handleSelect).toHaveBeenCalledTimes(1);
-			expect(handleSelect.mock.calls[0][0].detail.rackId).toBe('rack-1');
+			expect(handleSelect.mock.calls[0]![0].detail.rackId).toBe('rack-1');
 		});
 	});
 

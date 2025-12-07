@@ -12,6 +12,7 @@ function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
+		face: 'front',
 		...overrides
 	};
 }
@@ -21,6 +22,7 @@ function createMockStore(): DeviceCommandStore & {
 	removeDeviceAtIndexRaw: ReturnType<typeof vi.fn>;
 	moveDeviceRaw: ReturnType<typeof vi.fn>;
 	updateDeviceFaceRaw: ReturnType<typeof vi.fn>;
+	updateDeviceNameRaw: ReturnType<typeof vi.fn>;
 	getDeviceAtIndex: ReturnType<typeof vi.fn>;
 } {
 	return {
@@ -28,6 +30,7 @@ function createMockStore(): DeviceCommandStore & {
 		removeDeviceAtIndexRaw: vi.fn(),
 		moveDeviceRaw: vi.fn().mockReturnValue(true),
 		updateDeviceFaceRaw: vi.fn(),
+		updateDeviceNameRaw: vi.fn(),
 		getDeviceAtIndex: vi.fn()
 	};
 }

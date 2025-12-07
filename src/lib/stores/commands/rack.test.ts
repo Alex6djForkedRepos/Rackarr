@@ -14,7 +14,7 @@ function createMockRack(overrides: Partial<Rack> = {}): Rack {
 		height: 42,
 		width: 19,
 		desc_units: false,
-		form_factor: 'full-depth',
+		form_factor: '4-post-cabinet',
 		starting_unit: 1,
 		position: 0,
 		devices: [],
@@ -26,6 +26,7 @@ function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
+		face: 'front',
 		...overrides
 	};
 }
@@ -140,8 +141,8 @@ describe('Rack Commands', () => {
 			const command = createReplaceRackCommand(oldRack, newRack, store);
 
 			// Mutate originals
-			oldRack.devices[0].position = 99;
-			newRack.devices[0].position = 88;
+			oldRack.devices[0]!.position = 99;
+			newRack.devices[0]!.position = 88;
 
 			command.execute();
 
@@ -226,7 +227,7 @@ describe('Rack Commands', () => {
 			const command = createClearRackCommand(devices, store);
 
 			// Mutate original
-			devices[0].position = 99;
+			devices[0]!.position = 99;
 
 			command.execute();
 			command.undo();

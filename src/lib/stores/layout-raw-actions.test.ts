@@ -19,6 +19,7 @@ function createTestDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
+		face: 'front',
 		...overrides
 	};
 }
@@ -53,8 +54,8 @@ describe('Layout Store - Raw Actions', () => {
 			const store = getLayoutStore();
 			const deviceType = createTestDeviceType({ slug: 'server-1' });
 			store.addDeviceTypeRaw(deviceType);
-			store.placeDeviceRaw({ device_type: 'server-1', position: 5 });
-			store.placeDeviceRaw({ device_type: 'server-1', position: 15 });
+			store.placeDeviceRaw({ device_type: 'server-1', position: 5, face: 'front' });
+			store.placeDeviceRaw({ device_type: 'server-1', position: 15, face: 'front' });
 
 			expect(store.rack.devices.length).toBe(2);
 
@@ -78,9 +79,9 @@ describe('Layout Store - Raw Actions', () => {
 			const store = getLayoutStore();
 			store.addDeviceTypeRaw(createTestDeviceType({ slug: 'type-a' }));
 			store.addDeviceTypeRaw(createTestDeviceType({ slug: 'type-b' }));
-			store.placeDeviceRaw({ device_type: 'type-a', position: 5 });
-			store.placeDeviceRaw({ device_type: 'type-b', position: 10 });
-			store.placeDeviceRaw({ device_type: 'type-a', position: 20 });
+			store.placeDeviceRaw({ device_type: 'type-a', position: 5, face: 'front' });
+			store.placeDeviceRaw({ device_type: 'type-b', position: 10, face: 'front' });
+			store.placeDeviceRaw({ device_type: 'type-a', position: 20, face: 'front' });
 
 			const typeADevices = store.getPlacedDevicesForType('type-a');
 
@@ -195,7 +196,7 @@ describe('Layout Store - Raw Actions', () => {
 				height: 24,
 				width: 10 as const,
 				desc_units: true,
-				form_factor: 'open-frame' as const,
+				form_factor: '2-post-frame' as const,
 				starting_unit: 0,
 				position: 0,
 				devices: []

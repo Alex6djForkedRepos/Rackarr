@@ -733,7 +733,7 @@ describe('Rack SVG Component', () => {
 		];
 
 		it('renders blocked-slot rect elements when faceFilter is set', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'full-depth-server', position: 5, face: 'front' }]
 			};
@@ -753,7 +753,7 @@ describe('Rack SVG Component', () => {
 		});
 
 		it('blocked slot rects have correct position based on U', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'full-depth-server', position: 3, face: 'front' }]
 			};
@@ -778,7 +778,7 @@ describe('Rack SVG Component', () => {
 		});
 
 		it('blocked slot rects have correct height based on device U', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'full-depth-server', position: 5, face: 'front' }]
 			};
@@ -801,7 +801,7 @@ describe('Rack SVG Component', () => {
 		});
 
 		it('does not render blocked slots for half-depth devices', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'half-depth-switch', position: 5, face: 'front' }]
 			};
@@ -820,7 +820,7 @@ describe('Rack SVG Component', () => {
 		});
 
 		it('does not render blocked slots when faceFilter is undefined', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'full-depth-server', position: 5, face: 'front' }]
 			};
@@ -851,7 +851,7 @@ describe('Rack SVG Component', () => {
 				}
 			];
 
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'ups', position: 1, face: 'both' }]
 			};
@@ -886,7 +886,7 @@ describe('Rack SVG Component', () => {
 		});
 
 		it('blocked slots have appropriate opacity', () => {
-			const rackWithDevice: Rack = {
+			const rackWithDevice: RackType = {
 				...mockRack,
 				devices: [{ libraryId: 'full-depth-server', position: 5, face: 'front' }]
 			};

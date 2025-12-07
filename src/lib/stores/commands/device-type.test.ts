@@ -10,8 +10,11 @@ import type { DeviceType, PlacedDevice } from '$lib/types/v02';
 function createMockDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
 	return {
 		slug: 'test-device',
-		height: 2,
-		category: 'server',
+		u_height: 2,
+		rackarr: {
+			category: 'server',
+			colour: '#336699'
+		},
 		...overrides
 	};
 }
@@ -20,6 +23,7 @@ function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
+		face: 'front',
 		...overrides
 	};
 }
@@ -200,7 +204,7 @@ describe('Device Type Commands', () => {
 			const command = createDeleteDeviceTypeCommand(deviceType, placedDevices, store);
 
 			// Mutate original array
-			placedDevices[0].position = 99;
+			placedDevices[0]!.position = 99;
 
 			command.execute();
 			command.undo();

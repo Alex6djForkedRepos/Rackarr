@@ -36,17 +36,16 @@ export const SlugSchema = z
  */
 export const DeviceCategorySchema = z.enum([
 	'server',
-	'storage',
-	'networking',
+	'network',
+	'patch-panel',
 	'power',
-	'cooling',
+	'storage',
 	'kvm',
-	'audio-video',
-	'security',
-	'cable-management',
-	'accessories',
-	'other',
-	'shelf'
+	'av-media',
+	'cooling',
+	'shelf',
+	'blank',
+	'other'
 ]);
 
 /**

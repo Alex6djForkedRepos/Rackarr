@@ -49,7 +49,7 @@ describe('Layout Store (v0.2)', () => {
 		it('compatibility: racks returns single rack in array', () => {
 			const store = getLayoutStore();
 			expect(store.racks).toHaveLength(1);
-			expect(store.racks[0].name).toBe('Racky McRackface');
+			expect(store.racks[0]!.name).toBe('Racky McRackface');
 		});
 	});
 
