@@ -24,14 +24,12 @@
 	import { getToastStore } from '$lib/stores/toast.svelte';
 	import { getImageStore } from '$lib/stores/images.svelte';
 	import type { ImageData } from '$lib/types/images';
-	import { openFilePicker, detectFileFormatAsync } from '$lib/utils/file';
-	import { extractArchive } from '$lib/utils/archive';
+	import { openFilePicker } from '$lib/utils/file';
 	import {
-		downloadArchiveV02,
-		generateArchiveFilenameV02,
+		downloadArchive,
+		generateArchiveFilename,
 		extractFolderArchive
-	} from '$lib/utils/folder';
-	import { migrateToV02, migrateImages } from '$lib/utils/migrate-v02';
+	} from '$lib/utils/archive';
 	import {
 		generateExportSVG,
 		exportAsSVG,
@@ -100,10 +98,10 @@
 			const images = imageStore.getAllImages();
 
 			// Get the filename for the toast message
-			const filename = generateArchiveFilenameV02(layoutStore.layout);
+			const filename = generateArchiveFilename(layoutStore.layout);
 
-			// Save as v0.2 folder archive (.rackarr.zip)
-			await downloadArchiveV02(layoutStore.layout, images);
+			// Save as folder archive (.rackarr.zip)
+			await downloadArchive(layoutStore.layout, images);
 			layoutStore.markClean();
 			toastStore.showToast(`Saved ${filename}`, 'success', 3000);
 
@@ -130,82 +128,24 @@
 				return;
 			}
 
-			// Detect file format using async detection for accurate ZIP inspection
-			const format = await detectFileFormatAsync(file);
-			let warningMessage: string | null = null;
+			// Load folder archive (.rackarr.zip)
+			const { layout, images } = await extractFolderArchive(file);
 
-			if (format === 'folder-archive') {
-				// Load v0.2 folder archive
-				const { layout, images } = await extractFolderArchive(file);
-
-				// Clear and restore images from archive
-				imageStore.clearAllImages();
-				for (const [deviceSlug, deviceImages] of images) {
-					if (deviceImages.front) {
-						imageStore.setDeviceImage(deviceSlug, 'front', deviceImages.front);
-					}
-					if (deviceImages.rear) {
-						imageStore.setDeviceImage(deviceSlug, 'rear', deviceImages.rear);
-					}
+			// Clear and restore images from archive
+			imageStore.clearAllImages();
+			for (const [deviceSlug, deviceImages] of images) {
+				if (deviceImages.front) {
+					imageStore.setDeviceImage(deviceSlug, 'front', deviceImages.front);
 				}
-
-				// Load v0.2 layout directly
-				layoutStore.loadLayout(layout);
-			} else if (format === 'legacy-archive') {
-				// Load legacy ZIP archive and migrate to v0.2
-				const { layout: legacyLayout, images: legacyImages } = await extractArchive(file);
-
-				// Migrate layout and get id-to-slug mapping
-				const { layout: v02Layout, idToSlugMap } = migrateToV02(legacyLayout);
-
-				// Migrate images using the id-to-slug mapping
-				const migratedImages = migrateImages(legacyImages, idToSlugMap);
-
-				// Clear and restore migrated images
-				imageStore.clearAllImages();
-				for (const [deviceSlug, deviceImages] of migratedImages) {
-					if (deviceImages.front) {
-						imageStore.setDeviceImage(deviceSlug, 'front', deviceImages.front);
-					}
-					if (deviceImages.rear) {
-						imageStore.setDeviceImage(deviceSlug, 'rear', deviceImages.rear);
-					}
+				if (deviceImages.rear) {
+					imageStore.setDeviceImage(deviceSlug, 'rear', deviceImages.rear);
 				}
-
-				layoutStore.loadLayout(v02Layout);
-
-				// Check if multiple racks were truncated
-				if (legacyLayout.racks && legacyLayout.racks.length > 1) {
-					warningMessage = `Layout contained ${legacyLayout.racks.length} racks. Loaded first rack only.`;
-				}
-			} else if (format === 'legacy-json') {
-				// Load legacy JSON and migrate to v0.2
-				const text = await file.text();
-				const legacyLayout = JSON.parse(text);
-
-				// Migrate to v0.2
-				const { layout: v02Layout } = migrateToV02(legacyLayout);
-
-				// No images in JSON format
-				imageStore.clearAllImages();
-				layoutStore.loadLayout(v02Layout);
-
-				// Check if multiple racks were truncated
-				if (legacyLayout.racks && legacyLayout.racks.length > 1) {
-					warningMessage = `Layout contained ${legacyLayout.racks.length} racks. Loaded first rack only.`;
-				}
-			} else {
-				throw new Error('Unrecognized file format');
 			}
 
+			layoutStore.loadLayout(layout);
 			layoutStore.markClean();
 			selectionStore.clearSelection();
-
-			if (warningMessage) {
-				toastStore.showToast(warningMessage, 'warning');
-			} else {
-				toastStore.showToast('Layout loaded successfully', 'success');
-			}
+			toastStore.showToast('Layout loaded successfully', 'success');
 		} catch (error) {
 			console.error('Failed to load layout:', error);
 			toastStore.showToast(

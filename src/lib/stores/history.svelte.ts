@@ -18,10 +18,10 @@ let redoStack = $state<Command[]>([]);
 const canUndo = $derived(undoStack.length > 0);
 const canRedo = $derived(redoStack.length > 0);
 const undoDescription = $derived(
-	undoStack.length > 0 ? `Undo: ${undoStack[undoStack.length - 1].description}` : null
+	undoStack.length > 0 ? `Undo: ${undoStack[undoStack.length - 1]!.description}` : null
 );
 const redoDescription = $derived(
-	redoStack.length > 0 ? `Redo: ${redoStack[redoStack.length - 1].description}` : null
+	redoStack.length > 0 ? `Redo: ${redoStack[redoStack.length - 1]!.description}` : null
 );
 const historyLength = $derived(undoStack.length);
 
@@ -54,7 +54,7 @@ function undo(): boolean {
 	}
 
 	// Pop from undo stack
-	const command = undoStack[undoStack.length - 1];
+	const command = undoStack[undoStack.length - 1]!;
 	undoStack = undoStack.slice(0, -1);
 
 	// Undo the command
@@ -76,7 +76,7 @@ function redo(): boolean {
 	}
 
 	// Pop from redo stack
-	const command = redoStack[redoStack.length - 1];
+	const command = redoStack[redoStack.length - 1]!;
 	redoStack = redoStack.slice(0, -1);
 
 	// Re-execute the command

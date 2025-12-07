@@ -5,7 +5,7 @@
 
 import yaml from 'js-yaml';
 import type { Layout, Rack } from '$lib/types/v02';
-import { LayoutSchema } from '$lib/schemas/v02';
+import { LayoutSchema } from '$lib/schemas';
 
 /**
  * Serialize object to YAML string

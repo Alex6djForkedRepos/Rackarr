@@ -3,9 +3,8 @@
  * Manages auto-save to sessionStorage for work-in-progress protection
  */
 
-import type { Layout } from '$lib/types';
-import { validateLayoutStructure } from './serialization';
-import { migrateLayout } from './migration';
+import type { Layout } from '$lib/types/v02';
+import { LayoutSchema } from '$lib/schemas';
 
 export const STORAGE_KEY = 'rackarr_session';
 
@@ -24,7 +23,6 @@ export function saveToSession(layout: Layout): void {
 
 /**
  * Load layout from sessionStorage
- * Automatically migrates older layout versions
  * @returns Layout if valid session exists, null otherwise
  */
 export function loadFromSession(): Layout | null {
@@ -33,16 +31,16 @@ export function loadFromSession(): Layout | null {
 		if (!json) return null;
 
 		const parsed: unknown = JSON.parse(json);
-		if (!validateLayoutStructure(parsed)) {
+
+		// Validate against current schema
+		const result = LayoutSchema.safeParse(parsed);
+		if (!result.success) {
+			// Invalid or outdated format, clear it
+			clearSession();
 			return null;
 		}
 
-		// Migrate if needed (supports v0.1.0 and v1.0)
-		if (parsed.version === '0.1.0' || parsed.version === '1.0') {
-			return migrateLayout(parsed);
-		}
-
-		return parsed;
+		return result.data as Layout;
 	} catch {
 		// sessionStorage not available or invalid JSON
 		return null;

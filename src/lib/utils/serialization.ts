@@ -4,7 +4,7 @@
 
 import type { Layout, Rack } from '$lib/types/v02';
 import type { FormFactor } from '$lib/types';
-import { getStarterLibraryV02 } from '$lib/data/starterLibraryV02';
+import { getStarterLibrary } from '$lib/data/starterLibrary';
 
 /**
  * Create a new empty v0.2 layout
@@ -16,7 +16,7 @@ export function createLayout(name: string = 'Racky McRackface'): Layout {
 		version: '0.2.0',
 		name,
 		rack: createDefaultRack(name),
-		device_types: getStarterLibraryV02(),
+		device_types: getStarterLibrary(),
 		settings: {
 			display_mode: 'label',
 			show_labels_on_images: false

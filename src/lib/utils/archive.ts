@@ -1,6 +1,6 @@
 /**
- * Folder Archive Utilities
- * For v0.2 folder-based ZIP archives with YAML and nested image structure
+ * Archive Utilities
+ * Folder-based ZIP archives with YAML and nested image structure
  */
 
 import JSZip from 'jszip';
@@ -192,18 +192,18 @@ function blobToDataUrl(blob: Blob): Promise<string> {
  * @param layout - The layout to generate filename for
  * @returns Filename with .rackarr.zip extension
  */
-export function generateArchiveFilenameV02(layout: Layout): string {
+export function generateArchiveFilename(layout: Layout): string {
 	const safeName = slugify(layout.name) || 'untitled';
 	return `${safeName}.rackarr.zip`;
 }
 
 /**
- * Download a v0.2 layout as a folder-based ZIP archive
+ * Download a layout as a folder-based ZIP archive
  * @param layout - The layout to save
  * @param images - Map of device images
  * @param filename - Optional custom filename
  */
-export async function downloadArchiveV02(
+export async function downloadArchive(
 	layout: Layout,
 	images: ImageStoreMap,
 	filename?: string
@@ -218,7 +218,7 @@ export async function downloadArchiveV02(
 		// Create a temporary anchor element
 		const anchor = document.createElement('a');
 		anchor.href = url;
-		anchor.download = filename ?? generateArchiveFilenameV02(layout);
+		anchor.download = filename ?? generateArchiveFilename(layout);
 
 		// Trigger the download
 		anchor.click();

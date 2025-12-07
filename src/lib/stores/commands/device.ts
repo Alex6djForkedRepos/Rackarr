@@ -3,7 +3,7 @@
  */
 
 import type { Command } from './types';
-import type { PlacedDevice } from '$lib/types/v02';
+import type { PlacedDevice, DeviceFace } from '$lib/types/v02';
 
 /**
  * Interface for layout store operations needed by device commands
@@ -12,7 +12,7 @@ export interface DeviceCommandStore {
 	placeDeviceRaw(device: PlacedDevice): number;
 	removeDeviceAtIndexRaw(index: number): PlacedDevice | undefined;
 	moveDeviceRaw(index: number, newPosition: number): boolean;
-	updateDeviceFaceRaw(index: number, face: 'front' | 'rear'): void;
+	updateDeviceFaceRaw(index: number, face: DeviceFace): void;
 	updateDeviceNameRaw(index: number, name: string | undefined): void;
 	getDeviceAtIndex(index: number): PlacedDevice | undefined;
 }
@@ -95,8 +95,8 @@ export function createRemoveDeviceCommand(
  */
 export function createUpdateDeviceFaceCommand(
 	index: number,
-	oldFace: 'front' | 'rear',
-	newFace: 'front' | 'rear',
+	oldFace: DeviceFace,
+	newFace: DeviceFace,
 	store: DeviceCommandStore,
 	deviceName: string = 'device'
 ): Command {

@@ -4,17 +4,15 @@
  * Uses v0.2 types with slug-based device identification
  */
 
-import type { FormFactor, DeviceCategory, Device, Layout as LegacyLayout } from '$lib/types';
+import type { FormFactor, DeviceCategory, Device } from '$lib/types';
 import type { Layout, Rack, DeviceType, PlacedDevice, DeviceFace, RackView } from '$lib/types/v02';
 import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
-import { createLayout, createRack } from '$lib/utils/serialization-v02';
+import { createLayout, createRack } from '$lib/utils/serialization';
 import {
 	createDeviceType as createDeviceTypeHelper,
 	findDeviceType,
 	type CreateDeviceTypeInput
-} from '$lib/stores/layout-helpers-v02';
-import { migrateToV02 } from '$lib/utils/migrate-v02';
-import { migrateLayout } from '$lib/utils/migration';
+} from '$lib/stores/layout-helpers';
 import { getHistoryStore } from './history.svelte';
 import {
 	createAddDeviceTypeCommand,
@@ -154,7 +152,6 @@ export function getLayoutStore() {
 		// Layout actions
 		createNewLayout,
 		loadLayout,
-		loadLegacyLayout,
 		resetLayout: resetLayoutStore,
 
 		// Rack actions (simplified for single rack)
@@ -269,37 +266,6 @@ function loadLayout(layoutData: Layout): void {
 	// Mark as started (user has loaded a layout)
 	hasStarted = true;
 	saveHasStarted(true);
-}
-
-/**
- * Load an existing layout (legacy format)
- * Automatically migrates from older versions to v0.2
- * @param layoutData - Legacy layout to load
- * @returns Number of racks that were in the original file (for toast display)
- */
-function loadLegacyLayout(layoutData: LegacyLayout): number {
-	// First apply legacy migrations (v0.1.0 → v0.3.0)
-	const migrated = migrateLayout(layoutData);
-	const originalRackCount = migrated.racks.length;
-
-	// Then migrate to v0.2
-	const { layout: v02Layout } = migrateToV02(migrated);
-
-	// Ensure runtime view is set
-	layout = {
-		...v02Layout,
-		rack: {
-			...v02Layout.rack,
-			view: 'front'
-		}
-	};
-	isDirty = false;
-
-	// Mark as started (user has loaded a layout)
-	hasStarted = true;
-	saveHasStarted(true);
-
-	return originalRackCount;
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * v0.2 Starter Device Type Library
+ * Starter Device Type Library
  * Common device types pre-populated in new layouts
  */
 
@@ -66,10 +66,10 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 ];
 
 /**
- * Get the v0.2 starter device type library
+ * Get the starter device type library
  * These are the default device types available in a new layout
  */
-export function getStarterLibraryV02(): DeviceType[] {
+export function getStarterLibrary(): DeviceType[] {
 	return STARTER_DEVICES.map((spec) => ({
 		slug: slugify(spec.name),
 		u_height: spec.u_height,
