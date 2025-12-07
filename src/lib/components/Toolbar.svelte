@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import Tooltip from './Tooltip.svelte';
+	import ToolbarDrawer from './ToolbarDrawer.svelte';
 	import {
 		IconPlus,
 		IconSave,
@@ -18,7 +19,8 @@
 		IconImage,
 		IconLogo,
 		IconUndo,
-		IconRedo
+		IconRedo,
+		IconMenu
 	} from './icons';
 	import type { DisplayMode } from '$lib/types';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
@@ -65,6 +67,20 @@
 	const layoutStore = getLayoutStore();
 	const toastStore = getToastStore();
 
+	// Drawer state for hamburger menu
+	let drawerOpen = $state(false);
+	let brandRef: HTMLElement | null = $state(null);
+
+	function toggleDrawer() {
+		drawerOpen = !drawerOpen;
+	}
+
+	function closeDrawer() {
+		drawerOpen = false;
+		// Return focus to brand/hamburger button
+		brandRef?.focus();
+	}
+
 	function handleUndo() {
 		if (!layoutStore.canUndo) return;
 		const desc = layoutStore.undoDescription?.replace('Undo: ', '') ?? 'action';
@@ -83,11 +99,22 @@
 <header class="toolbar">
 	<!-- Left section: Branding -->
 	<div class="toolbar-section toolbar-left">
-		<div class="toolbar-brand">
+		<button
+			bind:this={brandRef}
+			class="toolbar-brand"
+			type="button"
+			aria-expanded={drawerOpen}
+			aria-controls="toolbar-drawer"
+			aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+			onclick={toggleDrawer}
+		>
 			<IconLogo size={36} />
 			<span class="brand-name">Rackarr</span>
 			<span class="brand-tagline">Rack Layout Designer for Homelabbers</span>
-		</div>
+			<span class="hamburger-icon" aria-hidden="true">
+				<IconMenu size={20} />
+			</span>
+		</button>
 	</div>
 
 	<!-- Center section: Main actions -->
@@ -207,8 +234,22 @@
 
 		<div class="separator" aria-hidden="true"></div>
 
+		<Tooltip text="Help & Shortcuts" shortcut="?" position="bottom">
+			<button class="toolbar-action-btn" aria-label="Help" onclick={onhelp}>
+				<IconHelp size={16} />
+				<span>Help</span>
+			</button>
+		</Tooltip>
+	</div>
+
+	<!-- Right section: Theme toggle (always visible) -->
+	<div class="toolbar-section toolbar-right">
 		<Tooltip text="Toggle Theme" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Toggle Theme" onclick={ontoggletheme}>
+			<button
+				class="toolbar-action-btn theme-toggle-btn"
+				aria-label="Toggle Theme"
+				onclick={ontoggletheme}
+			>
 				{#if theme === 'dark'}
 					<IconSun size={16} />
 					<span>Light</span>
@@ -218,18 +259,30 @@
 				{/if}
 			</button>
 		</Tooltip>
-
-		<Tooltip text="Help & Shortcuts" shortcut="?" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Help" onclick={onhelp}>
-				<IconHelp size={16} />
-				<span>Help</span>
-			</button>
-		</Tooltip>
 	</div>
-
-	<!-- Right section: Spacer for balance -->
-	<div class="toolbar-section toolbar-right"></div>
 </header>
+
+<!-- Toolbar Drawer (hamburger menu) -->
+<ToolbarDrawer
+	open={drawerOpen}
+	{displayMode}
+	canUndo={layoutStore.canUndo}
+	canRedo={layoutStore.canRedo}
+	{hasSelection}
+	undoDescription={layoutStore.undoDescription ?? 'Undo'}
+	redoDescription={layoutStore.redoDescription ?? 'Redo'}
+	onclose={closeDrawer}
+	{onnewrack}
+	{onsave}
+	{onload}
+	{onexport}
+	{ondelete}
+	{onfitall}
+	{ontoggledisplaymode}
+	{onhelp}
+	onundo={handleUndo}
+	onredo={handleRedo}
+/>
 
 <style>
 	.toolbar {
@@ -252,22 +305,18 @@
 
 	.toolbar-left {
 		flex: 0 0 auto;
-		z-index: 1;
 	}
 
 	.toolbar-center {
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
+		flex: 1;
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: var(--space-1);
-		z-index: 2; /* Above toolbar-left to ensure buttons are clickable */
 	}
 
 	.toolbar-right {
 		flex: 0 0 auto;
-		z-index: 1;
 	}
 
 	.toolbar-brand {
@@ -276,6 +325,21 @@
 		gap: var(--space-2);
 		color: var(--colour-text);
 		padding: var(--space-2) var(--space-4) var(--space-2) 0;
+		cursor: default;
+		border-radius: var(--radius-md);
+		transition: background-color var(--duration-fast) var(--ease-out);
+		/* Reset button styles */
+		background: transparent;
+		border: none;
+		font: inherit;
+	}
+
+	/* Hamburger icon hidden by default */
+	.hamburger-icon {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		color: var(--colour-text-muted);
 	}
 
 	.brand-name {
@@ -391,10 +455,44 @@
 		}
 	}
 
-	/* Responsive: Narrower screens - hide tagline */
-	@media (max-width: 900px) {
+	/* Responsive: Hide tagline earlier to prevent overlap with center buttons */
+	@media (max-width: 1200px) {
 		.brand-tagline {
 			display: none;
+		}
+	}
+
+	/* Responsive: Hamburger mode - hide center toolbar, show hamburger icon */
+	@media (max-width: 1023px) {
+		.toolbar-center {
+			display: none;
+		}
+
+		.hamburger-icon {
+			display: flex;
+		}
+
+		.toolbar-brand {
+			cursor: pointer;
+			padding: var(--space-2);
+		}
+
+		.toolbar-brand:hover {
+			background: var(--colour-surface-hover);
+		}
+
+		.toolbar-brand:focus-visible {
+			outline: none;
+			box-shadow: 0 0 0 2px var(--colour-focus-ring);
+		}
+
+		/* Keep theme toggle icon-only in hamburger mode */
+		.theme-toggle-btn span {
+			display: none;
+		}
+
+		.theme-toggle-btn {
+			padding: var(--space-2);
 		}
 	}
 

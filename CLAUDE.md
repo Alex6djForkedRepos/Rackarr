@@ -1,9 +1,21 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.1
+**Version:** 0.4.2
 
 ---
+
+## v0.4.2 Changes
+
+- **Toolbar responsiveness**: Fixed text overlap issues between tagline and toolbar buttons
+- **Hamburger menu**: Added collapsible menu at narrow viewports (<1024px)
+  - Logo becomes clickable menu trigger with hamburger icon
+  - Left drawer slides in with grouped actions (File, Edit, View)
+  - Theme toggle remains always visible for quick access
+- **Layout fix**: Removed absolute positioning from toolbar center section for proper flexbox spacing
+- **Breakpoint adjustments**: Tagline now hides at 1200px (was 900px) to prevent overlap
+- **New components**: `IconMenu.svelte`, `ToolbarDrawer.svelte`
+- Full keyboard/accessibility support (Escape to close, focus management, ARIA attributes)
 
 ## v0.4.1 Changes
 

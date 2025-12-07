@@ -45,6 +45,12 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] responsive quick-wins implemented (icon-only toolbar, narrow sidebar, overflow handling)
   - See `docs/planning/responsive-quick-wins-spec.md` for details
 
+- [x] Toolbar UI Issues - Responsiveness Problems (v0.4.2)
+  - [x] **Text Overlap in Header**: Fixed by hiding tagline at 1200px breakpoint
+  - [x] **No Responsive Behavior**: Added hamburger menu at <1024px with left drawer
+  - [x] **Inconsistent Spacing**: Fixed by removing absolute positioning, using flexbox
+  - See `docs/planning/spec-toolbar.md` for implementation details
+
 ## Released
 
 ### v0.4.0 — Code Audit & Legacy Cleanup
@@ -231,6 +237,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-05 | Responsive quick-wins implemented                         |
 | 2025-12-06 | v0.3.4 released (responsive quick-wins)                   |
 | 2025-12-07 | v0.4.0 released (breaking: removed legacy format support) |
+| 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)  |
 
 ---
 
