@@ -212,7 +212,8 @@ describe('Toolbar Component', () => {
 			layoutStore.addDeviceType({
 				name: 'Test Server',
 				category: 'server',
-				height: 2
+				u_height: 2,
+				colour: '#3b82f6'
 			});
 
 			render(Toolbar);
@@ -233,7 +234,8 @@ describe('Toolbar Component', () => {
 			layoutStore.addDeviceType({
 				name: 'Test Server',
 				category: 'server',
-				height: 2
+				u_height: 2,
+				colour: '#3b82f6'
 			});
 			layoutStore.placeDevice('rack-1', 'test-server', 1, 'front');
 
@@ -251,7 +253,8 @@ describe('Toolbar Component', () => {
 			layoutStore.addDeviceType({
 				name: 'Test Server',
 				category: 'server',
-				height: 2
+				u_height: 2,
+				colour: '#3b82f6'
 			});
 			layoutStore.placeDevice('rack-1', 'test-server', 1, 'front');
 
@@ -270,7 +273,8 @@ describe('Toolbar Component', () => {
 			layoutStore.addDeviceType({
 				name: 'Test Server',
 				category: 'server',
-				height: 2
+				u_height: 2,
+				colour: '#3b82f6'
 			});
 			layoutStore.placeDevice('rack-1', 'test-server', 1, 'front');
 

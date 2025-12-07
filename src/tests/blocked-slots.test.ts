@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getBlockedSlots } from '$lib/utils/blocked-slots';
-import type { Rack, Device, RackView } from '$lib/types';
-import type { DeviceFace } from '$lib/types-v02';
+import type { Rack, Device, RackView, DeviceFace } from '$lib/types';
 
 // Helper to create a test rack
 function createTestRack(overrides: Partial<Rack> = {}): Rack {
@@ -9,7 +8,8 @@ function createTestRack(overrides: Partial<Rack> = {}): Rack {
 		id: 'rack-1',
 		name: 'Test Rack',
 		height: 12,
-		width: '19"',
+		width: 19,
+		position: 0,
 		view: 'front' as RackView,
 		devices: [],
 		...overrides

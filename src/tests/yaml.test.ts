@@ -269,7 +269,7 @@ describe('v0.2 Layout YAML Serialization', () => {
 			const parsed = parseLayoutYaml(yaml);
 
 			expect(parsed.device_types).toHaveLength(1);
-			expect(parsed.device_types[0].slug).toBe('test-server');
+			expect(parsed.device_types[0]!.slug).toBe('test-server');
 			expect(parsed.settings.display_mode).toBe('label');
 		});
 
@@ -381,7 +381,7 @@ settings:
 				{
 					slug: 'device-3',
 					u_height: 3,
-					rackarr: { colour: '#333333', category: 'networking' }
+					rackarr: { colour: '#333333', category: 'network' }
 				}
 			];
 
@@ -415,9 +415,9 @@ settings:
 			const parsed = parseLayoutYaml(yaml);
 
 			expect(parsed.rack.devices).toHaveLength(3);
-			expect(parsed.rack.devices[0].position).toBe(1);
-			expect(parsed.rack.devices[1].name).toBe('Second');
-			expect(parsed.rack.devices[2].face).toBe('both');
+			expect(parsed.rack.devices[0]!.position).toBe(1);
+			expect(parsed.rack.devices[1]!.name).toBe('Second');
+			expect(parsed.rack.devices[2]!.face).toBe('both');
 		});
 
 		it('settings preserved', () => {

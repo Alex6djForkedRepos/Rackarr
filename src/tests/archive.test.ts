@@ -390,7 +390,7 @@ settings:
 
 			expect(result.layout.name).toBe('Round Trip Test');
 			expect(result.layout.device_types).toHaveLength(1);
-			expect(result.layout.device_types[0].slug).toBe('test-server');
+			expect(result.layout.device_types[0]!.slug).toBe('test-server');
 			expect(result.layout.rack.devices).toHaveLength(1);
 		});
 
