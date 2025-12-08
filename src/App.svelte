@@ -146,6 +146,12 @@
 			layoutStore.loadLayout(layout);
 			layoutStore.markClean();
 			selectionStore.clearSelection();
+
+			// Reset view to center the loaded rack after DOM updates
+			requestAnimationFrame(() => {
+				canvasStore.fitAll(layoutStore.racks);
+			});
+
 			toastStore.showToast('Layout loaded successfully', 'success');
 		} catch (error) {
 			console.error('Failed to load layout:', error);

@@ -335,4 +335,55 @@ describe('Canvas Store', () => {
 			expect(store.zoomPercentage).toBe(175);
 		});
 	});
+
+	describe('fitAll', () => {
+		it('fitAll function is callable', () => {
+			const store = getCanvasStore();
+
+			// fitAll should be a function on the store
+			expect(typeof store.fitAll).toBe('function');
+		});
+
+		it('fitAll does nothing without panzoom instance', () => {
+			const store = getCanvasStore();
+			const initialZoom = store.zoom;
+
+			// Should not throw when called without panzoom
+			store.fitAll([]);
+
+			expect(store.zoom).toBe(initialZoom);
+		});
+
+		it('fitAll centers rack in viewport when panzoom is available', () => {
+			const store = getCanvasStore();
+			const mockPanzoom = createMockPanzoom(1);
+
+			// Mock matchMedia for reduced motion check
+			vi.stubGlobal(
+				'matchMedia',
+				vi.fn(() => ({ matches: false }))
+			);
+
+			// Mock canvas element for viewport dimensions
+			const mockCanvas = document.createElement('div');
+			Object.defineProperty(mockCanvas, 'clientWidth', { value: 800 });
+			Object.defineProperty(mockCanvas, 'clientHeight', { value: 600 });
+
+			store.setCanvasElement(mockCanvas);
+			store.setPanzoomInstance(mockPanzoom as ReturnType<typeof import('panzoom').default>);
+
+			// Call fitAll with mock rack data
+			const mockRacks = [{ id: 'rack-1', name: 'Test', height: 42, position: 0 }] as Parameters<
+				typeof store.fitAll
+			>[0];
+
+			store.fitAll(mockRacks);
+
+			// Should call zoomAbs and moveTo to center the content
+			expect(mockPanzoom.zoomAbs).toHaveBeenCalled();
+			expect(mockPanzoom.moveTo).toHaveBeenCalled();
+
+			vi.unstubAllGlobals();
+		});
+	});
 });

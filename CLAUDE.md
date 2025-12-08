@@ -1,9 +1,14 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.6
+**Version:** 0.4.7
 
 ---
+
+## v0.4.7 Changes
+
+- **Reset view on load**: Automatically centers rack in viewport after loading a layout file
+- Added `canvasStore.fitAll()` call in `handleLoad` to reset zoom and pan position
 
 ## v0.4.6 Changes
 
