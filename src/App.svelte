@@ -35,6 +35,7 @@
 		exportAsSVG,
 		exportAsPNG,
 		exportAsJPEG,
+		exportAsPDF,
 		downloadBlob,
 		generateExportFilename
 	} from '$lib/utils/export';
@@ -211,8 +212,11 @@
 				downloadBlob(imageBlob, filename);
 				toastStore.showToast('JPEG exported successfully', 'success');
 			} else if (options.format === 'pdf') {
-				// PDF export will be implemented with jspdf library
-				toastStore.showToast('PDF export not yet implemented', 'info');
+				const svgString = exportAsSVG(svg);
+				const pdfBlob = await exportAsPDF(svgString, options.background);
+				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				downloadBlob(pdfBlob, filename);
+				toastStore.showToast('PDF exported successfully', 'success');
 			}
 		} catch (error) {
 			console.error('Export failed:', error);

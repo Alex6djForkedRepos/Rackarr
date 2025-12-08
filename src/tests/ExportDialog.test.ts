@@ -46,7 +46,7 @@ describe('ExportDialog', () => {
 	});
 
 	describe('Format Options', () => {
-		it('shows format options in Single Image mode', () => {
+		it('shows format options including PDF', () => {
 			render(ExportDialog, {
 				props: { open: true, racks: mockRacks, selectedRackId: null }
 			});
@@ -54,10 +54,11 @@ describe('ExportDialog', () => {
 			const formatSelect = screen.getByLabelText(/format/i);
 			expect(formatSelect).toBeInTheDocument();
 
-			// Check format options exist (PNG, JPEG, SVG - no PDF in Single Image mode)
+			// Check format options exist (PNG, JPEG, SVG, PDF)
 			expect(screen.getByRole('option', { name: /png/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /jpeg/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /svg/i })).toBeInTheDocument();
+			expect(screen.getByRole('option', { name: /pdf/i })).toBeInTheDocument();
 		});
 
 		it('defaults to PNG format', () => {
@@ -67,6 +68,16 @@ describe('ExportDialog', () => {
 
 			const formatSelect = screen.getByLabelText(/format/i) as HTMLSelectElement;
 			expect(formatSelect.value).toBe('png');
+		});
+
+		it('can select PDF format', async () => {
+			render(ExportDialog, {
+				props: { open: true, racks: mockRacks, selectedRackId: null }
+			});
+
+			const formatSelect = screen.getByLabelText(/format/i) as HTMLSelectElement;
+			await fireEvent.change(formatSelect, { target: { value: 'pdf' } });
+			expect(formatSelect.value).toBe('pdf');
 		});
 	});
 
@@ -110,6 +121,10 @@ describe('ExportDialog', () => {
 
 			// Change to JPEG format - checkbox should be hidden
 			await fireEvent.change(formatSelect, { target: { value: 'jpeg' } });
+			expect(screen.queryByLabelText(/transparent background/i)).not.toBeInTheDocument();
+
+			// Change to PDF format - checkbox should also be hidden (PDF doesn't support transparency)
+			await fireEvent.change(formatSelect, { target: { value: 'pdf' } });
 			expect(screen.queryByLabelText(/transparent background/i)).not.toBeInTheDocument();
 		});
 

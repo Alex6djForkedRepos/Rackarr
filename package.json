@@ -1,6 +1,6 @@
 {
 	"name": "rackarr",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"description": "Rack Layout Designer for Homelabbers - A browser-based visual tool for planning server rack layouts",
 	"author": "gvns",
 	"license": "MIT",
@@ -62,6 +62,7 @@
 	},
 	"dependencies": {
 		"js-yaml": "^4.1.1",
+		"jspdf": "^3.0.4",
 		"jszip": "^3.10.1",
 		"panzoom": "^9.4.3",
 		"zod": "^4.1.13"

@@ -238,6 +238,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-06 | v0.3.4 released (responsive quick-wins)                   |
 | 2025-12-07 | v0.4.0 released (breaking: removed legacy format support) |
 | 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)  |
+| 2025-12-08 | v0.4.3 released (PDF export)                              |
 
 ---
 

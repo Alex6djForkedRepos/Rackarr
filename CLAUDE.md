@@ -1,9 +1,18 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.2
+**Version:** 0.4.3
 
 ---
+
+## v0.4.3 Changes
+
+- **PDF Export**: Implemented PDF export functionality using jspdf
+  - US Letter size (8.5x11") with rack centered
+  - Auto landscape/portrait based on aspect ratio
+  - 0.5" margins with proper scaling
+- Added `exportAsPDF` function to export utilities
+- PDF option now available in Export dialog
 
 ## v0.4.2 Changes
 

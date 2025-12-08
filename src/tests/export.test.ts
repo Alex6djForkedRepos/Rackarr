@@ -4,6 +4,7 @@ import {
 	exportAsSVG,
 	exportAsPNG,
 	exportAsJPEG,
+	exportAsPDF,
 	downloadBlob,
 	generateExportFilename
 } from '$lib/utils/export';
@@ -282,6 +283,16 @@ describe('Export Utilities', () => {
 		it('exportAsJPEG function is defined', () => {
 			expect(typeof exportAsJPEG).toBe('function');
 		});
+	});
+
+	describe('exportAsPDF', () => {
+		it('exportAsPDF function is defined', () => {
+			expect(typeof exportAsPDF).toBe('function');
+		});
+
+		// Note: Canvas/image operations are not fully supported in jsdom
+		// The actual PDF export works in a real browser but not in tests
+		// We verify the function signature and that it's exported
 	});
 
 	describe('downloadBlob', () => {

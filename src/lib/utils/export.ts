@@ -2,8 +2,16 @@
  * Export utilities for generating images from rack layouts
  */
 
-import type { Rack, Device, ExportOptions, ExportFormat, DeviceCategory } from '$lib/types';
+import type {
+	Rack,
+	Device,
+	ExportOptions,
+	ExportFormat,
+	DeviceCategory,
+	ExportBackground
+} from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
+import { jsPDF } from 'jspdf';
 
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
@@ -769,6 +777,102 @@ export async function exportAsJPEG(
 	quality: number = 0.92
 ): Promise<Blob> {
 	return exportAsRaster(svg, 'image/jpeg', scale, quality);
+}
+
+/**
+ * Export SVG string as PDF blob (US Letter size, centered)
+ */
+export async function exportAsPDF(svgString: string, background: ExportBackground): Promise<Blob> {
+	// Parse SVG to get dimensions
+	const parser = new DOMParser();
+	const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
+	const svgElement = svgDoc.documentElement;
+
+	const imgWidth = parseInt(svgElement.getAttribute('width') || '0', 10);
+	const imgHeight = parseInt(svgElement.getAttribute('height') || '0', 10);
+
+	if (imgWidth === 0 || imgHeight === 0) {
+		throw new Error('Invalid SVG dimensions');
+	}
+
+	// Convert SVG to canvas first
+	const canvas = await svgToCanvas(svgString, imgWidth, imgHeight, background);
+
+	// US Letter dimensions in points (72 dpi)
+	const letterWidth = 612; // 8.5 inches
+	const letterHeight = 792; // 11 inches
+
+	// Create PDF (landscape if image is wider than tall)
+	const isLandscape = imgWidth > imgHeight;
+
+	const pdf = new jsPDF({
+		orientation: isLandscape ? 'landscape' : 'portrait',
+		unit: 'pt',
+		format: 'letter'
+	});
+
+	// Calculate scaling to fit on page with margins
+	const margin = 36; // 0.5 inch margins
+	const pageWidth = isLandscape ? letterHeight : letterWidth;
+	const pageHeight = isLandscape ? letterWidth : letterHeight;
+	const availableWidth = pageWidth - margin * 2;
+	const availableHeight = pageHeight - margin * 2;
+
+	const scale = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
+
+	const scaledWidth = imgWidth * scale;
+	const scaledHeight = imgHeight * scale;
+
+	// Center on page
+	const x = (pageWidth - scaledWidth) / 2;
+	const y = (pageHeight - scaledHeight) / 2;
+
+	// Add image to PDF
+	const imgData = canvas.toDataURL('image/png');
+	pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
+
+	// Return as blob
+	return pdf.output('blob');
+}
+
+/**
+ * Convert SVG string to canvas
+ */
+async function svgToCanvas(
+	svgString: string,
+	width: number,
+	height: number,
+	background: ExportBackground
+): Promise<HTMLCanvasElement> {
+	const canvas = document.createElement('canvas');
+	const scale = 2; // Higher resolution for PDF
+	canvas.width = width * scale;
+	canvas.height = height * scale;
+
+	const ctx = canvas.getContext('2d');
+	if (!ctx) {
+		throw new Error('Failed to get canvas context');
+	}
+
+	ctx.scale(scale, scale);
+
+	// Fill background if not transparent
+	if (background !== 'transparent') {
+		ctx.fillStyle = background === 'dark' ? DARK_BG : LIGHT_BG;
+		ctx.fillRect(0, 0, width, height);
+	}
+
+	// Convert SVG to data URL and load as image
+	const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+	const url = URL.createObjectURL(svgBlob);
+
+	try {
+		const img = await loadImage(url);
+		ctx.drawImage(img, 0, 0, width, height);
+		return canvas;
+	} finally {
+		URL.revokeObjectURL(url);
+	}
 }
 
 /**
