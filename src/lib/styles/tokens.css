@@ -191,6 +191,13 @@
 	/* Sidebar (fixed) */
 	--sidebar-width: 280px;
 
+	/* Z-Index Layers */
+	--z-sidebar: 10;
+	--z-drawer-backdrop: 99;
+	--z-drawer: 100;
+	--z-modal: 200;
+	--z-toast: 300;
+
 	/* Form Inputs */
 	--input-bg: var(--neutral-800);
 	--input-border: var(--neutral-700);

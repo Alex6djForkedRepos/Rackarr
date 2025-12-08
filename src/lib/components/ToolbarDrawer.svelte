@@ -214,15 +214,15 @@
 	.toolbar-drawer {
 		position: fixed;
 		top: var(--toolbar-height);
-		left: 0;
+		right: 0;
 		width: var(--drawer-width);
 		max-width: 85vw;
 		height: calc(100vh - var(--toolbar-height));
 		background: var(--colour-surface);
-		border-right: 1px solid var(--colour-border);
-		transform: translateX(-100%);
+		border-left: 1px solid var(--colour-border);
+		transform: translateX(100%);
 		transition: transform var(--duration-normal) var(--ease-out);
-		z-index: 100;
+		z-index: var(--z-drawer);
 		overflow-y: auto;
 		box-shadow: var(--shadow-lg);
 	}
@@ -241,7 +241,7 @@
 		transition:
 			opacity var(--duration-normal) var(--ease-out),
 			visibility var(--duration-normal);
-		z-index: 99;
+		z-index: var(--z-drawer-backdrop);
 		border: none;
 		cursor: default;
 	}
