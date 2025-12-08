@@ -12,14 +12,39 @@ export function openFilePicker(): Promise<File | null> {
 		// Create a temporary file input
 		const input = document.createElement('input');
 		input.type = 'file';
-		// Accept only archive format
-		input.accept = '.rackarr.zip,.zip';
+		// Accept ZIP files (including .rackarr.zip which is a zip file)
+		// Using application/zip MIME type is more reliable across browsers
+		input.accept = '.zip,application/zip,application/x-zip-compressed';
+
+		let resolved = false;
 
 		// Handle file selection
-		input.addEventListener('change', () => {
+		const handleChange = () => {
+			if (resolved) return;
+			resolved = true;
+			cleanup();
 			const file = input.files?.[0] ?? null;
 			resolve(file);
-		});
+		};
+
+		// Handle cancel (window regains focus without a file being selected)
+		const handleFocus = () => {
+			// Delay to allow change event to fire first
+			setTimeout(() => {
+				if (resolved) return;
+				resolved = true;
+				cleanup();
+				resolve(null);
+			}, 300);
+		};
+
+		const cleanup = () => {
+			input.removeEventListener('change', handleChange);
+			window.removeEventListener('focus', handleFocus);
+		};
+
+		input.addEventListener('change', handleChange);
+		window.addEventListener('focus', handleFocus);
 
 		// Trigger the file picker
 		input.click();

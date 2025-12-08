@@ -1,9 +1,22 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.3
+**Version:** 0.4.5
 
 ---
+
+## v0.4.5 Changes
+
+- **Toolbar polish**: Added `white-space: nowrap` to prevent button text wrapping
+- **Tagline removed**: Removed tagline from toolbar to prevent overlap issues (description remains in Help panel)
+- **File picker fix**: Improved browser compatibility for Load Layout dialog
+  - Changed accept types to use MIME types for better cross-browser support
+  - Added cancel event handling for file picker dialog
+- **GitHub Actions fix**: Updated deploy workflow to use Node 22 and `npm install` for npm version compatibility
+
+## v0.4.4 Changes
+
+- **Docker build fix**: Changed Dockerfile to use `node:22-alpine` and `npm install --ignore-scripts` for npm lockfile compatibility
 
 ## v0.4.3 Changes
 

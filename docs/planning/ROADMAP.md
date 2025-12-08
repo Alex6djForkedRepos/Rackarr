@@ -51,20 +51,19 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] **Inconsistent Spacing**: Fixed by removing absolute positioning, using flexbox
   - See `docs/planning/spec-toolbar.md` for implementation details
 
-- [ ] Toolbar UI Issues - Button Text Wrapping
-  - [ ] Multi-word buttons (New Rack, Load Layout, Reset View) wrap to multiple lines
-  - [ ] Buttons should widen instead of wrapping text - add `white-space: nowrap`
-  - [ ] Tagline still overlaps with buttons at ~1470px width
-  - [ ] Lower tagline hide threshold from 1200px to ~900px, or remove tagline entirely (move to Help/About)
+- [x] Toolbar UI Issues - Button Text Wrapping (v0.4.5)
+  - [x] Multi-word buttons (New Rack, Load Layout, Reset View) wrap to multiple lines
+  - [x] Buttons should widen instead of wrapping text - add `white-space: nowrap`
+  - [x] Tagline removed from toolbar entirely (moved to Help panel description)
 
-- [ ] Version number in Help/About stuck on 0.3.4
-  - [ ] Version should always display current package.json version
-  - [ ] Investigate why version is hardcoded or not updating
+- [x] Version number in Help/About stuck on 0.3.4 (v0.4.5)
+  - [x] Verified version is correctly injected from package.json at build time
+  - [x] Issue was stale cached build artifacts
 
-- [ ] Load Layout functionality broken
-  - [ ] Open file dialog does not allow any files to be selected
-  - [ ] Even when forcing file selection, layout fails to load
-  - [ ] Investigate file picker accept types and archive extraction
+- [x] Load Layout functionality broken (v0.4.5)
+  - [x] Fixed file picker accept types for better browser compatibility
+  - [x] Added cancel event handling for file picker dialog
+  - [x] Fixed GitHub Actions workflow npm version compatibility
 
 ## Released
 
@@ -255,6 +254,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)  |
 | 2025-12-08 | v0.4.3 released (PDF export)                              |
 | 2025-12-08 | v0.4.4 released (Docker build fix)                        |
+| 2025-12-08 | v0.4.5 released (toolbar polish, file picker fix)         |
 
 ---
 

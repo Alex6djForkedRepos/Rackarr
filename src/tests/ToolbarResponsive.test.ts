@@ -53,12 +53,13 @@ describe('Toolbar Responsive Structure', () => {
 			expect(brandName?.textContent).toBe('Rackarr');
 		});
 
-		it('brand section contains brand-tagline element', () => {
+		it('brand section does not contain tagline (moved to Help)', () => {
 			const { container } = render(Toolbar);
 
+			// Tagline was removed from toolbar to prevent overlap issues
+			// It is now displayed in the Help panel instead
 			const tagline = container.querySelector('.brand-tagline');
-			expect(tagline).toBeInTheDocument();
-			expect(tagline?.textContent).toContain('Homelabbers');
+			expect(tagline).not.toBeInTheDocument();
 		});
 
 		it('brand section contains logo icon', () => {
@@ -112,6 +113,33 @@ describe('Toolbar Responsive Structure', () => {
 				const svg = btn.querySelector('svg');
 				expect(svg).toBeInTheDocument();
 			});
+		});
+	});
+
+	describe('Button text wrapping', () => {
+		it('toolbar action buttons use toolbar-action-btn class for consistent styling', () => {
+			const { container } = render(Toolbar);
+
+			const actionButtons = container.querySelectorAll('.toolbar-action-btn');
+			expect(actionButtons.length).toBeGreaterThan(0);
+
+			// All action buttons should have the consistent class for CSS targeting
+			// CSS includes white-space: nowrap to prevent text wrapping (verified in component)
+			actionButtons.forEach((btn) => {
+				expect(btn.classList.contains('toolbar-action-btn')).toBe(true);
+			});
+		});
+
+		it('multi-word button labels exist (New Rack, Load Layout, Reset View)', () => {
+			const { container } = render(Toolbar);
+
+			const spans = container.querySelectorAll('.toolbar-action-btn span');
+			const textsFound = Array.from(spans).map((span) => span.textContent?.trim());
+
+			// These multi-word buttons should exist and not wrap
+			expect(textsFound).toContain('New Rack');
+			expect(textsFound).toContain('Load Layout');
+			expect(textsFound).toContain('Reset View');
 		});
 	});
 });

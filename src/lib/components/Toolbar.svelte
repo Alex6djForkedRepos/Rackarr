@@ -110,7 +110,6 @@
 		>
 			<IconLogo size={36} />
 			<span class="brand-name">Rackarr</span>
-			<span class="brand-tagline">Rack Layout Designer for Homelabbers</span>
 			<span class="hamburger-icon" aria-hidden="true">
 				<IconMenu size={20} />
 			</span>
@@ -347,16 +346,6 @@
 		font-weight: var(--font-weight-bold);
 	}
 
-	.brand-tagline {
-		font-size: 0.8rem;
-		font-weight: var(--font-weight-normal);
-		color: var(--colour-text-muted);
-		margin-left: var(--space-2);
-		position: relative;
-		top: 2px;
-		pointer-events: none; /* Prevent intercepting clicks on toolbar buttons */
-	}
-
 	.toolbar-action-btn {
 		display: inline-flex;
 		align-items: center;
@@ -369,6 +358,7 @@
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-medium);
 		cursor: pointer;
+		white-space: nowrap;
 		transition:
 			background-color var(--duration-fast) var(--ease-out),
 			border-color var(--duration-fast) var(--ease-out),
@@ -452,13 +442,6 @@
 
 		.separator {
 			margin: 0 var(--space-1);
-		}
-	}
-
-	/* Responsive: Hide tagline earlier to prevent overlap with center buttons */
-	@media (max-width: 1200px) {
-		.brand-tagline {
-			display: none;
 		}
 	}
 
