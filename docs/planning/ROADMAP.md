@@ -65,6 +65,25 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] Added cancel event handling for file picker dialog
   - [x] Fixed GitHub Actions workflow npm version compatibility
 
+## Planned
+
+### v0.5.0 — Airflow Visualization
+
+**Status:** Spec Ready
+**Spec:** `docs/planning/spec-airflow-visualization.md`
+
+Optional visualization overlay for device airflow direction:
+
+| Feature              | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| Airflow metadata     | Dropdown in device form (passive, front-to-rear, etc.) |
+| Toggle button        | Toolbar button + `A` keyboard shortcut                 |
+| Direction indicators | SVG arrows with marching animation                     |
+| Dual-view            | Intake (blue) on front, exhaust (red) on rear          |
+| Conflict detection   | Subtle indicator between opposing devices              |
+
+---
+
 ## Released
 
 ### v0.4.0 — Code Audit & Legacy Cleanup
@@ -257,6 +276,8 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-08 | v0.4.5 released (toolbar polish, file picker fix)         |
 | 2025-12-08 | v0.4.6 released (fix 0.5U device schema validation)       |
 | 2025-12-08 | v0.4.7 released (reset view after layout load)            |
+| 2025-12-08 | v0.4.8 released (toolbar drawer fix, z-index tokens)      |
+| 2025-12-08 | v0.5.0 spec ready (airflow visualization)                 |
 
 ---
 
