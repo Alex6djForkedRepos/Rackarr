@@ -70,6 +70,11 @@ Work through each top level heading one by one, mark with x only once complete.
   - [ ] Investigate if these wrapper functions can be removed in favor of direct `updateDeviceType`/`deleteDeviceType` calls
   - [ ] Remove any remaining "legacy compatibility" comments from codebase
 
+- [ ] Device selection highlights all instances of same device type
+  - [ ] When selecting a device on canvas, all devices of that type show blue outline
+  - [ ] Selection behaviour is correct (only one device selected), but visual is confusing
+  - [ ] Should only highlight the specific placed device, not all instances of the device type
+
 ## Planned
 
 ### v0.5.0 — Airflow Visualization
