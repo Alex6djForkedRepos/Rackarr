@@ -218,8 +218,9 @@
 					{rack}
 					deviceLibrary={layoutStore.deviceLibrary}
 					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedId === rack.id}
-					selectedDeviceId={selectionStore.selectedType === 'device'
-						? selectionStore.selectedId
+					selectedDeviceIndex={selectionStore.selectedType === 'device' &&
+					selectionStore.selectedRackId === rack.id
+						? selectionStore.selectedDeviceIndex
 						: null}
 					displayMode={uiStore.displayMode}
 					showLabelsOnImages={uiStore.showLabelsOnImages}

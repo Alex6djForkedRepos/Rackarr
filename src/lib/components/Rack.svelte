@@ -22,7 +22,8 @@
 		rack: RackType;
 		deviceLibrary: Device[];
 		selected: boolean;
-		selectedDeviceId?: string | null;
+		/** Index of the selected device in the rack's devices array (null if no device selected) */
+		selectedDeviceIndex?: number | null;
 		displayMode?: DisplayMode;
 		showLabelsOnImages?: boolean;
 		airflowMode?: boolean;
@@ -54,7 +55,7 @@
 		rack,
 		deviceLibrary,
 		selected,
-		selectedDeviceId = null,
+		selectedDeviceIndex = null,
 		displayMode = 'label',
 		showLabelsOnImages = false,
 		airflowMode = false,
@@ -131,12 +132,15 @@
 	// Filter devices by face - use faceFilter prop if provided, otherwise fall back to rack.view
 	const effectiveFaceFilter = $derived(faceFilter ?? rack.view);
 
+	// Filter devices by face and preserve original indices for selection tracking
 	const visibleDevices = $derived(
-		rack.devices.filter((placedDevice) => {
-			const { face } = placedDevice;
-			if (face === 'both') return true; // Both-face devices visible in all views
-			return face === effectiveFaceFilter; // Show devices matching the filter
-		})
+		rack.devices
+			.map((placedDevice, originalIndex) => ({ placedDevice, originalIndex }))
+			.filter(({ placedDevice }) => {
+				const { face } = placedDevice;
+				if (face === 'both') return true; // Both-face devices visible in all views
+				return face === effectiveFaceFilter; // Show devices matching the filter
+			})
 	);
 
 	// Calculate blocked slots for this view (only when faceFilter is set)
@@ -476,7 +480,7 @@
 
 		<!-- Devices -->
 		<g transform="translate(0, {RACK_PADDING + RAIL_WIDTH})">
-			{#each visibleDevices as placedDevice, deviceIndex (placedDevice.libraryId + '-' + placedDevice.position)}
+			{#each visibleDevices as { placedDevice, originalIndex } (placedDevice.libraryId + '-' + placedDevice.position)}
 				{@const device = getDeviceById(placedDevice.libraryId)}
 				{#if device}
 					<RackDevice
@@ -484,8 +488,8 @@
 						position={placedDevice.position}
 						rackHeight={rack.height}
 						rackId={rack.id}
-						{deviceIndex}
-						selected={selectedDeviceId === placedDevice.libraryId}
+						deviceIndex={originalIndex}
+						selected={selectedDeviceIndex === originalIndex}
 						uHeight={U_HEIGHT}
 						rackWidth={RACK_WIDTH}
 						{displayMode}
@@ -494,7 +498,7 @@
 						{airflowMode}
 						placedDeviceName={placedDevice.name}
 						onselect={ondeviceselect}
-						ondragstart={() => handleDeviceDragStart(deviceIndex)}
+						ondragstart={() => handleDeviceDragStart(originalIndex)}
 						ondragend={handleDeviceDragEnd}
 					/>
 				{/if}

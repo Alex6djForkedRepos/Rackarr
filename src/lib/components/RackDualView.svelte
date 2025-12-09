@@ -11,7 +11,8 @@
 		rack: RackType;
 		deviceLibrary: Device[];
 		selected: boolean;
-		selectedDeviceId?: string | null;
+		/** Index of the selected device in the rack's devices array */
+		selectedDeviceIndex?: number | null;
 		displayMode?: DisplayMode;
 		showLabelsOnImages?: boolean;
 		airflowMode?: boolean;
@@ -42,7 +43,7 @@
 		rack,
 		deviceLibrary,
 		selected,
-		selectedDeviceId = null,
+		selectedDeviceIndex = null,
 		displayMode = 'label',
 		showLabelsOnImages = false,
 		airflowMode = false,
@@ -117,7 +118,7 @@
 				{rack}
 				{deviceLibrary}
 				selected={false}
-				{selectedDeviceId}
+				{selectedDeviceIndex}
 				{displayMode}
 				{showLabelsOnImages}
 				{airflowMode}
@@ -138,7 +139,7 @@
 				{rack}
 				{deviceLibrary}
 				selected={false}
-				{selectedDeviceId}
+				{selectedDeviceIndex}
 				{displayMode}
 				{showLabelsOnImages}
 				{airflowMode}

@@ -193,6 +193,79 @@ describe('Rack Visual Enhancements', () => {
 		});
 	});
 
+	describe('Device Selection', () => {
+		it('only the device at the selected index shows selection highlight, not all devices of same type', () => {
+			// Create two devices with the same libraryId (same device type)
+			const deviceType = {
+				id: 'device-type-1',
+				name: 'Test Server',
+				height: 1,
+				colour: '#4A90D9',
+				category: 'server' as const
+			};
+
+			// Place two instances of the same device type in the rack
+			const rackWithDevices: RackType = {
+				...testRack,
+				devices: [
+					{ libraryId: 'device-type-1', position: 5, face: 'front' },
+					{ libraryId: 'device-type-1', position: 10, face: 'front' } // Same libraryId, different position
+				]
+			};
+
+			// Render with only device at index 0 selected
+			const { container } = render(Rack, {
+				props: {
+					rack: rackWithDevices,
+					deviceLibrary: [deviceType],
+					selected: false,
+					selectedDeviceIndex: 0 // Select the first device only
+				}
+			});
+
+			// Find all device groups
+			const deviceGroups = container.querySelectorAll('.rack-device');
+			expect(deviceGroups.length).toBe(2);
+
+			// Find selection outlines
+			const selectionOutlines = container.querySelectorAll('.device-selection');
+
+			// Only ONE device should have a selection outline, not both
+			expect(selectionOutlines.length).toBe(1);
+		});
+
+		it('no devices are selected when selectedDeviceIndex is null', () => {
+			const deviceType = {
+				id: 'device-type-1',
+				name: 'Test Server',
+				height: 1,
+				colour: '#4A90D9',
+				category: 'server' as const
+			};
+
+			const rackWithDevices: RackType = {
+				...testRack,
+				devices: [
+					{ libraryId: 'device-type-1', position: 5, face: 'front' },
+					{ libraryId: 'device-type-1', position: 10, face: 'front' }
+				]
+			};
+
+			const { container } = render(Rack, {
+				props: {
+					rack: rackWithDevices,
+					deviceLibrary: [deviceType],
+					selected: false,
+					selectedDeviceIndex: null
+				}
+			});
+
+			// No selection outlines should be present
+			const selectionOutlines = container.querySelectorAll('.device-selection');
+			expect(selectionOutlines.length).toBe(0);
+		});
+	});
+
 	describe('Different Rack Heights', () => {
 		it('24U rack has correct number of highlighted labels', () => {
 			// Create a 24U rack by modifying the existing one
