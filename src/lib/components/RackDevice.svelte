@@ -25,6 +25,7 @@
 		showLabelsOnImages?: boolean;
 		placedDeviceName?: string;
 		airflowMode?: boolean;
+		hasConflict?: boolean;
 		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
@@ -44,6 +45,7 @@
 		showLabelsOnImages = false,
 		placedDeviceName,
 		airflowMode = false,
+		hasConflict = false,
 		onselect,
 		ondragstart: ondragstartProp,
 		ondragend: ondragendProp
@@ -175,6 +177,19 @@
 		/>
 	{/if}
 
+	<!-- Airflow conflict border -->
+	{#if airflowMode && hasConflict}
+		<rect
+			class="airflow-conflict"
+			x="1"
+			y="1"
+			width={deviceWidth - 2}
+			height={deviceHeight - 2}
+			rx="2"
+			ry="2"
+		/>
+	{/if}
+
 	<!-- Device content: Image or Label -->
 	{#if showImage}
 		<!-- Device image -->
@@ -276,6 +291,13 @@
 	.device-selection {
 		fill: none;
 		stroke: var(--colour-selection);
+		stroke-width: 2;
+		pointer-events: none;
+	}
+
+	.airflow-conflict {
+		fill: none;
+		stroke: var(--colour-airflow-conflict, #f59e0b);
 		stroke-width: 2;
 		pointer-events: none;
 	}

@@ -250,5 +250,28 @@ describe('Airflow Utilities', () => {
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(0);
 		});
+
+		it('side-to-rear does not conflict with other devices', () => {
+			const devices: Device[] = [
+				createDevice('switch-side', 1, 'side-to-rear'),
+				createDevice('server-front-rear', 2, 'front-to-rear')
+			];
+			const rack: Rack = {
+				id: 'rack-1',
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				form_factor: '4-post-cabinet',
+				desc_units: false,
+				starting_unit: 1,
+				position: 0,
+				devices: [createPlacedDevice('switch-side', 1), createPlacedDevice('server-front-rear', 2)],
+				view: 'front'
+			};
+			const conflicts = findAirflowConflicts(rack, devices);
+			// side-to-rear has same direction as front-to-rear (intake front, exhaust rear)
+			// so no conflict expected
+			expect(conflicts).toHaveLength(0);
+		});
 	});
 });

@@ -92,6 +92,12 @@ docs/planning/
 **Read `docs/planning/spec-combined.md` for complete technical specification.**
 **Read `docs/planning/CLAUDE-planning.md` for development instructions including scope guard.**
 
+## Development Philosophy
+
+**Greenfield approach:** Do not use migration or legacy support concepts in this project. Implement features as if they are the first and only implementation.
+
+---
+
 ## Autonomous Mode
 
 When given an overnight execution prompt:
