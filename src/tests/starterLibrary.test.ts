@@ -5,9 +5,9 @@ import { createLayout } from '$lib/utils/serialization';
 
 describe('Starter Device Type Library', () => {
 	describe('getStarterLibrary', () => {
-		it('returns 27 device types', () => {
+		it('returns 26 device types', () => {
 			const deviceTypes = getStarterLibrary();
-			expect(deviceTypes).toHaveLength(27);
+			expect(deviceTypes).toHaveLength(26);
 		});
 
 		it('most categories have at least one starter device type', () => {
@@ -18,6 +18,7 @@ describe('Starter Device Type Library', () => {
 			expect(categoriesWithDevices.has('server')).toBe(true);
 			expect(categoriesWithDevices.has('network')).toBe(true);
 			expect(categoriesWithDevices.has('blank')).toBe(true);
+			expect(categoriesWithDevices.has('cable-management')).toBe(true);
 		});
 
 		it('all device types have valid properties', () => {
@@ -57,79 +58,357 @@ describe('Starter Device Type Library', () => {
 		});
 	});
 
-	describe('Specific starter device types', () => {
-		it('includes server device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const servers = deviceTypes.filter((d) => d.rackarr.category === 'server');
-
-			expect(servers.length).toBeGreaterThanOrEqual(3);
-			expect(servers.some((d) => d.model === '1U Server' && d.u_height === 1)).toBe(true);
-			expect(servers.some((d) => d.model === '2U Server' && d.u_height === 2)).toBe(true);
-			expect(servers.some((d) => d.model === '4U Server' && d.u_height === 4)).toBe(true);
+	describe('server category (3 items)', () => {
+		it('includes 1U Server', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Server');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('server');
 		});
 
-		it('includes network device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const network = deviceTypes.filter((d) => d.rackarr.category === 'network');
-
-			expect(network.length).toBeGreaterThanOrEqual(3);
-			expect(network.some((d) => d.model === '1U Switch')).toBe(true);
-			expect(network.some((d) => d.model === '1U Router')).toBe(true);
-			expect(network.some((d) => d.model === '1U Firewall')).toBe(true);
+		it('includes 2U Server', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Server');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(2);
+			expect(device?.rackarr.category).toBe('server');
 		});
 
-		it('includes patch panel device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const patchPanels = deviceTypes.filter((d) => d.rackarr.category === 'patch-panel');
+		it('includes 4U Server', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '4U Server');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(4);
+			expect(device?.rackarr.category).toBe('server');
+		});
+	});
 
-			expect(patchPanels.length).toBeGreaterThanOrEqual(2);
-			expect(patchPanels.some((d) => d.model === '1U Patch Panel')).toBe(true);
-			expect(patchPanels.some((d) => d.model === '2U Patch Panel')).toBe(true);
+	describe('network category (4 items)', () => {
+		it('includes 8-Port Switch', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '8-Port Switch');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('network');
 		});
 
-		it('includes power device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const power = deviceTypes.filter((d) => d.rackarr.category === 'power');
-
-			expect(power.length).toBeGreaterThanOrEqual(3);
-			expect(power.some((d) => d.model === '1U PDU')).toBe(true);
-			expect(power.some((d) => d.model === '2U UPS')).toBe(true);
-			expect(power.some((d) => d.model === '4U UPS')).toBe(true);
+		it('includes 24-Port Switch', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '24-Port Switch');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('network');
 		});
 
-		it('includes blank panel device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const blanks = deviceTypes.filter((d) => d.rackarr.category === 'blank');
-
-			expect(blanks.length).toBeGreaterThanOrEqual(3);
-			expect(blanks.some((d) => d.model === '0.5U Blank' && d.u_height === 0.5)).toBe(true);
-			expect(blanks.some((d) => d.model === '1U Blank')).toBe(true);
-			expect(blanks.some((d) => d.model === '2U Blank')).toBe(true);
+		it('includes 48-Port Switch', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '48-Port Switch');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('network');
 		});
 
-		it('includes half-U blanking fan', () => {
-			const deviceTypes = getStarterLibrary();
-			const cooling = deviceTypes.filter((d) => d.rackarr.category === 'cooling');
+		it('includes 1U Router/Firewall', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Router/Firewall');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('network');
+		});
+	});
 
-			expect(cooling.some((d) => d.model === '0.5U Blanking Fan' && d.u_height === 0.5)).toBe(true);
+	describe('patch-panel category (2 items)', () => {
+		it('includes 24-Port Patch Panel', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '24-Port Patch Panel');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('patch-panel');
 		});
 
-		it('includes shelf device types', () => {
-			const deviceTypes = getStarterLibrary();
-			const shelves = deviceTypes.filter((d) => d.rackarr.category === 'shelf');
+		it('includes 48-Port Patch Panel', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '48-Port Patch Panel');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(2);
+			expect(device?.rackarr.category).toBe('patch-panel');
+		});
+	});
 
-			expect(shelves.length).toBe(3);
-			expect(shelves.some((d) => d.model === '1U Shelf' && d.u_height === 1)).toBe(true);
-			expect(shelves.some((d) => d.model === '2U Shelf' && d.u_height === 2)).toBe(true);
-			expect(shelves.some((d) => d.model === '4U Shelf' && d.u_height === 4)).toBe(true);
+	describe('storage category (3 items)', () => {
+		it('includes 1U Storage', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Storage');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('storage');
+		});
+
+		it('includes 2U Storage', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Storage');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(2);
+			expect(device?.rackarr.category).toBe('storage');
+		});
+
+		it('includes 4U Storage', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '4U Storage');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(4);
+			expect(device?.rackarr.category).toBe('storage');
+		});
+	});
+
+	describe('power category (3 items)', () => {
+		it('includes 1U PDU', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U PDU');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('power');
+		});
+
+		it('includes 2U UPS', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U UPS');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(2);
+			expect(device?.rackarr.category).toBe('power');
+		});
+
+		it('includes 4U UPS', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '4U UPS');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(4);
+			expect(device?.rackarr.category).toBe('power');
+		});
+	});
+
+	describe('kvm category (2 items)', () => {
+		it('includes 1U KVM', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U KVM');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('kvm');
+		});
+
+		it('includes 1U Console Drawer', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Console Drawer');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('kvm');
+		});
+	});
+
+	describe('av-media category (2 items)', () => {
+		it('includes 1U Receiver', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Receiver');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('av-media');
+		});
+
+		it('includes 2U Amplifier', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Amplifier');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('av-media');
+		});
+	});
+
+	describe('cooling category (1 item)', () => {
+		it('includes 1U Fan Panel', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Fan Panel');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('cooling');
+		});
+
+		it('does NOT include 0.5U Blanking Fan (removed)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '0.5U Blanking Fan');
+			expect(device).toBeUndefined();
+		});
+	});
+
+	describe('blank category (3 items)', () => {
+		it('includes 0.5U Blank', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '0.5U Blank');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(0.5);
+			expect(device?.rackarr.category).toBe('blank');
+		});
+
+		it('includes 1U Blank', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Blank');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('blank');
+		});
+
+		it('includes 2U Blank', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Blank');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('blank');
+		});
+	});
+
+	describe('shelf category (2 items)', () => {
+		it('includes 1U Shelf', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Shelf');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('shelf');
+		});
+
+		it('includes 2U Shelf', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Shelf');
+			expect(device).toBeDefined();
+			expect(device?.rackarr.category).toBe('shelf');
+		});
+
+		it('does NOT include 4U Shelf (removed)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '4U Shelf');
+			expect(device).toBeUndefined();
 		});
 
 		it('shelf device types have correct colour', () => {
-			const deviceTypes = getStarterLibrary();
-			const shelves = deviceTypes.filter((d) => d.rackarr.category === 'shelf');
+			const library = getStarterLibrary();
+			const shelves = library.filter((d) => d.rackarr.category === 'shelf');
 
 			shelves.forEach((shelf) => {
 				expect(shelf.rackarr.colour).toBe('#8B4513');
+			});
+		});
+	});
+
+	describe('cable-management category (2 items)', () => {
+		it('includes 1U Brush Panel', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Brush Panel');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('cable-management');
+		});
+
+		it('includes 1U Cable Management', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Cable Management');
+			expect(device).toBeDefined();
+			expect(device?.u_height).toBe(1);
+			expect(device?.rackarr.category).toBe('cable-management');
+		});
+
+		it('cable-management devices have Steel Blue colour', () => {
+			const library = getStarterLibrary();
+			const cableDevices = library.filter((d) => d.rackarr.category === 'cable-management');
+
+			expect(cableDevices).toHaveLength(2);
+			cableDevices.forEach((device) => {
+				expect(device.rackarr.colour).toBe('#4682B4');
+			});
+		});
+	});
+
+	describe('removed items', () => {
+		it('does NOT include 1U Generic (removed)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Generic');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 2U Generic (removed)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Generic');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 1U Router (merged into Router/Firewall)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Router');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 1U Firewall (merged into Router/Firewall)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Firewall');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 1U Switch (renamed to specific port counts)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Switch');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 1U Patch Panel (renamed to 24-Port Patch Panel)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Patch Panel');
+			expect(device).toBeUndefined();
+		});
+
+		it('does NOT include 2U Patch Panel (renamed to 48-Port Patch Panel)', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '2U Patch Panel');
+			expect(device).toBeUndefined();
+		});
+	});
+
+	describe('slug generation', () => {
+		it('generates correct slug for 1U Router/Firewall', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Router/Firewall');
+			expect(device?.slug).toBe('1u-router-firewall');
+		});
+
+		it('generates correct slug for 24-Port Switch', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '24-Port Switch');
+			expect(device?.slug).toBe('24-port-switch');
+		});
+
+		it('generates correct slug for 0.5U Blank', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '0.5U Blank');
+			expect(device?.slug).toBe('0-5u-blank');
+		});
+
+		it('generates correct slug for 1U Cable Management', () => {
+			const library = getStarterLibrary();
+			const device = library.find((d) => d.model === '1U Cable Management');
+			expect(device?.slug).toBe('1u-cable-management');
+		});
+	});
+
+	describe('all devices have required properties', () => {
+		it('every device has a slug', () => {
+			const library = getStarterLibrary();
+			library.forEach((device) => {
+				expect(device.slug).toBeDefined();
+				expect(device.slug.length).toBeGreaterThan(0);
+			});
+		});
+
+		it('every device has u_height > 0', () => {
+			const library = getStarterLibrary();
+			library.forEach((device) => {
+				expect(device.u_height).toBeGreaterThan(0);
+			});
+		});
+
+		it('every device has a category color', () => {
+			const library = getStarterLibrary();
+			library.forEach((device) => {
+				expect(device.rackarr.colour).toBeDefined();
+				expect(device.rackarr.colour).toMatch(/^#[0-9A-Fa-f]{6}$/);
 			});
 		});
 	});
@@ -138,7 +417,7 @@ describe('Starter Device Type Library', () => {
 		it('new layout includes starter library', () => {
 			const layout = createLayout();
 
-			expect(layout.device_types.length).toBe(27);
+			expect(layout.device_types.length).toBe(26);
 			expect(layout.device_types[0]?.slug).toBeTruthy();
 		});
 
