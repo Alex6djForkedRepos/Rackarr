@@ -136,12 +136,15 @@ interface DeviceType {
 
 ```typescript
 interface PlacedDevice {
+	id: string; // UUID for stable reference (survives reordering)
 	device_type: string; // Reference to DeviceType.slug
 	position: number; // Bottom U position (1-indexed)
 	face: DeviceFace;
 	name?: string; // Custom instance name
 }
 ```
+
+**Note:** The `id` field is a UUID generated on device placement using `crypto.randomUUID()`. It provides a stable identifier for placement-level image overrides that survives device reordering.
 
 ### 3.4 Rack
 
@@ -207,10 +210,21 @@ my-rack.rackarr.zip
 └── my-rack/
     ├── my-rack.yaml           # Layout data
     └── assets/
-        └── [device-slug]/
-            ├── front.png      # Front image (optional)
-            └── rear.png       # Rear image (optional)
+        ├── device-types/      # Device type default images
+        │   └── [device-slug]/
+        │       ├── front.webp
+        │       └── rear.webp
+        └── placements/        # Placement override images (optional)
+            └── [placement-id]/
+                ├── front.webp
+                └── rear.webp
 ```
+
+**Image Storage:**
+
+- `device-types/` — Images uploaded when creating device types (shared by all instances)
+- `placements/` — Per-placement image overrides (keyed by PlacedDevice.id)
+- Bundled images are not stored in archives (loaded from app assets)
 
 ### 4.2 YAML Schema
 
@@ -227,7 +241,8 @@ rack:
   form_factor: '4-post-cabinet'
   starting_unit: 1
   devices:
-    - device_type: 'dell-r650'
+    - id: '550e8400-e29b-41d4-a716-446655440000'
+      device_type: 'dell-r650'
       position: 40
       face: 'front'
       name: 'Web Server 1'
@@ -610,6 +625,24 @@ Device slugs are generated from names using the `slugify()` utility:
 | 0.5U Blank          | `0-5u-blank`          |
 | 1U Cable Management | `1u-cable-management` |
 
+### 11.5 Bundled Images
+
+Active devices (~15 of 26) have pre-bundled WebP images for immediate visual representation in image display mode. Images are sourced from the NetBox Device Type Library (CC0 licensed) and processed to 400px max width.
+
+| Category | Devices with Bundled Images                                       |
+| -------- | ----------------------------------------------------------------- |
+| Server   | 1U Server, 2U Server, 4U Server                                   |
+| Network  | 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Router/Firewall |
+| Storage  | 1U Storage, 2U Storage, 4U Storage                                |
+| Power    | 2U UPS, 4U UPS                                                    |
+| KVM      | 1U Console Drawer                                                 |
+
+Passive/generic items display as category-colored rectangles (no bundled images):
+
+- Blanks, Shelves, Patch Panels, Cable Management, PDU, Fan Panel, 1U KVM, AV/Media
+
+See Section 16 for full Device Image System documentation.
+
 ---
 
 ## 12. Commands
@@ -699,7 +732,102 @@ Conflicts detected when exhaust of one device feeds intake of adjacent device:
 
 ---
 
-## 16. Out of Scope
+## 16. Device Image System
+
+### 16.1 Overview
+
+Two-level image storage system with device type defaults and placement-level overrides.
+
+### 16.2 Image Sources
+
+| Source                    | Storage Location                | Purpose                   |
+| ------------------------- | ------------------------------- | ------------------------- |
+| Bundled                   | `src/lib/assets/device-images/` | Starter library defaults  |
+| User upload (device type) | In-memory → archive             | Custom device type images |
+| User upload (placement)   | In-memory → archive             | Per-placement overrides   |
+
+### 16.3 Image Lookup Priority
+
+When rendering a device, images are resolved in this order:
+
+1. **Placement override** — Custom image for this specific placed device (keyed by `PlacedDevice.id`)
+2. **Device type default** — Image uploaded when creating/editing the device type (keyed by `DeviceType.slug`)
+3. **Bundled default** — Pre-bundled image for starter library devices (keyed by slug)
+4. **No image** — Falls back to category-colored rectangle
+
+### 16.4 Image Processing
+
+User-uploaded images are auto-processed for consistency:
+
+| Processing Step | Details                                             |
+| --------------- | --------------------------------------------------- |
+| Resize          | Max 400px width (preserves aspect ratio)            |
+| Format          | Convert to WebP                                     |
+| Purpose         | Keeps archives lean, consistent with bundled images |
+
+Images under 400px width are not resized. Processing happens client-side using canvas API.
+
+### 16.5 Bundled Images
+
+~15 active devices from the starter library have pre-bundled WebP images:
+
+| Category | Devices with Images                                               |
+| -------- | ----------------------------------------------------------------- |
+| Server   | 1U Server, 2U Server, 4U Server                                   |
+| Network  | 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Router/Firewall |
+| Storage  | 1U Storage, 2U Storage, 4U Storage                                |
+| Power    | 2U UPS, 4U UPS                                                    |
+| KVM      | 1U Console Drawer                                                 |
+
+Passive/generic items remain as category-colored rectangles:
+
+- Blanks (0.5U, 1U, 2U)
+- Shelves (1U, 2U)
+- Patch panels, Cable management, PDU, Fan Panel, Receiver, Amplifier
+
+### 16.6 Image Store Architecture
+
+```typescript
+// Two separate stores for different image levels
+const deviceTypeImages = new SvelteMap<string, DeviceImageData>(); // key: slug
+const placementImages = new SvelteMap<string, DeviceImageData>(); // key: placement id
+
+// Combined lookup with fallback
+function getImageForPlacement(
+	slug: string,
+	placementId: string,
+	face: 'front' | 'rear'
+): ImageData | undefined {
+	// 1. Check placement override
+	const override = placementImages.get(placementId)?.[face];
+	if (override) return override;
+
+	// 2. Fall back to device type default
+	const typeDefault = deviceTypeImages.get(slug)?.[face];
+	if (typeDefault) return typeDefault;
+
+	// 3. Check bundled images (loaded at app init)
+	// (already in deviceTypeImages from loadBundledImages())
+
+	return undefined; // Colored rectangle fallback
+}
+```
+
+### 16.7 EditPanel Image Override UI
+
+When a device is selected, EditPanel shows:
+
+| State                     | UI                                               |
+| ------------------------- | ------------------------------------------------ |
+| Using device type default | "Using default image" label                      |
+| Has placement override    | "Custom image" label + "Reset to default" button |
+| No image available        | Image upload prompt                              |
+
+Users can upload a custom image for the specific placement, which overrides the device type default for that instance only.
+
+---
+
+## 17. Out of Scope
 
 Features that will NOT be implemented:
 

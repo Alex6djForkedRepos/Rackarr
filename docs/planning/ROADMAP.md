@@ -87,8 +87,9 @@ Items requiring investigation and architecture design before implementation.
 
 **Status:** Complete
 **Created:** 2025-12-11
+**Completed:** 2025-12-11
 
-Selected Lucide icons for each device category. See SPEC.md Section 10 for the full mapping.
+Implemented Lucide icons for all 12 device categories in `CategoryIcon.svelte`.
 
 | Category           | Lucide Icon            |
 | ------------------ | ---------------------- |
@@ -105,108 +106,68 @@ Selected Lucide icons for each device category. See SPEC.md Section 10 for the f
 | `cable-management` | `cable`                |
 | `other`            | `circle-help`          |
 
-> **Next step:** Implement `lucide-svelte` integration in `CategoryIcon.svelte`
+See SPEC.md Section 10 for the full mapping.
 
 ---
 
 ### Starter Library Rationalization
 
-**Status:** Research Complete, Implementation Ready
+**Status:** Complete
 **Created:** 2025-12-11
+**Completed:** 2025-12-11
 
-The current starter library has 26 generic device types ("1U Server", "2U NAS", etc.) that need rationalization to better represent common homelab gear categories.
+Rationalized the starter library to 26 device types representing common homelab gear.
 
-#### Research (Complete)
+- [x] **Research** — Audited existing library, researched common homelab gear, defined target list
+- [x] **Implementation** — Updated `starterLibrary.ts` with all changes:
+  - Added: 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Storage, 1U Brush Panel, 1U Cable Management
+  - Removed: 4U Shelf, 1U Generic, 2U Generic, 0.5U Blanking Fan
+  - Renamed: 1U Switch → 1U Router/Firewall, patch panels get port counts (24/48-Port)
+- [x] **Tests updated** — Starter library tests reflect new device list
+- [x] **Slug generation verified** — Slugs work correctly for all renamed devices
 
-- [x] **Audit current starter library** — Documented existing 26 device types and categories
-- [x] **Research common homelab gear** — r/homelab, ServeTheHome forums, homelab blogs (2024-2025)
-- [x] **Define target library** — Approved 26-item library with add/remove/rename changes
-- [x] **Document final list** — See `docs/planning/research/starter-library-rationalization.md`
-
-#### Implementation
-
-- [ ] **Update `starterLibrary.ts`** — Apply approved changes:
-  - Add: 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Storage, 1U Brush Panel, 1U Cable Management
-  - Remove: 4U Shelf, 1U Generic, 2U Generic, 0.5U Blanking Fan
-  - Rename: 1U Switch → 1U Router/Firewall, patch panels get port counts (24/48-Port)
-  - Merge: 1U Router + 1U Firewall → 1U Router/Firewall
-- [ ] **Update tests** — Ensure starter library tests reflect new device list
-- [ ] **Verify slug generation** — Confirm slugs work correctly for renamed devices
-
-> **Prerequisite for:** Device Image System implementation
+> See `docs/planning/research/starter-library-rationalization.md` for research documentation.
 
 ---
 
 ### Device Image System
 
-**Status:** Research Complete, Implementation Ready
+**Status:** In Progress
 **Created:** 2025-12-11
 
-The current image system has limitations:
-
-- Images only addable when creating new device types (no editing after)
-- No default images for starter library devices
-- Single-level storage (device type only, no per-placement overrides)
+Two-level image system with device type defaults and placement-level overrides.
 
 > **Note:** Implementation will be greenfield — no migration layers, version suffixes, or legacy compatibility code.
 
 #### Phase 1: Architecture Design (Complete)
 
-Research and document the two-level image storage system:
+- [x] **Image inheritance model** — Device type → placement override fallback
+- [x] **Storage format** — `assets/device-types/` + `assets/placements/`
+- [x] **Image processing** — 400px max WebP, auto-process uploads
+- [x] **Licensing** — CC0 1.0 for NetBox images
 
-- [x] **Image inheritance model** — Device type images as defaults, placement-level overrides
-  - Two separate stores: `deviceTypeImages` and `placementImages`
-  - **Decision:** Add stable `id` field to PlacedDevice (survives reordering)
-  - Key scheme: placement images keyed by `{slug}:{id}`
-  - Fallback logic: placement image → device type image → colored rectangle
+> See `docs/planning/research/device-images.md` for full research.
 
-- [x] **Storage format decisions**
-  - Device type images remain in separate store (not embedded in DeviceType)
-  - Archive structure: `assets/device-types/{slug}/` and `assets/placements/{slug}/{id}/`
+#### Phase 2: Bundled Starter Library Images (In Progress)
 
-- [x] **Image processing decisions**
-  - Bundled images: 400px max width, WebP format
-  - Originals stored in `assets-source/device-images/` (git-tracked, not bundled)
-  - Optimized stored in `src/lib/assets/device-images/` (Vite-bundled)
-  - User uploads: auto-resize to 400px max + WebP conversion
+Bundle ~15 active device images (servers, switches, storage, UPS):
 
-- [x] **Licensing** — CC0 1.0 (public domain), no attribution required
+- [ ] Create directory structure and processing script
+- [ ] Download representative images from NetBox
+- [ ] Process to 400px max WebP
+- [ ] Create bundled image manifest (`src/lib/data/bundledImages.ts`)
+- [ ] Load bundled images on app initialization
 
-> See `docs/planning/research/device-images.md` for full research documentation.
+#### Phase 3: Placement Image Overrides (Planned)
 
-#### Phase 2: Starter Library Default Images
+Per-placement image overrides with stable IDs:
 
-Bundle representative images for the 26 starter library device types:
-
-- [ ] **Download representative images from NetBox** — Front images for each device type
-  - Use representative gear images (e.g., Dell R630 image for "1U Server")
-  - See mapping table in `starter-library-rationalization.md`
-- [ ] **Process images** — Resize to 400px max width, convert to WebP
-- [ ] **Store originals** — `assets-source/device-images/{manufacturer}/{model}.front.png`
-- [ ] **Store optimized** — `src/lib/assets/device-images/{category}/{slug}.front.webp`
-- [ ] **Wire up to starter library** — Import images in `starterLibrary.ts`, set as defaults
-- [ ] **Add npm script** — `npm run process-images` to regenerate optimized from originals
-
-#### Phase 3: Placement Image Overrides
-
-Implementation of per-placement image overrides:
-
-- [ ] Add stable `id` field to PlacedDevice type
-- [ ] Refactor `ImageStore` to separate device type / placement stores
-- [ ] Add image upload UI to `EditPanel` for selected placed devices
-- [ ] Add "Using default" / "Custom image" indicator in EditPanel
-- [ ] Add "Reset to default" action for placement overrides
-- [ ] Update archive save/load for two-level image structure
-- [ ] Update `RackDevice` rendering to check placement → device type → fallback
-
-#### Phase 4: NetBox On-Demand Fetch (Future)
-
-Optional future enhancement for fetching images on-demand:
-
-- [ ] Implement search/browse UI for NetBox device library
-- [ ] Fetch from `raw.githubusercontent.com` (CORS-friendly)
-- [ ] Cache fetched images locally
-- [ ] Allow user to assign fetched image to device type or placement
+- [ ] Add `id: string` (UUID) field to PlacedDevice type
+- [ ] Generate UUID on device placement
+- [ ] Refactor ImageStore for two-level storage
+- [ ] Update archive format for device-types/ + placements/
+- [ ] Add image override UI to EditPanel
+- [ ] Auto-process user uploads (400px + WebP)
 
 ---
 
@@ -382,6 +343,23 @@ Features that will **not** be implemented:
 
 ---
 
+## Considerations but Not Doing
+
+Features that were considered but explicitly deferred or rejected.
+
+### NetBox On-Demand Fetch (Deferred)
+
+Fetch device images on-demand from the NetBox Device Type Library:
+
+- Search/browse UI for NetBox library
+- Fetch from `raw.githubusercontent.com` (CORS-friendly)
+- Cache fetched images locally
+- Assign fetched images to device types or placements
+
+**Reason for deferral:** The bundled images + user upload approach covers immediate user needs without network dependency. On-demand fetch adds complexity (UI for search/browse, network error handling, caching) that can be evaluated later based on user feedback. May revisit if users frequently request specific device images not in the starter library.
+
+---
+
 ## Process
 
 ### Adding Features to Roadmap
@@ -427,6 +405,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-10 | Type system consolidation: unified on DeviceType/PlacedDevice      |
 | 2025-12-11 | Added Research section: Starter Library & Device Image System      |
 | 2025-12-11 | Device category icons: selected Lucide icons for all 12 categories |
+| 2025-12-11 | Device Image System: spec complete, Phase 4 deferred               |
 
 ---
 

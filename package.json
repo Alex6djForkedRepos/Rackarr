@@ -24,7 +24,8 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
-		"prepare": "husky"
+		"prepare": "husky",
+		"process-images": "npx tsx scripts/process-images.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -34,7 +35,7 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.6",
 		"@types/js-yaml": "^4.0.9",
-		"@types/node": "^24",
+		"@types/node": "^24.10.3",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.0",
@@ -44,6 +45,7 @@
 		"lint-staged": "^16.1.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
+		"sharp": "^0.34.5",
 		"svelte": "^5.43.8",
 		"svelte-check": "^4.3.4",
 		"typescript": "^5.9.3",
