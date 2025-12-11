@@ -83,6 +83,32 @@ Work through each top level heading one by one, mark with x only once complete.
 
 Items requiring investigation and architecture design before implementation.
 
+### Device Category Icons
+
+**Status:** Complete
+**Created:** 2025-12-11
+
+Selected Lucide icons for each device category. See SPEC.md Section 10 for the full mapping.
+
+| Category           | Lucide Icon            |
+| ------------------ | ---------------------- |
+| `server`           | `server`               |
+| `network`          | `network`              |
+| `patch-panel`      | `ethernet-port`        |
+| `power`            | `zap`                  |
+| `storage`          | `hard-drive`           |
+| `kvm`              | `monitor`              |
+| `av-media`         | `speaker`              |
+| `cooling`          | `fan`                  |
+| `shelf`            | `align-end-horizontal` |
+| `blank`            | `circle-off`           |
+| `cable-management` | `cable`                |
+| `other`            | `circle-help`          |
+
+> **Next step:** Implement `lucide-svelte` integration in `CategoryIcon.svelte`
+
+---
+
 ### Starter Library Rationalization
 
 **Status:** Research Complete, Implementation Ready
@@ -323,7 +349,6 @@ Features explicitly deferred with no priority assigned:
 
 | Feature                     | Notes                                       |
 | --------------------------- | ------------------------------------------- |
-| Device category icons       | Lucide icons for each category (lucide.dev) |
 | Custom device categories    | Allow user-defined categories               |
 | 3D visualization            | Three.js rack view                          |
 | Cloud sync / accounts       | User accounts, cloud storage                |
@@ -376,31 +401,32 @@ Backlog → Future Roadmap → Planned (current) → Released
 
 ## Changelog
 
-| Date       | Change                                                        |
-| ---------- | ------------------------------------------------------------- |
-| 2025-11-27 | Initial roadmap created                                       |
-| 2025-11-27 | v0.1 development started                                      |
-| 2025-11-28 | v0.1 released                                                 |
-| 2025-11-28 | v0.2 spec created                                             |
-| 2025-11-29 | Added panzoom library to v0.2 scope                           |
-| 2025-11-30 | v0.2.0 released                                               |
-| 2025-12-01 | v0.2.1 released (accessibility & design polish)               |
-| 2025-12-02 | Consolidated spec; single-rack permanent scope                |
-| 2025-12-03 | v0.3.0 released (YAML archive format)                         |
-| 2025-12-05 | Responsive quick-wins implemented                             |
-| 2025-12-06 | v0.3.4 released (responsive quick-wins)                       |
-| 2025-12-07 | v0.4.0 released (breaking: removed legacy format support)     |
-| 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)      |
-| 2025-12-08 | v0.4.3 released (PDF export)                                  |
-| 2025-12-08 | v0.4.4 released (Docker build fix)                            |
-| 2025-12-08 | v0.4.5 released (toolbar polish, file picker fix)             |
-| 2025-12-08 | v0.4.6 released (fix 0.5U device schema validation)           |
-| 2025-12-08 | v0.4.7 released (reset view after layout load)                |
-| 2025-12-08 | v0.4.8 released (toolbar drawer fix, z-index tokens)          |
-| 2025-12-08 | v0.4.9 spec ready (airflow visualization)                     |
-| 2025-12-09 | v0.4.9 released (airflow visualization, selection bug fix)    |
-| 2025-12-10 | Type system consolidation: unified on DeviceType/PlacedDevice |
-| 2025-12-11 | Added Research section: Starter Library & Device Image System |
+| Date       | Change                                                             |
+| ---------- | ------------------------------------------------------------------ |
+| 2025-11-27 | Initial roadmap created                                            |
+| 2025-11-27 | v0.1 development started                                           |
+| 2025-11-28 | v0.1 released                                                      |
+| 2025-11-28 | v0.2 spec created                                                  |
+| 2025-11-29 | Added panzoom library to v0.2 scope                                |
+| 2025-11-30 | v0.2.0 released                                                    |
+| 2025-12-01 | v0.2.1 released (accessibility & design polish)                    |
+| 2025-12-02 | Consolidated spec; single-rack permanent scope                     |
+| 2025-12-03 | v0.3.0 released (YAML archive format)                              |
+| 2025-12-05 | Responsive quick-wins implemented                                  |
+| 2025-12-06 | v0.3.4 released (responsive quick-wins)                            |
+| 2025-12-07 | v0.4.0 released (breaking: removed legacy format support)          |
+| 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)           |
+| 2025-12-08 | v0.4.3 released (PDF export)                                       |
+| 2025-12-08 | v0.4.4 released (Docker build fix)                                 |
+| 2025-12-08 | v0.4.5 released (toolbar polish, file picker fix)                  |
+| 2025-12-08 | v0.4.6 released (fix 0.5U device schema validation)                |
+| 2025-12-08 | v0.4.7 released (reset view after layout load)                     |
+| 2025-12-08 | v0.4.8 released (toolbar drawer fix, z-index tokens)               |
+| 2025-12-08 | v0.4.9 spec ready (airflow visualization)                          |
+| 2025-12-09 | v0.4.9 released (airflow visualization, selection bug fix)         |
+| 2025-12-10 | Type system consolidation: unified on DeviceType/PlacedDevice      |
+| 2025-12-11 | Added Research section: Starter Library & Device Image System      |
+| 2025-12-11 | Device category icons: selected Lucide icons for all 12 categories |
 
 ---
 

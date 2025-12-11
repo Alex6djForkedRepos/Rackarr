@@ -518,22 +518,24 @@ interface ExportOptions {
 
 ---
 
-## 10. Category Colors
+## 10. Category Colors & Icons
 
-| Category         | Color      | Hex     |
-| ---------------- | ---------- | ------- |
-| server           | Blue       | #4A90D9 |
-| network          | Purple     | #7B68EE |
-| patch-panel      | Slate      | #708090 |
-| power            | Red        | #DC143C |
-| storage          | Green      | #228B22 |
-| kvm              | Orange     | #FF8C00 |
-| av-media         | Purple     | #9932CC |
-| cooling          | Teal       | #00CED1 |
-| shelf            | Brown      | #8B4513 |
-| blank            | Dark Slate | #2F4F4F |
-| cable-management | Steel Blue | #4682B4 |
-| other            | Gray       | #808080 |
+Each device category has an assigned color and icon from [Lucide](https://lucide.dev).
+
+| Category           | Color      | Hex     | Lucide Icon            |
+| ------------------ | ---------- | ------- | ---------------------- |
+| `server`           | Blue       | #4A90D9 | `server`               |
+| `network`          | Purple     | #7B68EE | `network`              |
+| `patch-panel`      | Slate      | #708090 | `ethernet-port`        |
+| `power`            | Red        | #DC143C | `zap`                  |
+| `storage`          | Green      | #228B22 | `hard-drive`           |
+| `kvm`              | Orange     | #FF8C00 | `monitor`              |
+| `av-media`         | Purple     | #9932CC | `speaker`              |
+| `cooling`          | Teal       | #00CED1 | `fan`                  |
+| `shelf`            | Brown      | #8B4513 | `align-end-horizontal` |
+| `blank`            | Dark Slate | #2F4F4F | `circle-off`           |
+| `cable-management` | Steel Blue | #4682B4 | `cable`                |
+| `other`            | Gray       | #808080 | `circle-help`          |
 
 ---
 
