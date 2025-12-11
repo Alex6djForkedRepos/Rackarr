@@ -2,13 +2,13 @@
 
 **Created:** 2025-12-11
 **Updated:** 2025-12-11
-**Feature:** Starter Library Rationalization
+**Features:** Starter Library Rationalization, Lucide Category Icons
 
 ---
 
 ## Overview
 
-This document contains prompts for implementing the starter library rationalization in a test-driven, incremental manner. Each prompt builds on the previous ones, ensuring no orphaned code and continuous integration.
+This document contains prompts for implementing features in a test-driven, incremental manner. Each prompt builds on the previous ones, ensuring no orphaned code and continuous integration.
 
 ### Implementation Principles
 
@@ -16,6 +16,10 @@ This document contains prompts for implementing the starter library rationalizat
 2. **Incremental Progress**: Small, focused changes that build on each other
 3. **No Big Jumps**: Each step is testable and verifiable
 4. **Integration First**: Wire up changes immediately after implementation
+
+---
+
+## Feature A: Starter Library Rationalization
 
 ### Changes Summary
 
@@ -28,6 +32,31 @@ From research in `docs/planning/research/starter-library-rationalization.md`:
 **Rename (3 items):** 1U Switch → 1U Router/Firewall, 1U Patch Panel → 24-Port Patch Panel, 2U Patch Panel → 48-Port Patch Panel
 
 **New Category:** `cable-management` (Steel Blue #4682B4)
+
+---
+
+## Feature B: Lucide Category Icons
+
+### Changes Summary
+
+Replace custom SVG icons in `CategoryIcon.svelte` with icons from [lucide-svelte](https://lucide.dev).
+
+**Icon Mapping (from SPEC.md Section 10):**
+
+| Category           | Lucide Icon          |
+| ------------------ | -------------------- |
+| `server`           | `Server`             |
+| `network`          | `Network`            |
+| `patch-panel`      | `EthernetPort`       |
+| `power`            | `Zap`                |
+| `storage`          | `HardDrive`          |
+| `kvm`              | `Monitor`            |
+| `av-media`         | `Speaker`            |
+| `cooling`          | `Fan`                |
+| `shelf`            | `AlignEndHorizontal` |
+| `blank`            | `CircleOff`          |
+| `cable-management` | `Cable`              |
+| `other`            | `CircleHelp`         |
 
 ---
 
@@ -727,16 +756,281 @@ Perform final review and cleanup of all starter library changes.
 
 ---
 
+## Phase 6: Lucide Category Icons
+
+### Prompt 6.1 — Install lucide-svelte and Update CategoryIcon Tests
+
+````text
+Install the lucide-svelte package and update CategoryIcon tests to verify Lucide icons are used.
+
+**Context:**
+Icon selection is complete (documented in SPEC.md Section 10). Now implement the integration.
+
+**Task:**
+1. Install lucide-svelte: `npm install lucide-svelte`
+2. Read current tests in `src/tests/CategoryIcons.test.ts`
+3. Update tests to verify Lucide icon components are rendered
+
+**Implementation (TDD):**
+
+First, install the dependency:
+```bash
+npm install lucide-svelte
+````
+
+Then update `src/tests/CategoryIcons.test.ts`:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/svelte';
+import CategoryIcon from '$lib/components/CategoryIcon.svelte';
+import type { DeviceCategory } from '$lib/types';
+
+const ALL_CATEGORIES: DeviceCategory[] = [
+	'server',
+	'network',
+	'patch-panel',
+	'power',
+	'storage',
+	'kvm',
+	'av-media',
+	'cooling',
+	'shelf',
+	'blank',
+	'cable-management',
+	'other'
+];
+
+// Map of category to expected Lucide icon (check for SVG with specific class or data attribute)
+const CATEGORY_ICONS: Record<DeviceCategory, string> = {
+	server: 'lucide-server',
+	network: 'lucide-network',
+	'patch-panel': 'lucide-ethernet-port',
+	power: 'lucide-zap',
+	storage: 'lucide-hard-drive',
+	kvm: 'lucide-monitor',
+	'av-media': 'lucide-speaker',
+	cooling: 'lucide-fan',
+	shelf: 'lucide-align-end-horizontal',
+	blank: 'lucide-circle-off',
+	'cable-management': 'lucide-cable',
+	other: 'lucide-circle-help'
+};
+
+describe('CategoryIcon Component', () => {
+	describe('Rendering', () => {
+		it.each(ALL_CATEGORIES)('renders Lucide icon for "%s" category', (category) => {
+			const { container } = render(CategoryIcon, { props: { category } });
+			const svg = container.querySelector('svg');
+			expect(svg).toBeInTheDocument();
+			// Lucide icons have class attribute containing the icon name
+			expect(svg?.classList.toString()).toContain('lucide');
+		});
+
+		it('renders at default size (16px)', () => {
+			const { container } = render(CategoryIcon, { props: { category: 'server' } });
+			const svg = container.querySelector('svg');
+			expect(svg).toHaveAttribute('width', '16');
+			expect(svg).toHaveAttribute('height', '16');
+		});
+
+		it('renders at specified size', () => {
+			const { container } = render(CategoryIcon, { props: { category: 'server', size: 24 } });
+			const svg = container.querySelector('svg');
+			expect(svg).toHaveAttribute('width', '24');
+			expect(svg).toHaveAttribute('height', '24');
+		});
+	});
+
+	describe('Accessibility', () => {
+		it('has aria-hidden for decorative icons', () => {
+			const { container } = render(CategoryIcon, { props: { category: 'server' } });
+			const svg = container.querySelector('svg');
+			expect(svg).toHaveAttribute('aria-hidden', 'true');
+		});
+	});
+
+	describe('CSS class', () => {
+		it('has category-icon class on wrapper', () => {
+			const { container } = render(CategoryIcon, { props: { category: 'server' } });
+			const wrapper = container.querySelector('.category-icon');
+			expect(wrapper).toBeInTheDocument();
+		});
+	});
+});
+```
+
+**Note:** Tests will FAIL until implementation is complete.
+
+**Verification:**
+
+1. Run `npm install` — lucide-svelte installed
+2. Run `npm run test:run` — tests fail (expected)
+
+**Acceptance Criteria:**
+
+- [ ] lucide-svelte installed as dependency
+- [ ] CategoryIcon tests updated for Lucide
+- [ ] Tests include cable-management category
+- [ ] Tests fail initially (TDD)
+
+````
+
+---
+
+### Prompt 6.2 — Update CategoryIcon.svelte to Use Lucide Icons
+
+```text
+Update CategoryIcon.svelte to render Lucide icons instead of custom SVGs.
+
+**Context:**
+Tests from Prompt 6.1 are failing. Now implement the changes to make them pass.
+
+**Task:**
+1. Read failing tests from `src/tests/CategoryIcons.test.ts`
+2. Read current `src/lib/components/CategoryIcon.svelte`
+3. Replace custom SVGs with Lucide icon components
+
+**Implementation:**
+
+Update `src/lib/components/CategoryIcon.svelte`:
+
+```svelte
+<!--
+  CategoryIcon Component
+  Lucide icons for each device category
+-->
+<script lang="ts">
+  import type { DeviceCategory } from '$lib/types';
+  import {
+    Server,
+    Network,
+    EthernetPort,
+    Zap,
+    HardDrive,
+    Monitor,
+    Speaker,
+    Fan,
+    AlignEndHorizontal,
+    CircleOff,
+    Cable,
+    CircleHelp
+  } from 'lucide-svelte';
+
+  interface Props {
+    category: DeviceCategory;
+    size?: number;
+  }
+
+  let { category, size = 16 }: Props = $props();
+
+  // Map categories to Lucide icon components
+  const iconMap: Record<DeviceCategory, typeof Server> = {
+    'server': Server,
+    'network': Network,
+    'patch-panel': EthernetPort,
+    'power': Zap,
+    'storage': HardDrive,
+    'kvm': Monitor,
+    'av-media': Speaker,
+    'cooling': Fan,
+    'shelf': AlignEndHorizontal,
+    'blank': CircleOff,
+    'cable-management': Cable,
+    'other': CircleHelp
+  };
+
+  // Get the icon component for this category (fallback to CircleHelp)
+  const IconComponent = $derived(iconMap[category] ?? CircleHelp);
+</script>
+
+<span class="category-icon">
+  <IconComponent {size} aria-hidden="true" />
+</span>
+
+<style>
+  .category-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    color: currentColor;
+  }
+
+  .category-icon :global(svg) {
+    display: block;
+  }
+</style>
+````
+
+**Verification:**
+
+1. Run `npm run test:run` — CategoryIcon tests pass
+2. Run `npm run check` — no TypeScript errors
+3. Run `npm run lint` — no lint warnings
+4. Run `npm run dev` — visual verification in Device Library
+
+**Acceptance Criteria:**
+
+- [ ] All 12 categories have Lucide icons
+- [ ] Icons render at correct sizes
+- [ ] Icons inherit color from parent
+- [ ] All tests pass
+- [ ] Device Library shows Lucide icons
+
+````
+
+---
+
+### Prompt 6.3 — Final Lucide Icons Verification
+
+```text
+Perform final review and cleanup of Lucide icons implementation.
+
+**Task:**
+1. Run all tests: `npm run test:run`
+2. Run E2E tests: `npm run test:e2e`
+3. Run type checking: `npm run check`
+4. Run linting: `npm run lint`
+5. Manual testing in browser
+
+**Checklist:**
+- [ ] All unit tests pass
+- [ ] All E2E tests pass
+- [ ] No TypeScript errors
+- [ ] No lint warnings
+- [ ] Icons display correctly in Device Library sidebar
+- [ ] Icons display correctly in Add Device form category dropdown
+- [ ] Icons display correctly at different sizes
+- [ ] Icons inherit parent text color correctly
+
+**Manual Testing:**
+1. Start dev server: `npm run dev`
+2. Verify Device Library shows Lucide icons next to category headers
+3. Verify icons are crisp and properly sized
+4. Click "Add Device" and verify category dropdown shows icons
+5. Verify icons work in both light and dark themes
+6. Verify no visual regression in existing UI
+
+**Acceptance Criteria:**
+- [ ] All automated checks pass
+- [ ] Manual testing successful
+- [ ] Ready for commit
+````
+
+---
+
 ## Summary
 
-| Phase | Prompts | Focus                          |
-| ----- | ------- | ------------------------------ |
-| 1     | 1.1     | Add cable-management category  |
-| 2     | 2.1     | Write starter library tests    |
-| 3     | 3.1     | Update starterLibrary.ts       |
-| 4     | 4.1     | E2E integration tests          |
-| 5     | 5.1     | Final verification and cleanup |
+| Phase | Prompts   | Focus                                |
+| ----- | --------- | ------------------------------------ |
+| 1     | 1.1       | Add cable-management category        |
+| 2     | 2.1       | Write starter library tests          |
+| 3     | 3.1       | Update starterLibrary.ts             |
+| 4     | 4.1       | E2E integration tests                |
+| 5     | 5.1       | Final verification and cleanup       |
+| 6     | 6.1 - 6.3 | Lucide category icons implementation |
 
-**Total: 5 prompts across 5 phases**
+**Total: 8 prompts across 6 phases**
 
 Each prompt is self-contained but builds on previous work. Tests are written first (TDD), then implementation, then integration testing.

@@ -2,7 +2,7 @@
 
 **Created:** 2025-12-11
 **Updated:** 2025-12-11
-**Feature:** Starter Library Rationalization
+**Features:** Starter Library Rationalization, Lucide Category Icons
 **Prompts:** `docs/planning/PROMPT-PLAN.md`
 
 ---
@@ -10,6 +10,10 @@
 ## Quick Reference
 
 Mark items with `[x]` as they are completed. Each section corresponds to a prompt in PROMPT-PLAN.md.
+
+---
+
+# Feature A: Starter Library Rationalization
 
 ---
 
@@ -224,7 +228,105 @@ Mark items with `[x]` as they are completed. Each section corresponds to a promp
 
 ---
 
+# Feature B: Lucide Category Icons
+
+---
+
+## Phase 6: Lucide Category Icons
+
+### 6.1 — Install lucide-svelte and Update Tests
+
+**Goal:** Install Lucide and write TDD tests for icon integration.
+
+- [ ] Run `npm install lucide-svelte`
+- [ ] Verify package added to `package.json`
+- [ ] Read current `src/tests/CategoryIcons.test.ts`
+- [ ] Update ALL_CATEGORIES to include `cable-management`
+- [ ] Update tests to verify Lucide SVG class present
+- [ ] Write test: renders SVG with `lucide` class
+- [ ] Write test: renders at default size (16px)
+- [ ] Write test: renders at custom size
+- [ ] Write test: has `aria-hidden="true"`
+- [ ] Write test: has `.category-icon` wrapper
+- [ ] Run `npm run test:run` — tests FAIL (expected)
+
+**Acceptance Criteria:**
+
+- [ ] lucide-svelte installed
+- [ ] Tests updated for Lucide
+- [ ] Tests fail initially (TDD)
+
+---
+
+### 6.2 — Update CategoryIcon.svelte
+
+**Goal:** Replace custom SVGs with Lucide icon components.
+
+- [ ] Read failing tests
+- [ ] Open `src/lib/components/CategoryIcon.svelte`
+- [ ] Import Lucide icons:
+  - [ ] `Server`
+  - [ ] `Network`
+  - [ ] `EthernetPort`
+  - [ ] `Zap`
+  - [ ] `HardDrive`
+  - [ ] `Monitor`
+  - [ ] `Speaker`
+  - [ ] `Fan`
+  - [ ] `AlignEndHorizontal`
+  - [ ] `CircleOff`
+  - [ ] `Cable`
+  - [ ] `CircleHelp`
+- [ ] Create `iconMap` Record mapping categories to components
+- [ ] Use `$derived` to get icon component
+- [ ] Wrap in `<span class="category-icon">`
+- [ ] Pass `size` and `aria-hidden="true"` to icon
+- [ ] Update styles for inline-flex layout
+- [ ] Run `npm run test:run` — all tests pass
+- [ ] Run `npm run check` — no TypeScript errors
+- [ ] Run `npm run lint` — no warnings
+
+**Acceptance Criteria:**
+
+- [ ] All 12 categories have Lucide icons
+- [ ] Icons render at correct sizes
+- [ ] All tests pass
+
+---
+
+### 6.3 — Final Lucide Icons Verification
+
+**Goal:** Complete verification before commit.
+
+**Automated Checks:**
+
+- [ ] `npm run test:run` — all unit tests pass
+- [ ] `npm run test:e2e` — all E2E tests pass
+- [ ] `npm run check` — no TypeScript errors
+- [ ] `npm run lint` — no warnings
+- [ ] `npm run build` — builds successfully
+
+**Manual Testing:**
+
+- [ ] Start dev server: `npm run dev`
+- [ ] Device Library sidebar shows Lucide icons
+- [ ] Icons are crisp and properly sized
+- [ ] Click "Add Device" — category dropdown shows icons
+- [ ] Test light theme — icons visible
+- [ ] Test dark theme — icons visible
+- [ ] No visual regression in existing UI
+
+**Final Acceptance:**
+
+- [ ] All automated checks pass
+- [ ] Manual testing complete
+- [ ] Ready for commit
+
+---
+
 ## Files to Modify
+
+### Feature A: Starter Library
 
 | File                               | Changes                       |
 | ---------------------------------- | ----------------------------- |
@@ -236,18 +338,27 @@ Mark items with `[x]` as they are completed. Each section corresponds to a promp
 | `src/tests/starterLibrary.test.ts` | Comprehensive library tests   |
 | `e2e/deviceLibrary.spec.ts`        | E2E integration tests         |
 
+### Feature B: Lucide Icons
+
+| File                                     | Changes                         |
+| ---------------------------------------- | ------------------------------- |
+| `package.json`                           | Add lucide-svelte dependency    |
+| `src/lib/components/CategoryIcon.svelte` | Replace custom SVGs with Lucide |
+| `src/tests/CategoryIcons.test.ts`        | Update tests for Lucide         |
+
 ---
 
 ## Progress Tracking
 
 | Phase     | Description           | Items   | Done  | %      |
 | --------- | --------------------- | ------- | ----- | ------ |
-| 1         | Category Type         | 16      | 0     | 0      |
-| 2         | Starter Library Tests | 47      | 0     | 0      |
-| 3         | Implementation        | 25      | 0     | 0      |
-| 4         | E2E Tests             | 8       | 0     | 0      |
-| 5         | Final Verification    | 18      | 0     | 0      |
-| **Total** |                       | **114** | **0** | **0%** |
+| 1         | Category Type         | 16      | 0     | 0%     |
+| 2         | Starter Library Tests | 47      | 0     | 0%     |
+| 3         | Implementation        | 25      | 0     | 0%     |
+| 4         | E2E Tests             | 8       | 0     | 0%     |
+| 5         | Final Verification    | 18      | 0     | 0%     |
+| 6         | Lucide Icons          | 35      | 0     | 0%     |
+| **Total** |                       | **149** | **0** | **0%** |
 
 ---
 
