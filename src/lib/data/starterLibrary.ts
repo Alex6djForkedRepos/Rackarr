@@ -19,8 +19,7 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 	{ name: '2U Server', u_height: 2, category: 'server' },
 	{ name: '4U Server', u_height: 4, category: 'server' },
 
-	// Network devices (4)
-	{ name: '8-Port Switch', u_height: 1, category: 'network' },
+	// Network devices (3)
 	{ name: '24-Port Switch', u_height: 1, category: 'network' },
 	{ name: '48-Port Switch', u_height: 1, category: 'network' },
 	{ name: '1U Router/Firewall', u_height: 1, category: 'network' },

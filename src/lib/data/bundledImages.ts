@@ -14,7 +14,6 @@ import server2uFront from '$lib/assets/device-images/server/2u-server.front.webp
 import server4uFront from '$lib/assets/device-images/server/4u-server.front.webp';
 
 // Network images
-import switch8portFront from '$lib/assets/device-images/network/8-port-switch.front.webp';
 import switch24portFront from '$lib/assets/device-images/network/24-port-switch.front.webp';
 import switch48portFront from '$lib/assets/device-images/network/48-port-switch.front.webp';
 import routerFirewallFront from '$lib/assets/device-images/network/1u-router-firewall.front.webp';
@@ -51,7 +50,6 @@ const BUNDLED_IMAGES: Record<string, BundledImageSet> = {
 	'4u-server': { front: server4uFront },
 
 	// Network
-	'8-port-switch': { front: switch8portFront },
 	'24-port-switch': { front: switch24portFront },
 	'48-port-switch': { front: switch48portFront },
 	'1u-router-firewall': { front: routerFirewallFront },

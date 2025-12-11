@@ -16,8 +16,8 @@ describe('Layout Store (v0.2)', () => {
 			// v0.2 has a single rack, not an array
 			expect(store.layout.rack).toBeDefined();
 			expect(store.layout.rack.devices).toEqual([]);
-			// Starter library has 27 device types
-			expect(store.layout.device_types.length).toBe(27);
+			// Starter library has 26 device types
+			expect(store.layout.device_types.length).toBe(26);
 		});
 
 		it('initializes isDirty as false', () => {
@@ -77,8 +77,8 @@ describe('Layout Store (v0.2)', () => {
 				colour: '#4A90D9'
 			});
 			store.createNewLayout('New Layout');
-			// Starter library has 27 device types
-			expect(store.device_types.length).toBe(27);
+			// Starter library has 26 device types
+			expect(store.device_types.length).toBe(26);
 		});
 
 		it('sets isDirty to false', () => {
@@ -770,8 +770,8 @@ describe('Layout Store (v0.2)', () => {
 
 			expect(freshStore.layout.name).toBe('Racky McRackface');
 			expect(freshStore.layout.rack.devices).toEqual([]);
-			// Starter library has 27 device types
-			expect(freshStore.device_types.length).toBe(27);
+			// Starter library has 26 device types
+			expect(freshStore.device_types.length).toBe(26);
 			expect(freshStore.isDirty).toBe(false);
 		});
 	});

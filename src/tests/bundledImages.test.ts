@@ -26,11 +26,6 @@ describe('bundledImages', () => {
 			expect(url).toBeDefined();
 		});
 
-		it('returns URL for 8-port-switch front image', () => {
-			const url = getBundledImage('8-port-switch', 'front');
-			expect(url).toBeDefined();
-		});
-
 		it('returns URL for 24-port-switch front image', () => {
 			const url = getBundledImage('24-port-switch', 'front');
 			expect(url).toBeDefined();
@@ -92,7 +87,7 @@ describe('bundledImages', () => {
 		it('returns list of device slugs with bundled images', () => {
 			const slugs = getBundledImageSlugs();
 			expect(Array.isArray(slugs)).toBe(true);
-			expect(slugs.length).toBe(12); // 3 servers + 4 network + 3 storage + 1 power + 1 kvm
+			expect(slugs.length).toBe(11); // 3 servers + 3 network + 3 storage + 1 power + 1 kvm
 		});
 
 		it('includes all server slugs', () => {
@@ -104,7 +99,6 @@ describe('bundledImages', () => {
 
 		it('includes all network slugs', () => {
 			const slugs = getBundledImageSlugs();
-			expect(slugs).toContain('8-port-switch');
 			expect(slugs).toContain('24-port-switch');
 			expect(slugs).toContain('48-port-switch');
 			expect(slugs).toContain('1u-router-firewall');

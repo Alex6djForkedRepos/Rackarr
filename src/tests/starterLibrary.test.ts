@@ -5,9 +5,9 @@ import { createLayout } from '$lib/utils/serialization';
 
 describe('Starter Device Type Library', () => {
 	describe('getStarterLibrary', () => {
-		it('returns 27 device types', () => {
+		it('returns 26 device types', () => {
 			const deviceTypes = getStarterLibrary();
-			expect(deviceTypes).toHaveLength(27);
+			expect(deviceTypes).toHaveLength(26);
 		});
 
 		it('most categories have at least one starter device type', () => {
@@ -84,15 +84,7 @@ describe('Starter Device Type Library', () => {
 		});
 	});
 
-	describe('network category (4 items)', () => {
-		it('includes 8-Port Switch', () => {
-			const library = getStarterLibrary();
-			const device = library.find((d) => d.model === '8-Port Switch');
-			expect(device).toBeDefined();
-			expect(device?.u_height).toBe(1);
-			expect(device?.rackarr.category).toBe('network');
-		});
-
+	describe('network category (3 items)', () => {
 		it('includes 24-Port Switch', () => {
 			const library = getStarterLibrary();
 			const device = library.find((d) => d.model === '24-Port Switch');
@@ -417,7 +409,7 @@ describe('Starter Device Type Library', () => {
 		it('new layout includes starter library', () => {
 			const layout = createLayout();
 
-			expect(layout.device_types.length).toBe(27);
+			expect(layout.device_types.length).toBe(26);
 			expect(layout.device_types[0]?.slug).toBeTruthy();
 		});
 
