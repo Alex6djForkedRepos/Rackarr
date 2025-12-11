@@ -32,7 +32,6 @@
 		hasRacks?: boolean;
 		theme?: 'dark' | 'light';
 		displayMode?: DisplayMode;
-		showLabelsOnImages?: boolean;
 		airflowMode?: boolean;
 		onnewrack?: () => void;
 		onsave?: () => void;
@@ -42,7 +41,6 @@
 		onfitall?: () => void;
 		ontoggletheme?: () => void;
 		ontoggledisplaymode?: () => void;
-		ontoggleshowlabelsonimages?: () => void;
 		ontoggleairflowmode?: () => void;
 		onhelp?: () => void;
 	}
@@ -52,7 +50,6 @@
 		hasRacks = false,
 		theme = 'dark',
 		displayMode = 'label',
-		showLabelsOnImages = false,
 		airflowMode = false,
 		onnewrack,
 		onsave,
@@ -62,12 +59,17 @@
 		onfitall,
 		ontoggletheme,
 		ontoggledisplaymode,
-		ontoggleshowlabelsonimages,
 		ontoggleairflowmode,
 		onhelp
 	}: Props = $props();
 
-	const displayModeLabel = $derived(displayMode === 'label' ? 'Label' : 'Image');
+	// Display mode labels for the 3-way toggle
+	const displayModeLabels: Record<DisplayMode, string> = {
+		label: 'Label',
+		image: 'Image',
+		'image-label': 'Image+Label'
+	};
+	const displayModeLabel = $derived(displayModeLabels[displayMode]);
 
 	const layoutStore = getLayoutStore();
 	const toastStore = getToastStore();
@@ -198,26 +200,15 @@
 			>
 				{#if displayMode === 'label'}
 					<IconLabel size={16} />
+				{:else if displayMode === 'image'}
+					<IconImage size={16} />
 				{:else}
+					<!-- image-label mode: show both icons stacked -->
 					<IconImage size={16} />
 				{/if}
 				<span>{displayModeLabel}</span>
 			</button>
 		</Tooltip>
-
-		{#if displayMode === 'image'}
-			<Tooltip text="Show Labels on Images" position="bottom">
-				<label class="checkbox-toggle">
-					<input
-						type="checkbox"
-						checked={showLabelsOnImages}
-						onchange={ontoggleshowlabelsonimages}
-						aria-label="Show labels on images"
-					/>
-					<span class="checkbox-label">Labels</span>
-				</label>
-			</Tooltip>
-		{/if}
 
 		<Tooltip text="Toggle Airflow View" shortcut="A" position="bottom">
 			<button
@@ -455,33 +446,6 @@
 		margin: 0 var(--space-2);
 	}
 
-	.checkbox-toggle {
-		display: flex;
-		align-items: center;
-		gap: var(--space-1);
-		cursor: pointer;
-		padding: var(--space-1) var(--space-2);
-		border-radius: var(--radius-sm);
-		color: var(--colour-text-muted);
-		font-size: var(--font-size-sm);
-	}
-
-	.checkbox-toggle:hover {
-		background: var(--colour-bg-hover);
-		color: var(--colour-text);
-	}
-
-	.checkbox-toggle input[type='checkbox'] {
-		width: 14px;
-		height: 14px;
-		accent-color: var(--colour-selection);
-		cursor: pointer;
-	}
-
-	.checkbox-label {
-		user-select: none;
-	}
-
 	/* Responsive: Medium screens - icon-only buttons */
 	@media (max-width: 1000px) {
 		.toolbar-action-btn span {
@@ -490,10 +454,6 @@
 
 		.toolbar-action-btn {
 			padding: var(--space-2);
-		}
-
-		.checkbox-toggle .checkbox-label {
-			display: none;
 		}
 
 		.separator {

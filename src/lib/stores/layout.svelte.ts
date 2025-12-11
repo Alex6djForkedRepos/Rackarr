@@ -10,7 +10,8 @@ import type {
 	DeviceType,
 	PlacedDevice,
 	DeviceFace,
-	RackView
+	RackView,
+	DisplayMode
 } from '$lib/types';
 import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
 import { createLayout, createRack } from '$lib/utils/serialization';
@@ -486,9 +487,9 @@ function markStarted(): void {
 
 /**
  * Update the display mode in layout settings
- * @param mode - Display mode to set ('label' or 'image')
+ * @param mode - Display mode to set ('label', 'image', or 'image-label')
  */
-function updateDisplayMode(mode: 'label' | 'image'): void {
+function updateDisplayMode(mode: DisplayMode): void {
 	layout = {
 		...layout,
 		settings: { ...layout.settings, display_mode: mode }

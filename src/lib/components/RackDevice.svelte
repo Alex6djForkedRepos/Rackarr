@@ -71,15 +71,18 @@
 
 	const imageStore = getImageStore();
 
+	// Check if display mode shows images (either 'image' or 'image-label')
+	const isImageMode = $derived(displayMode === 'image' || displayMode === 'image-label');
+
 	// Get the device image URL for the current view
 	const deviceImageUrl = $derived.by(() => {
-		if (displayMode !== 'image') return null;
+		if (!isImageMode) return null;
 		const face = rackView === 'rear' ? 'rear' : 'front';
 		return imageStore.getImageUrl(device.slug, face);
 	});
 
 	// Should show image or fall back to label
-	const showImage = $derived(displayMode === 'image' && deviceImageUrl);
+	const showImage = $derived(isImageMode && deviceImageUrl);
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);

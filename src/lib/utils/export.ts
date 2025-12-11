@@ -638,7 +638,8 @@ export function generateExportSVG(
 			const deviceImage = deviceImages?.[face];
 			// Support both URL-based (bundled) and dataUrl-based (user upload) images
 			const imageUrl = deviceImage?.url ?? deviceImage?.dataUrl;
-			const showImage = displayMode === 'image' && imageUrl;
+			const isImageMode = displayMode === 'image' || displayMode === 'image-label';
+			const showImage = isImageMode && imageUrl;
 
 			if (showImage) {
 				// Render device image

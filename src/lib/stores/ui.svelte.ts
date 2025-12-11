@@ -25,13 +25,14 @@ let zoom = $state(100);
 let leftDrawerOpen = $state(false);
 let rightDrawerOpen = $state(false);
 let displayMode = $state<DisplayMode>('label');
-let showLabelsOnImages = $state(false);
 let airflowMode = $state(false);
 
 // Derived values (using $derived rune)
 const canZoomIn = $derived(zoom < ZOOM_MAX);
 const canZoomOut = $derived(zoom > ZOOM_MIN);
 const zoomScale = $derived(zoom / 100);
+// Derive showLabelsOnImages from displayMode for backward compatibility
+const showLabelsOnImages = $derived(displayMode === 'image-label');
 
 // Apply initial theme to document (using the non-reactive initial value)
 applyThemeToDocument(initialTheme);
@@ -45,7 +46,6 @@ export function resetUIStore(): void {
 	leftDrawerOpen = false;
 	rightDrawerOpen = false;
 	displayMode = 'label';
-	showLabelsOnImages = false;
 	airflowMode = false;
 	applyThemeToDocument(theme);
 }
@@ -117,8 +117,6 @@ export function getUIStore() {
 		// Display mode actions
 		toggleDisplayMode,
 		setDisplayMode,
-		toggleShowLabelsOnImages,
-		setShowLabelsOnImages,
 
 		// Airflow mode actions
 		toggleAirflowMode,
@@ -220,35 +218,27 @@ function closeRightDrawer(): void {
 }
 
 /**
- * Toggle display mode between label and image
+ * Display mode cycle order
+ */
+const DISPLAY_MODE_ORDER: DisplayMode[] = ['label', 'image', 'image-label'];
+
+/**
+ * Toggle display mode through: label → image → image-label → label
  */
 function toggleDisplayMode(): void {
-	displayMode = displayMode === 'label' ? 'image' : 'label';
+	const currentIndex = DISPLAY_MODE_ORDER.indexOf(displayMode);
+	const nextIndex = (currentIndex + 1) % DISPLAY_MODE_ORDER.length;
+	displayMode = DISPLAY_MODE_ORDER[nextIndex] ?? 'label';
 }
 
 /**
  * Set display mode to a specific value
- * @param mode - Display mode to set ('label' or 'image')
+ * @param mode - Display mode to set ('label', 'image', or 'image-label')
  */
 function setDisplayMode(mode: DisplayMode): void {
-	if (mode === 'label' || mode === 'image') {
+	if (DISPLAY_MODE_ORDER.includes(mode)) {
 		displayMode = mode;
 	}
-}
-
-/**
- * Toggle whether to show labels on images
- */
-function toggleShowLabelsOnImages(): void {
-	showLabelsOnImages = !showLabelsOnImages;
-}
-
-/**
- * Set whether to show labels on images
- * @param value - Boolean value to set
- */
-function setShowLabelsOnImages(value: boolean): void {
-	showLabelsOnImages = value;
 }
 
 /**

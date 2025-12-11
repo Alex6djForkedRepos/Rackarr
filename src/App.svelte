@@ -282,11 +282,7 @@
 		uiStore.toggleDisplayMode();
 		// Sync with layout settings
 		layoutStore.updateDisplayMode(uiStore.displayMode);
-	}
-
-	function handleToggleShowLabelsOnImages() {
-		uiStore.toggleShowLabelsOnImages();
-		// Sync with layout settings
+		// Also sync showLabelsOnImages for backward compatibility
 		layoutStore.updateShowLabelsOnImages(uiStore.showLabelsOnImages);
 	}
 
@@ -367,7 +363,6 @@
 		hasRacks={layoutStore.hasRack}
 		theme={uiStore.theme}
 		displayMode={uiStore.displayMode}
-		showLabelsOnImages={uiStore.showLabelsOnImages}
 		airflowMode={uiStore.airflowMode}
 		onnewrack={handleNewRack}
 		onsave={handleSave}
@@ -377,7 +372,6 @@
 		onfitall={handleFitAll}
 		ontoggletheme={handleToggleTheme}
 		ontoggledisplaymode={handleToggleDisplayMode}
-		ontoggleshowlabelsonimages={handleToggleShowLabelsOnImages}
 		ontoggleairflowmode={handleToggleAirflowMode}
 		onhelp={handleHelp}
 	/>

@@ -237,12 +237,15 @@ describe('UI Store', () => {
 			expect(store.displayMode).toBe('label');
 		});
 
-		it('toggleDisplayMode switches between label and image', () => {
+		it('toggleDisplayMode cycles through label → image → image-label → label', () => {
 			const store = getUIStore();
 			expect(store.displayMode).toBe('label');
 
 			store.toggleDisplayMode();
 			expect(store.displayMode).toBe('image');
+
+			store.toggleDisplayMode();
+			expect(store.displayMode).toBe('image-label');
 
 			store.toggleDisplayMode();
 			expect(store.displayMode).toBe('label');
@@ -253,6 +256,9 @@ describe('UI Store', () => {
 
 			store.setDisplayMode('image');
 			expect(store.displayMode).toBe('image');
+
+			store.setDisplayMode('image-label');
+			expect(store.displayMode).toBe('image-label');
 
 			store.setDisplayMode('label');
 			expect(store.displayMode).toBe('label');
@@ -265,36 +271,28 @@ describe('UI Store', () => {
 			expect(store.displayMode).toBe('image');
 
 			// Invalid mode should be ignored
-			store.setDisplayMode('invalid' as 'label' | 'image');
+			store.setDisplayMode('invalid' as 'label' | 'image' | 'image-label');
 			expect(store.displayMode).toBe('image');
 		});
 	});
 
-	describe('Show Labels On Images', () => {
-		it('initial showLabelsOnImages is false', () => {
+	describe('Show Labels On Images (derived from displayMode)', () => {
+		it('showLabelsOnImages is false when displayMode is label', () => {
 			const store = getUIStore();
+			store.setDisplayMode('label');
 			expect(store.showLabelsOnImages).toBe(false);
 		});
 
-		it('toggleShowLabelsOnImages toggles value', () => {
+		it('showLabelsOnImages is false when displayMode is image', () => {
 			const store = getUIStore();
-			expect(store.showLabelsOnImages).toBe(false);
-
-			store.toggleShowLabelsOnImages();
-			expect(store.showLabelsOnImages).toBe(true);
-
-			store.toggleShowLabelsOnImages();
+			store.setDisplayMode('image');
 			expect(store.showLabelsOnImages).toBe(false);
 		});
 
-		it('setShowLabelsOnImages sets specific value', () => {
+		it('showLabelsOnImages is true when displayMode is image-label', () => {
 			const store = getUIStore();
-
-			store.setShowLabelsOnImages(true);
+			store.setDisplayMode('image-label');
 			expect(store.showLabelsOnImages).toBe(true);
-
-			store.setShowLabelsOnImages(false);
-			expect(store.showLabelsOnImages).toBe(false);
 		});
 	});
 

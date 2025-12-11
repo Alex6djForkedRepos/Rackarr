@@ -52,8 +52,11 @@ export type FormFactor = '2-post' | '4-post' | '4-post-cabinet' | 'wall-mount' |
 
 /**
  * Display mode for devices in rack visualization
+ * - 'label': Show device name as text
+ * - 'image': Show device image only
+ * - 'image-label': Show device image with name overlay
  */
-export type DisplayMode = 'label' | 'image';
+export type DisplayMode = 'label' | 'image' | 'image-label';
 
 // =============================================================================
 // Device Types (Storage/Serialization - NetBox-compatible)
