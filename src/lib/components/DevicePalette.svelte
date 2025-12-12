@@ -11,6 +11,7 @@
 		getCategoryDisplayName
 	} from '$lib/utils/deviceFilters';
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
+	import { getBrandPacks } from '$lib/data/brandPacks';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
 	import CollapsibleSection from './CollapsibleSection.svelte';
 	import type { DeviceType } from '$lib/types';
@@ -41,11 +42,22 @@
 		defaultExpanded: boolean;
 	}
 
+	// Get brand packs
+	const brandPacks = getBrandPacks();
+
 	// Filter generic devices (from layout store)
 	const filteredGenericDevices = $derived(searchDevices(layoutStore.device_types, searchQuery));
 	const groupedGenericDevices = $derived(groupDevicesByCategory(filteredGenericDevices));
 
-	// Define sections (brand packs will be added in Phase 4)
+	// Filter brand pack devices by search
+	const filteredBrandPacks = $derived(
+		brandPacks.map((pack) => ({
+			...pack,
+			devices: searchDevices(pack.devices, searchQuery)
+		}))
+	);
+
+	// Define all sections: Generic first, then brand packs
 	const sections = $derived<DeviceSection[]>([
 		{
 			id: 'generic',
@@ -53,18 +65,7 @@
 			devices: filteredGenericDevices,
 			defaultExpanded: true
 		},
-		{
-			id: 'ubiquiti',
-			title: 'Ubiquiti',
-			devices: [], // Devices will be added in Phase 4
-			defaultExpanded: false
-		},
-		{
-			id: 'mikrotik',
-			title: 'Mikrotik',
-			devices: [], // Devices will be added in Phase 4
-			defaultExpanded: false
-		}
+		...filteredBrandPacks
 	]);
 
 	// Check if any section has devices (filtered by search)

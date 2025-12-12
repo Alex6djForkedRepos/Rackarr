@@ -268,12 +268,18 @@ describe('DevicePalette Collapsible Sections', () => {
 			expect(sectionButton).toHaveAttribute('aria-expanded', 'false');
 		});
 
-		it('brand sections show (0) count when no devices', () => {
+		it('Ubiquiti section shows correct device count', () => {
 			render(DevicePalette);
 
-			// Brand sections have no devices yet (Phase 4 will add them)
-			const counts = screen.getAllByText('(0)');
-			expect(counts.length).toBeGreaterThanOrEqual(2);
+			// Ubiquiti has 10 devices
+			expect(screen.getByText('(10)')).toBeInTheDocument();
+		});
+
+		it('Mikrotik section shows correct device count', () => {
+			render(DevicePalette);
+
+			// Mikrotik has 5 devices
+			expect(screen.getByText('(5)')).toBeInTheDocument();
 		});
 	});
 
