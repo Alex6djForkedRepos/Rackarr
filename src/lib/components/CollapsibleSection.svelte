@@ -80,13 +80,17 @@
 	}
 
 	.collapsible-header {
+		position: sticky;
+		top: 0;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		gap: var(--space-2);
 		width: 100%;
 		padding: var(--space-2) var(--space-3);
-		background: transparent;
+		background: var(--collapsible-header-bg, var(--colour-bg));
 		border: none;
+		border-bottom: 1px solid var(--colour-border);
 		color: var(--colour-text);
 		font-size: var(--font-size-sm);
 		font-weight: 600;
@@ -96,7 +100,7 @@
 	}
 
 	.collapsible-header:hover {
-		background: var(--colour-surface);
+		background: var(--collapsible-header-hover-bg, var(--colour-surface));
 	}
 
 	.collapsible-header:focus {
