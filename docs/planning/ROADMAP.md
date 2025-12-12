@@ -23,151 +23,281 @@ Single source of truth for version planning.
 
 ---
 
-## Outstanding Issues
-
-> **Process:** For each issue, create a branch, write a spec with test cases, implement using TDD.
-> Mark with `[x]` only when complete.
+# Roadmap Considerations
 
 ---
 
-### ~~Issue 1: Device Image Rendering Bugs~~ ✅ Complete
+## High-Priority: Brand-Specific Device Libraries
 
-**Priority:** High (breaks basic functionality)
-**Introduced:** v0.5.0 (bundled images feature)
-**Status:** Fixed in commit session 2025-12-12
+**Demand signal**: 6+ upvotes, multiple mentions, competitor promised "next release"
 
-| Sub-issue                            | Description                                                     | Status                                                          |
-| ------------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------- |
-| **~~1.1 Devices not clickable~~**    | In image mode, clicking devices with images doesn't select them | ✅ Fixed - moved foreignObject to render last (on top of stack) |
-| **~~1.2 Images clipped by rack~~**   | Device images appear cut off, possibly by rack boundaries       | ✅ N/A - render order was already correct                       |
-| **~~1.3 8-port switch scaling~~**    | Image scaled too large, network ports look oversized            | ✅ N/A - 8-port switch removed from library                     |
-| **~~1.4 Redundant label checkbox~~** | Toolbar shows unnecessary "label" checkbox in image mode        | ✅ Fixed - display mode is now 3-way toggle                     |
+**Requested brands**:
 
-**Solution:**
+- **Ubiquiti** — Homelab darling, UniFi ecosystem
+- **Mikrotik** — Power user favourite, RouterOS
 
-- Moved the foreignObject (drag-overlay) to render last in RackDevice.svelte so it's on top of the SVG z-order and receives click events properly
+### Priority: Option B — Curated Starter Packs
 
----
+Based on existing starter library research (2025-12-11), we already have an approved 27-item generic library. The next step is brand-specific packs.
 
-### ~~Issue 2: Front/Rear Mounting Logic~~ ✅ Complete
+**Ubiquiti Starter Pack** (target: 15-20 devices):
 
-**Priority:** Medium (confusing UX but workarounds exist)
-**Status:** Fixed in commit session 2025-12-12
+- USW-Pro-24, USW-Pro-48 (switches)
+- USW-Pro-24-PoE, USW-Pro-48-PoE (PoE switches)
+- USW-Aggregation (10GbE)
+- UDM-Pro, UDM-SE (gateway/controller)
+- UNVR, UNVR-Pro (NVR)
+- USP-PDU-Pro (power)
+- Cloud Key Gen2+
 
-| Sub-issue                           | Description                                                                                                               | Status   |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------- |
-| **~~2.1 0.5U movement increment~~** | Arrow key movement jumps by ±1 instead of ±device.u_height. 0.5U devices should move in 0.5U increments                   | ✅ Fixed |
-| **~~2.2 Front+rear slot sharing~~** | Cannot mount a rear device in a slot that has a front-mounted device. Half-depth devices on opposite faces should coexist | ✅ Fixed |
+**Mikrotik Starter Pack** (target: 15-20 devices):
 
-**Solution:**
+- CRS326-24G-2S+ (most popular switch)
+- CRS328-24P-4S+ (PoE switch)
+- CRS309-1G-8S+ (10GbE switch)
+- CCR2004-1G-12S+2XS (router)
+- RB5009UG+S+IN (router)
+- netPower series
 
-- Added `is_full_depth` property to DeviceType (defaults to `true`)
-- Updated `doFacesCollide()` in `collision.ts` to accept depth parameters
-- Half-depth front + half-depth rear at same U = no collision
-- Full-depth device blocks both faces at same U
-- Replaced inline collision checks in `layout.svelte.ts` and `KeyboardHandler.svelte` with `canPlaceDevice()`
-- Marked blanks, shelves, patch panels, and cable management as `is_full_depth: false` in starter library
-- Arrow key movement now uses `device.u_height` as increment
+**Effort**: Low-Medium — manual curation, leverage existing research
+**Source images**: NetBox device-type library has many of these
 
-**Files modified:**
+### Future: Option A — NetBox Device-Type Library Integration
 
-- `src/lib/utils/collision.ts` (depth-aware collision)
-- `src/lib/stores/layout.svelte.ts` (use `canPlaceDevice()`)
-- `src/lib/components/KeyboardHandler.svelte` (fix movement increment)
-- `src/lib/data/starterLibrary.ts` (add `is_full_depth` to half-depth devices)
+- Thousands of pre-defined devices at [netbox-community/devicetype-library](https://github.com/netbox-community/devicetype-library)
+- Already using NetBox-compatible schemas
+- Could import/convert on demand
+- **Defer until after brand starter packs prove the model**
 
 ---
 
-### Issue 3: Device Library Polish
+## Current Library Status (Reference)
 
-**Priority:** Low (cosmetic)
+**Approved Final Library (27 items)** from starter library rationalization:
 
-| Sub-issue                      | Description                                 | Status                               |
-| ------------------------------ | ------------------------------------------- | ------------------------------------ |
-| **~~3.1 KVM capitalization~~** | Category displays as "Kvm" instead of "KVM" | ✅ Fixed (commit 068ff29 2025-12-12) |
+| Category        | Items                                                             |
+| --------------- | ----------------------------------------------------------------- |
+| **Server**      | 1U Server, 2U Server, 4U Server                                   |
+| **Network**     | 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Router/Firewall |
+| **Patch Panel** | 24-Port Patch Panel, 48-Port Patch Panel                          |
+| **Storage**     | 1U Storage, 2U Storage, 4U Storage                                |
+| **Power**       | 1U PDU, 2U UPS, 4U UPS                                            |
+| **KVM**         | 1U KVM, 1U Console Drawer                                         |
+| **AV/Media**    | 1U Receiver, 2U Amplifier                                         |
+| **Cooling**     | 1U Fan Panel                                                      |
+| **Blank**       | 0.5U Blank, 1U Blank, 2U Blank                                    |
+| **Shelf**       | 1U Shelf, 2U Shelf                                                |
+| **Cable Mgmt**  | 1U Brush Panel, 1U Cable Management                               |
 
-**Solution:** Added `getCategoryDisplayName()` utility function to handle acronym capitalization.
-
----
-
-## Research
-
-Items requiring investigation and architecture design before implementation.
-
-### Device Category Icons
-
-**Status:** Complete
-**Created:** 2025-12-11
-**Completed:** 2025-12-11
-
-Implemented Lucide icons for all 12 device categories in `CategoryIcon.svelte`.
-
-| Category           | Lucide Icon            |
-| ------------------ | ---------------------- |
-| `server`           | `server`               |
-| `network`          | `network`              |
-| `patch-panel`      | `ethernet-port`        |
-| `power`            | `zap`                  |
-| `storage`          | `hard-drive`           |
-| `kvm`              | `monitor`              |
-| `av-media`         | `speaker`              |
-| `cooling`          | `fan`                  |
-| `shelf`            | `align-end-horizontal` |
-| `blank`            | `circle-off`           |
-| `cable-management` | `cable`                |
-| `other`            | `circle-help`          |
-
-See SPEC.md Section 10 for the full mapping.
+**Note**: Patch panels (24-port, 48-port) and cable management (brush panel, cable management) already in approved library.
 
 ---
 
-### Starter Library Rationalization
+### Export UX Overhaul
 
-**Status:** Complete
-**Created:** 2025-12-11
-**Completed:** 2025-12-11
+**Current state**: PNG and SVG export exist but output quality is rough
 
-Rationalized the starter library to 26 device types representing common homelab gear.
+**Issues to address**:
 
-- [x] **Research** — Audited existing library, researched common homelab gear, defined target list
-- [x] **Implementation** — Updated `starterLibrary.ts` with all changes:
-  - Added: 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Storage, 1U Brush Panel, 1U Cable Management
-  - Removed: 4U Shelf, 1U Generic, 2U Generic, 0.5U Blanking Fan
-  - Renamed: 1U Switch → 1U Router/Firewall, patch panels get port counts (24/48-Port)
-- [x] **Tests updated** — Starter library tests reflect new device list
-- [x] **Slug generation verified** — Slugs work correctly for all renamed devices
+- Visual polish of exported images
+- Layout/composition improvements
+- Filename conventions
+- Preview before export
 
-> See `docs/planning/research/starter-library-rationalization.md` for research documentation.
+**Additional formats to consider**:
+
+- CSV (for inventory/spreadsheet users)
+- NetBox import format (ecosystem integration)
+
+**Effort**: Medium — UX design review + implementation refinement
 
 ---
 
-### Device Image System
+## Research / Considerations (Future)
 
-**Status:** In Progress
-**Created:** 2025-12-11
+### UPS/PDU Enhancements
 
-Two-level image system with device type defaults and placement-level overrides.
+**Current state**: Basic 1U PDU, 2U UPS, 4U UPS in library
 
-> **Note:** Implementation will be greenfield — no migration layers, version suffixes, or legacy compatibility code.
+**Potential enhancements**:
 
-#### Phase 1: Architecture Design (Complete)
+- Outlet count property
+- VA/Watt ratings display
+- Runtime calculations (advanced)
+- Brand-specific models: APC Smart-UPS, CyberPower, Tripp Lite, Eaton
 
-- [x] **Image inheritance model** — Device type → placement override fallback
-- [x] **Storage format** — `assets/device-types/` + `assets/placements/`
-- [x] **Image processing** — 400px max WebP, auto-process uploads
-- [x] **Licensing** — CC0 1.0 for NetBox images
+**Representative models from research**:
 
-> See `docs/planning/research/device-images.md` for full research.
+- APC SMT1500RM2U, SMT2200RM2U (most common)
+- CyberPower PR series (budget alternative)
 
-#### Phase 2: Bundled Starter Library Images (In Progress)
+**Effort**: Low-Medium
+**Priority**: Medium — enhances existing functionality
 
-Bundle ~15 active device images (servers, switches, storage, UPS):
+---
 
-- [x] Create directory structure and processing script
-- [x] Download representative images from NetBox
-- [x] Process to 400px max WebP
-- [x] Create bundled image manifest (`src/lib/data/bundledImages.ts`)
-- [x] Load bundled images on app initialization
+### NAS/Storage Visual Fidelity
+
+**Current state**: Generic 1U/2U/4U Storage in library
+
+**Potential enhancements**:
+
+- Drive bay visualisation (3.5" vs 2.5")
+- Bay count property (4-bay, 8-bay, 12-bay, etc.)
+- Drive status indicators (future)
+
+**Popular models from research**:
+
+- Synology RS819 (1U, 4-bay)
+- Synology RS1221+ (2U, 8-bay)
+- QNAP TS-832PXU (2U)
+
+**Effort**: Medium (visual rendering work)
+**Priority**: Medium — improves visual accuracy
+
+---
+
+### Specific Chassis/Enclosure Support
+
+**Demand signal**: "Rosewill rack chassis" mentioned in thread
+
+**Approach**:
+
+- Don't model every chassis brand
+- Support generic chassis types with common form factors
+- Allow custom naming ("My Rosewill RSV-L4500U")
+- Consider case/chassis as a device category
+
+**Common homelab cases**:
+
+- Rosewill RSV-L4500 series
+- iStarUSA cases
+- Silverstone RM series
+
+**Effort**: Low — mostly labelling and category
+**Priority**: Low-Medium
+
+---
+
+### Multiple Racks
+
+**Status**: On existing roadmap, deferred from earlier scope reduction
+**Competitor**: Also on their roadmap, not shipped
+
+**Considerations**:
+
+- Data model already supports rack arrays
+- UI complexity is the challenge
+- Most homelabbers have 0-1 racks (validated in scope reduction)
+
+**Effort**: High (coordinate transforms, multi-canvas, or different approach)
+**Priority**: Low — address after core single-rack experience is polished
+
+---
+
+### Wishlist / Shopping List Feature
+
+**Competitor roadmap item**: "wishlist"
+
+**Concept**:
+
+- Mark devices as "planned" vs "installed"
+- Visual differentiation (opacity, border style, badge)
+- Generate shopping list export
+- Budget tracking (if prices added)
+
+**Effort**: Medium (new state per device, UI for toggle, export logic)
+**Priority**: Low — nice-to-have, not core functionality
+
+---
+
+## Messaging/Positioning Notes
+
+When launching publicly, emphasise:
+
+1. **"Engineered with 1400+ tests"** — Directly addresses "will this die in a year" skepticism from thread
+
+2. **"NetBox-compatible"** — Appeals to "NetBox is too heavy but I want the data model" crowd
+
+3. **"Self-hostable today"** — Ahead of competitor's roadmap
+
+4. **"Open source"** — Transparency they don't offer
+
+5. **"Same AI tools, different discipline"** — Honest about vibe coding, but the TDD difference matters
+
+---
+
+## Suggested Prioritisation
+
+### Next Release (v0.6?)
+
+- [ ] Curated Ubiquiti starter pack (15-20 devices)
+- [ ] Curated Mikrotik starter pack (15-20 devices)
+
+### Following Release (v0.7?)
+
+- [ ] Export UX overhaul (PNG/SVG quality + design review)
+- [ ] CSV export format
+- [ ] UPS/PDU property enhancements
+
+### Backlog / Research
+
+- [ ] NetBox device-type library browser/import
+- [ ] NAS/Storage visual fidelity (drive bays)
+- [ ] Chassis/enclosure category
+- [ ] Multiple racks
+- [ ] Wishlist/planned state
+- [ ] Community device contribution workflow
+- [ ] NetBox export format
+- [ ] Runtime/power calculations
+
+---
+
+## Infrastructure Considerations
+
+### Analytics Setup
+
+**Requirement**: Privacy-respecting analytics for usage insights
+
+**Recommended**: Umami
+
+- Self-hosted, open source
+- GDPR compliant, no cookies
+- Lightweight (~2KB script)
+
+**Hosting options**:
+
+A. **Cloudflare + Linode VPS**
+
+- Linode VPS runs Umami + potentially other services
+- Cloudflare proxy for DDoS protection, caching, SSL
+- Estimated cost: ~$5-10/mo Linode Nanode/Shared
+- Benefit: Full control, can add other services later
+
+B. **Umami Cloud**
+
+- Managed hosting from Umami team
+- Free tier: 10K events/month
+- Less infrastructure to manage
+- Trade-off: dependency on third party
+
+C. **Railway/Fly.io**
+
+- Container hosting with free tiers
+- Simpler than managing a VPS
+- May have cold start issues on free tier
+
+**Recommendation**: Option A (Cloudflare + Linode) for long-term flexibility
+
+**Infrastructure TODO**:
+
+- [ ] Provision Linode VPS (Nanode or Shared 1GB)
+- [ ] Set up Cloudflare proxy for VPS
+- [ ] Deploy Umami via Docker
+- [ ] Configure Umami for Rackarr domain
+- [ ] Add tracking script to app (respect DNT header)
+
+---
 
 #### Phase 3: Placement Image Overrides (Planned)
 
@@ -181,6 +311,19 @@ Per-placement image overrides with stable IDs:
 - [ ] Auto-process user uploads (400px + WebP)
 
 ---
+
+## Outstanding Issues
+
+> **Process:** For each issue, create a branch, write a spec with test cases, implement using TDD.
+> Mark with `[x]` only when complete.
+
+// add issues here
+
+---
+
+## Research
+
+// ** add research items here **
 
 ## Released
 
