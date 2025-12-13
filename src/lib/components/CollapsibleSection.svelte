@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { generateId } from '$lib/utils/device';
 
 	interface Props {
 		title: string;
@@ -15,7 +16,7 @@
 	let { title, count, defaultExpanded = false, children }: Props = $props();
 
 	// Generate unique ID for accessibility
-	const contentId = `collapsible-${crypto.randomUUID().slice(0, 8)}`;
+	const contentId = `collapsible-${generateId().slice(0, 8)}`;
 
 	// Expanded state using Svelte 5 runes
 	// Note: We intentionally capture only the initial value of defaultExpanded
