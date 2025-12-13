@@ -326,11 +326,41 @@ settings:
 - Global search spans all sections
 - Section headers show device counts
 
-**CollapsibleSection Behavior:**
+### DevicePalette Sidebar Architecture
 
-- Headers scroll normally with content (no sticky positioning)
-- Avoids header stacking/overlap issues when multiple sections are expanded
-- Smooth expand/collapse animation via `max-height` transition
+The DevicePalette uses an **exclusive accordion** pattern (radio-style) for brand sections:
+
+- Only one section can be expanded at a time
+- Clicking a section header closes any currently open section
+- Eliminates scroll/visibility issues with long device lists
+- Matches typical homelab workflow (single brand ecosystem focus)
+
+**Component Stack:**
+
+- Bits UI Accordion with `type="single"` for collapse behaviour
+- svelte-dnd-action for drag-and-drop (v0.9.59+ for Svelte 5 compatibility)
+- CSS Grid animation (`grid-template-rows: 0fr → 1fr`) for smooth transitions
+
+**Search Enhancement:**
+
+- Global search input above accordion for cross-brand device discovery
+- Filters all sections simultaneously, expanding matching sections
+- Keyboard shortcut (Ctrl+K / Cmd+K) for power users
+
+**Accessibility Requirements:**
+
+- Tab/Shift+Tab: Navigate between section headers
+- Enter/Space: Expand/collapse current section
+- Arrow Up/Down: Move between headers
+- ARIA: `aria-expanded`, `aria-controls`, `role="region"`
+
+**svelte-dnd-action Configuration:**
+
+- Each section's content area is the dnd-zone element
+- Use `onconsider`/`onfinalize` (Svelte 5 syntax, not `on:consider`)
+- Set `flipDurationMs: 200` for smooth reorder animation
+- Set `type: 'device-palette'` to scope drag operations
+- Avoid Svelte transitions on draggable items (use `animate:flip` instead)
 
 ### 5.3 Forms & Dialogs
 
@@ -806,21 +836,21 @@ In addition to the generic starter library, brand-specific device packs provide 
 
 #### 11.6.1 Organization
 
-Brand packs are organized as **collapsible sections** in the device palette:
+Brand packs are organized as an **exclusive accordion** (radio-style) in the device palette:
 
 | Section  | Default State | Contents                |
 | -------- | ------------- | ----------------------- |
 | Generic  | Expanded      | 26 generic device types |
-| Ubiquiti | Collapsed     | 15-20 Ubiquiti devices  |
-| Mikrotik | Collapsed     | 15-20 Mikrotik devices  |
+| Ubiquiti | Collapsed     | 10 Ubiquiti devices     |
+| Mikrotik | Collapsed     | 5 Mikrotik devices      |
 
 **Behavior:**
 
-- Each section header shows device count: "Ubiquiti (18)"
-- Click section header to expand/collapse
+- Each section header shows device count: "Ubiquiti (10)"
+- Click section header to expand it (closes any other open section)
+- **Only one section can be open at a time** (exclusive/radio behavior)
 - Search spans ALL sections (including collapsed)
-- Search results auto-expand relevant section
-- Multiple sections can be expanded simultaneously
+- Search results auto-expand first matching section
 
 #### 11.6.2 Brand Pack Data Model
 

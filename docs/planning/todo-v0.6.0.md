@@ -405,7 +405,7 @@ npm run test:run         # ALL unit tests must pass
   - [ ] Views vertically centered
   - [ ] Optional "Front"/"Rear" labels
 - [ ] Calculate correct dimensions:
-  - [ ] Width: rack_width _ 2 + gap + padding _ 2
+  - [ ] Width: rack*width * 2 + gap + padding \_ 2
   - [ ] Height: rack_height + padding \* 2 + label_height
 - [ ] Run tests — confirm they PASS
 - [ ] Manual verification: export "both" view
@@ -464,6 +464,103 @@ npm run test:run         # ALL unit tests must pass
 
 ---
 
+## Phase 9: Exclusive Accordion Refactor
+
+### Research Completion
+
+- [x] RES-01: Device Palette DnD Menu Patterns — Completed, decision: exclusive accordion
+
+### Prompt 9.1: Install and Configure Bits UI Accordion
+
+- [ ] **Write tests first** in `src/lib/components/ui/Accordion/Accordion.test.ts`:
+  - [ ] Test Accordion renders with provided sections
+  - [ ] Test only one section can be open at a time
+  - [ ] Test clicking open section closes it
+  - [ ] Test clicking different section switches to it
+  - [ ] Test keyboard accessibility (Tab, Enter, Space)
+  - [ ] Test ARIA attributes (`aria-expanded`, `aria-controls`)
+- [ ] Run tests — confirm they FAIL
+- [ ] Install Bits UI: `npm install bits-ui`
+- [ ] Create `src/lib/components/ui/Accordion/` directory
+- [ ] Create `index.ts` barrel export
+- [ ] Create Accordion wrapper component with `type="single"`
+- [ ] Integrate with theme CSS variables
+- [ ] Run tests — confirm they PASS
+- [ ] Commit: `feat(ui): add Bits UI Accordion wrapper component`
+
+### Prompt 9.2: Refactor DevicePalette to Exclusive Accordion
+
+- [ ] **Write tests first** in `src/lib/components/DevicePalette.test.ts`:
+  - [ ] Test DevicePalette renders all brand sections
+  - [ ] Test only one section expanded at a time
+  - [ ] Test default state: Generic section expanded
+  - [ ] Test section items are draggable
+  - [ ] Test switching sections doesn't break drag state
+  - [ ] Test collapsing open section works
+- [ ] Run tests — confirm relevant ones FAIL
+- [ ] Replace CollapsibleSection with Accordion
+- [ ] Convert sections to Accordion.Root > Accordion.Item structure
+- [ ] Configure svelte-dnd-action with Svelte 5 syntax
+- [ ] Run tests — confirm they PASS
+- [ ] Manual verification: drag-and-drop works
+- [ ] Commit: `refactor(device-palette): replace CollapsibleSection with Bits UI Accordion`
+
+### Prompt 9.3: Add Device Search to Palette
+
+- [ ] **Write tests first**:
+  - [ ] Test search input renders above accordion
+  - [ ] Test typing filters devices across all sections
+  - [ ] Test matching section auto-expands
+  - [ ] Test clearing search restores Generic expanded
+  - [ ] Test empty results show "No devices found"
+  - [ ] Test Ctrl+K keyboard shortcut focuses search
+- [ ] Run tests — confirm they FAIL
+- [ ] Add search input above Accordion
+- [ ] Implement debounced filtering (200ms)
+- [ ] Auto-expand first matching section
+- [ ] Add keyboard shortcut handler
+- [ ] Run tests — confirm they PASS
+- [ ] Commit: `feat(device-palette): add global device search`
+
+### Prompt 9.4: Smooth Accordion Animation
+
+- [ ] **Write tests**:
+  - [ ] Test accordion content animates on expand
+  - [ ] Test accordion content animates on collapse
+  - [ ] Test animation doesn't interfere with drag
+  - [ ] Test reduced motion preference respected
+- [ ] Implement CSS Grid animation (`grid-template-rows: 0fr → 1fr`)
+- [ ] Set duration 200-300ms with ease-out
+- [ ] Add `prefers-reduced-motion` fallback
+- [ ] Run tests — confirm they PASS
+- [ ] Manual verification: 60fps animation
+- [ ] Commit: `style(accordion): add smooth CSS Grid animation`
+
+### Prompt 9.5: Cleanup CollapsibleSection
+
+- [ ] Search codebase for CollapsibleSection usage
+- [ ] If only DevicePalette used it:
+  - [ ] Delete `src/lib/components/CollapsibleSection.svelte`
+  - [ ] Delete `src/lib/components/CollapsibleSection.test.ts`
+- [ ] Update barrel exports
+- [ ] Run full test suite
+- [ ] Commit: `refactor: remove unused CollapsibleSection component`
+
+### Phase 9 Checkpoint
+
+- [ ] Bits UI installed and configured
+- [ ] DevicePalette uses exclusive accordion
+- [ ] Only one section open at a time
+- [ ] Search filters across all sections
+- [ ] Smooth animation on expand/collapse
+- [ ] Drag-and-drop still works
+- [ ] Keyboard navigation works
+- [ ] Reduced motion respected
+- [ ] All tests pass
+- [ ] Visual verification in browser
+
+---
+
 ## Final Verification
 
 ### Automated Tests
@@ -482,18 +579,22 @@ npm run test:run         # ALL unit tests must pass
 - [ ] Select 2U UPS — EditPanel shows "Outlets: 6" and "VA Rating: 1500"
 - [ ] Select non-power device — no power section shown
 
-#### Brand Packs (R-01, R-02)
+#### Brand Packs & Exclusive Accordion (R-01, R-02)
 
-- [ ] Sidebar shows 3 collapsible sections
+- [ ] Sidebar shows 3 sections in exclusive accordion
 - [ ] Generic section expanded by default
 - [ ] Ubiquiti/Mikrotik sections collapsed by default
-- [ ] Clicking section header expands/collapses
+- [ ] Clicking section header expands it (closes other sections)
+- [ ] Only one section can be open at a time
 - [ ] Count badge shows correct numbers
 - [ ] Search "USW" — Ubiquiti section auto-expands
 - [ ] Search "CRS" — Mikrotik section auto-expands
+- [ ] Search clears — Generic section re-expands
 - [ ] Add Ubiquiti device to rack — works correctly
 - [ ] Add Mikrotik device to rack — works correctly
 - [ ] Switch to image mode — brand images display
+- [ ] Keyboard navigation works (Tab, Enter, Space)
+- [ ] Smooth animation on expand/collapse
 
 #### Export (R-03, R-04)
 
@@ -545,4 +646,4 @@ npm run test:run         # ALL unit tests must pass
 
 ---
 
-_Last updated: 2025-12-12_
+_Last updated: 2025-12-13_

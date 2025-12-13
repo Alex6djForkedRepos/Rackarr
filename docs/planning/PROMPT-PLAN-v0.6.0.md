@@ -992,4 +992,242 @@ TDD:
 
 ---
 
+## Phase 9: Exclusive Accordion Refactor
+
+### Overview
+
+Replace the current CollapsibleSection implementation with a Bits UI exclusive accordion pattern. This eliminates scroll/visibility issues by ensuring only one section is open at a time.
+
+**Research Reference:** RES-01 (ROADMAP.md)
+
+### Prompt 9.1: Install and Configure Bits UI Accordion
+
+```text
+Context: Rackarr DevicePalette currently uses CollapsibleSection components that cause scroll/visibility issues when multiple sections are expanded. We're refactoring to use Bits UI Accordion with exclusive (radio-style) behavior.
+
+Task: Add Bits UI dependency and create base Accordion wrapper component.
+
+Requirements:
+1. Install Bits UI: `npm install bits-ui`
+
+2. Create `src/lib/components/ui/Accordion/` directory with:
+   - `index.ts` — barrel export for Accordion components
+   - Wrapper components that configure Bits UI Accordion with `type="single"`
+
+3. Ensure CSS variables integrate with existing theme system:
+   - Use `--colour-surface-primary`, `--colour-text-primary`, etc.
+   - Support `data-state="open|closed"` for styling
+
+4. Write tests FIRST in `src/lib/components/ui/Accordion/Accordion.test.ts`:
+   - Test Accordion renders with provided sections
+   - Test only one section can be open at a time (exclusive behaviour)
+   - Test clicking open section closes it
+   - Test clicking different section switches to it
+   - Test section headers are keyboard accessible (Tab, Enter, Space)
+   - Test ARIA attributes are correctly applied (`aria-expanded`, `aria-controls`)
+
+TDD:
+1. Write tests (should fail — component doesn't exist)
+2. Install bits-ui
+3. Create Accordion wrapper components
+4. Run tests (should pass)
+5. Verify: npm run lint && npm run check && npm run build
+
+Files to create:
+- src/lib/components/ui/Accordion/index.ts
+- src/lib/components/ui/Accordion/Accordion.svelte (or wrapper components)
+- src/lib/components/ui/Accordion/Accordion.test.ts
+```
+
+### Prompt 9.2: Refactor DevicePalette to Exclusive Accordion
+
+```text
+Context: Bits UI Accordion wrapper is available. Refactor DevicePalette to replace CollapsibleSection with the exclusive accordion.
+
+Task: Replace current CollapsibleSection with Bits UI Accordion.
+
+Requirements:
+1. Replace CollapsibleSection imports with new Accordion components
+
+2. Convert sections array to Accordion structure:
+   - Accordion.Root with `type="single"` and `defaultValue="generic"`
+   - Each section becomes an Accordion.Item
+   - Device list goes in Accordion.Content
+
+3. Maintain existing functionality:
+   - Section headers show device count
+   - Devices are draggable (svelte-dnd-action)
+   - Click device to add to rack
+
+4. Handle svelte-dnd-action integration:
+   - Use `onconsider`/`onfinalize` (Svelte 5 syntax)
+   - Set `type: 'device-palette'` to scope drag operations
+   - Each Accordion.Content contains the dnd-zone
+
+5. Write tests FIRST in `src/lib/components/DevicePalette.test.ts`:
+   - Test DevicePalette renders all brand sections
+   - Test only one section expanded at a time
+   - Test default state: Generic section expanded
+   - Test section items are draggable
+   - Test switching sections doesn't break drag state
+   - Test collapsing open section works
+
+TDD:
+1. Write/update tests for exclusive accordion behavior
+2. Run tests (should fail — still using CollapsibleSection)
+3. Refactor to use Accordion
+4. Run tests (should pass)
+5. Manual verification: drag-and-drop still works
+
+Files to modify:
+- src/lib/components/DevicePalette.svelte
+- src/lib/components/DevicePalette.test.ts
+```
+
+### Prompt 9.3: Add Device Search to Palette
+
+```text
+Context: DevicePalette uses exclusive accordion. Add global search input for cross-brand device discovery.
+
+Task: Global search input that filters across all brand sections.
+
+Requirements:
+1. Add search input component above Accordion:
+   - Placeholder: "Search devices..."
+   - Clear button when text present
+   - Debounced input (200ms)
+
+2. Create derived state for filtered devices:
+   - Filter devices across all sections by name
+   - Case-insensitive partial match
+
+3. Search behavior with exclusive accordion:
+   - When search has results, auto-expand first matching section
+   - Show match count per section in header
+   - Clear search restores previous expansion state (Generic)
+
+4. Empty results handling:
+   - Show "No devices found" message
+   - Keep all sections collapsed
+
+5. Keyboard shortcut:
+   - Ctrl+K / Cmd+K focuses search input
+   - Escape clears search and returns focus to content
+
+6. Write tests FIRST:
+   - Test search input renders above accordion
+   - Test typing filters devices across all sections
+   - Test matching section auto-expands
+   - Test clearing search restores Generic expanded
+   - Test empty results show "No devices found"
+   - Test keyboard shortcut focuses search
+
+TDD:
+1. Write tests for search behavior
+2. Run tests (should fail)
+3. Implement search functionality
+4. Run tests (should pass)
+5. Manual verification
+
+Files to modify:
+- src/lib/components/DevicePalette.svelte
+- src/lib/components/DevicePalette.test.ts
+```
+
+### Prompt 9.4: Smooth Accordion Animation
+
+```text
+Context: Accordion is functional but needs smooth animations for expand/collapse.
+
+Task: CSS Grid animation for expand/collapse transitions.
+
+Requirements:
+1. Implement CSS Grid animation:
+   - `grid-template-rows: 0fr → 1fr` for expand
+   - `grid-template-rows: 1fr → 0fr` for collapse
+   - Content wrapper with `overflow: hidden`
+
+2. Animation timing:
+   - Duration: 200-300ms
+   - Easing: ease-out for natural feel
+
+3. Accessibility:
+   - Respect `prefers-reduced-motion` media query
+   - Instant transition for users with reduced motion preference
+
+4. DnD compatibility:
+   - Ensure animation doesn't interfere with drag operations
+   - Test dragging during animation works correctly
+
+5. Write tests:
+   - Test accordion content animates smoothly on expand
+   - Test accordion content animates smoothly on collapse
+   - Test animation doesn't interfere with drag operations
+   - Test reduced motion preference is respected
+
+TDD:
+1. Write tests for animation behavior
+2. Run tests (animation tests may need visual verification)
+3. Implement CSS Grid animation
+4. Run tests (should pass)
+5. Manual verification: smooth 60fps animation
+
+Files to modify:
+- src/lib/components/ui/Accordion/Accordion.svelte (or relevant component)
+- src/lib/components/DevicePalette.svelte (if needed)
+- src/lib/styles/tokens.css (if animation tokens needed)
+```
+
+### Prompt 9.5: Cleanup CollapsibleSection
+
+```text
+Context: DevicePalette now uses Bits UI Accordion. Clean up the old CollapsibleSection component.
+
+Task: Remove or deprecate CollapsibleSection component.
+
+Requirements:
+1. Check if CollapsibleSection is used elsewhere in codebase:
+   - Search for imports across all components
+   - If used elsewhere, keep it; if only DevicePalette used it, remove it
+
+2. If removing:
+   - Delete `src/lib/components/CollapsibleSection.svelte`
+   - Delete `src/lib/components/CollapsibleSection.test.ts`
+   - Remove any related CSS tokens
+
+3. If keeping:
+   - Add deprecation notice in component docstring
+   - Document that Accordion should be used for new features
+
+4. Update imports and barrel exports
+
+5. Run full test suite to ensure nothing breaks
+
+TDD:
+1. Search for CollapsibleSection usage
+2. Make decision: remove or deprecate
+3. Execute cleanup
+4. Run full test suite
+5. Verify: npm run lint && npm run check && npm run build
+
+Files to modify:
+- Potentially delete CollapsibleSection files
+- Update any barrel exports
+```
+
+### Completion Criteria (Phase 9)
+
+- [ ] Bits UI installed and configured
+- [ ] DevicePalette uses exclusive accordion
+- [ ] Only one section open at a time
+- [ ] Search filters across all sections
+- [ ] Smooth animation on expand/collapse
+- [ ] Drag-and-drop still works
+- [ ] Keyboard navigation works
+- [ ] Reduced motion respected
+- [ ] All tests pass
+- [ ] Visual verification in browser
+
+---
+
 _This plan implements ROADMAP items R-01 through R-05 for Rackarr v0.6.0_
