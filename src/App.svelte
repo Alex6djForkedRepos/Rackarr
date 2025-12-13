@@ -36,6 +36,7 @@
 		exportAsPNG,
 		exportAsJPEG,
 		exportAsPDF,
+		exportToCSV,
 		downloadBlob,
 		generateExportFilename
 	} from '$lib/utils/export';
@@ -232,6 +233,13 @@
 				);
 				downloadBlob(pdfBlob, filename);
 				toastStore.showToast('PDF exported successfully', 'success');
+			} else if (options.format === 'csv') {
+				// CSV export uses null view (no view in filename)
+				const csvContent = exportToCSV(racksToExport[0]!, layoutStore.device_types);
+				const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+				const filename = generateExportFilename(layoutStore.layout.name, null, options.format);
+				downloadBlob(blob, filename);
+				toastStore.showToast('CSV exported successfully', 'success');
 			}
 		} catch (error) {
 			console.error('Export failed:', error);

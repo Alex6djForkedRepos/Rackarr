@@ -24,6 +24,9 @@
 	let exportView = $state<ExportView>('both');
 	let transparent = $state(false);
 
+	// Computed: Is CSV format (data export - no image options)
+	const isCSV = $derived(format === 'csv');
+
 	// Computed: Can select transparent background (PNG and SVG only)
 	const canSelectTransparent = $derived(format === 'svg' || format === 'png');
 
@@ -83,47 +86,54 @@
 				<option value="jpeg">JPEG</option>
 				<option value="svg">SVG</option>
 				<option value="pdf">PDF</option>
+				<option value="csv">CSV (Spreadsheet)</option>
 			</select>
 		</div>
 
-		<div class="form-group">
-			<label for="export-view">View</label>
-			<select id="export-view" bind:value={exportView}>
-				<option value="both">Front & Rear (Side-by-Side)</option>
-				<option value="front">Front Only</option>
-				<option value="rear">Rear Only</option>
-			</select>
-		</div>
+		{#if isCSV}
+			<p class="csv-info">
+				Exports rack contents as a spreadsheet with device positions, names, models, and categories.
+			</p>
+		{:else}
+			<div class="form-group">
+				<label for="export-view">View</label>
+				<select id="export-view" bind:value={exportView}>
+					<option value="both">Front & Rear (Side-by-Side)</option>
+					<option value="front">Front Only</option>
+					<option value="rear">Rear Only</option>
+				</select>
+			</div>
 
-		<div class="form-group checkbox-group">
-			<label>
-				<input type="checkbox" bind:checked={includeLegend} />
-				Include legend
-			</label>
-		</div>
-
-		<div class="form-group checkbox-group">
-			<label>
-				<input type="checkbox" bind:checked={showAirflow} />
-				Show airflow indicators
-			</label>
-		</div>
-
-		<div class="form-group">
-			<label for="export-background">Background</label>
-			<select id="export-background" bind:value={background} disabled={transparent}>
-				<option value="dark">Dark</option>
-				<option value="light">Light</option>
-			</select>
-		</div>
-
-		{#if canSelectTransparent}
 			<div class="form-group checkbox-group">
 				<label>
-					<input type="checkbox" bind:checked={transparent} />
-					Transparent background
+					<input type="checkbox" bind:checked={includeLegend} />
+					Include legend
 				</label>
 			</div>
+
+			<div class="form-group checkbox-group">
+				<label>
+					<input type="checkbox" bind:checked={showAirflow} />
+					Show airflow indicators
+				</label>
+			</div>
+
+			<div class="form-group">
+				<label for="export-background">Background</label>
+				<select id="export-background" bind:value={background} disabled={transparent}>
+					<option value="dark">Dark</option>
+					<option value="light">Light</option>
+				</select>
+			</div>
+
+			{#if canSelectTransparent}
+				<div class="form-group checkbox-group">
+					<label>
+						<input type="checkbox" bind:checked={transparent} />
+						Transparent background
+					</label>
+				</div>
+			{/if}
 		{/if}
 	</div>
 
@@ -172,6 +182,14 @@
 
 	.form-group select option:disabled {
 		color: var(--colour-text-muted);
+	}
+
+	.csv-info {
+		color: var(--colour-text-muted);
+		font-size: var(--font-size-sm);
+		line-height: 1.5;
+		margin: 0;
+		padding: var(--space-2) 0;
 	}
 
 	.checkbox-group {
