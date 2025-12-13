@@ -14,7 +14,7 @@
 	} from '$lib/types';
 	import type { ImageStoreMap } from '$lib/types/images';
 	import Dialog from './Dialog.svelte';
-	import { generateExportSVG } from '$lib/utils/export';
+	import { generateExportSVG, generateExportFilename } from '$lib/utils/export';
 
 	interface Props {
 		open: boolean;
@@ -22,6 +22,7 @@
 		deviceTypes: DeviceType[];
 		images?: ImageStoreMap;
 		displayMode?: DisplayMode;
+		layoutName?: string;
 		selectedRackId: string | null;
 		onexport?: (event: CustomEvent<ExportOptions>) => void;
 		oncancel?: () => void;
@@ -33,6 +34,7 @@
 		deviceTypes,
 		images,
 		displayMode = 'label',
+		layoutName = 'layout',
 		selectedRackId: _selectedRackId,
 		onexport,
 		oncancel
@@ -54,6 +56,11 @@
 
 	// Computed: Can export (has racks)
 	const canExport = $derived(racks.length > 0);
+
+	// Computed: Preview filename
+	const previewFilename = $derived(
+		generateExportFilename(layoutName, isCSV ? null : exportView, format)
+	);
 
 	// Reset transparent when switching to format that doesn't support it
 	$effect(() => {
@@ -216,6 +223,12 @@
 		</div>
 	{/if}
 
+	<!-- Filename preview -->
+	<div class="filename-preview">
+		<span class="filename-label">Filename:</span>
+		<span class="filename-value">{previewFilename}</span>
+	</div>
+
 	<div class="dialog-actions">
 		<button type="button" class="btn-secondary" onclick={handleCancel}>Cancel</button>
 		<button type="button" class="btn-primary" onclick={handleExport} disabled={!canExport}>
@@ -351,11 +364,37 @@
 		cursor: not-allowed;
 	}
 
+	.filename-preview {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-2) 0;
+		margin-top: var(--space-2);
+	}
+
+	.filename-label {
+		font-size: var(--font-size-sm);
+		color: var(--colour-text-muted);
+		flex-shrink: 0;
+	}
+
+	.filename-value {
+		font-size: var(--font-size-sm);
+		font-family: monospace;
+		color: var(--colour-text);
+		background: var(--colour-surface-hover);
+		padding: var(--space-1) var(--space-2);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	.dialog-actions {
 		display: flex;
 		justify-content: flex-end;
 		gap: var(--space-3);
-		margin-top: var(--space-6);
+		margin-top: var(--space-4);
 		padding-top: var(--space-4);
 		border-top: 1px solid var(--colour-border);
 	}

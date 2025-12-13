@@ -448,6 +448,7 @@
 		deviceTypes={layoutStore.device_types}
 		images={imageStore.getAllImages()}
 		displayMode={uiStore.displayMode}
+		layoutName={layoutStore.layout.name}
 		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}
