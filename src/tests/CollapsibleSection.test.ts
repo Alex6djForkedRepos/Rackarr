@@ -242,6 +242,22 @@ describe('CollapsibleSection Component', () => {
 			expect(chevron).toBeInTheDocument();
 		});
 
+		it('header does not use sticky positioning', () => {
+			const { container } = render(CollapsibleSection, {
+				props: {
+					title: 'Test Section',
+					count: 5
+				}
+			});
+
+			const header = container.querySelector('.collapsible-header');
+			expect(header).toBeInTheDocument();
+
+			// Verify header scrolls with content (not sticky)
+			const styles = getComputedStyle(header!);
+			expect(styles.position).not.toBe('sticky');
+		});
+
 		it('chevron has rotated class when expanded', async () => {
 			const { container } = render(CollapsibleSection, {
 				props: {

@@ -947,14 +947,48 @@ TDD:
 3. Update and verify tests pass
 ```
 
-### Completion Criteria
+### Completion Criteria (Phase 7.1-7.3)
 
-- [ ] All console output uses `[rackarr:category]` format
-- [ ] debug.ts uses LOG_PREFIX constant
-- [ ] Tests verify correct prefixes
-- [ ] No direct console.log in src/lib (except debug.ts)
+- [x] All console output uses `[rackarr:category]` format
+- [x] debug.ts uses LOG_PREFIX constant
+- [x] Tests verify correct prefixes
+- [x] No direct console.log in src/lib (except debug.ts)
+- [x] All tests pass
+- [x] Lint and build pass
+
+---
+
+## Phase 8: UI Bug Fixes
+
+### Prompt 8.1: Fix CollapsibleSection Header Overlap
+
+```text
+Context: CollapsibleSection headers use `position: sticky` which causes headers to stack/overlap at `top: 0` when scrolling within DevicePalette. This makes bottommost items in expanded sections invisible.
+
+Task: Remove sticky positioning from CollapsibleSection headers.
+
+Requirements:
+1. Remove from `.collapsible-header` in CollapsibleSection.svelte:
+   - `position: sticky`
+   - `top: 0`
+   - `z-index: 1`
+2. Headers should scroll normally with content
+3. Retain all other styling (border, padding, hover states)
+
+TDD:
+1. Write test verifying header does NOT have `position: sticky`
+2. Run tests (should fail)
+3. Remove sticky positioning
+4. Run tests (should pass)
+5. Verify: npm run lint && npm run check && npm run build
+```
+
+### Completion Criteria (Phase 8)
+
+- [ ] CollapsibleSection headers scroll with content
+- [ ] No header overlap when multiple sections expanded
 - [ ] All tests pass
-- [ ] Lint and build pass
+- [ ] Visual verification in browser
 
 ---
 

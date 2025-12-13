@@ -326,6 +326,12 @@ settings:
 - Global search spans all sections
 - Section headers show device counts
 
+**CollapsibleSection Behavior:**
+
+- Headers scroll normally with content (no sticky positioning)
+- Avoids header stacking/overlap issues when multiple sections are expanded
+- Smooth expand/collapse animation via `max-height` transition
+
 ### 5.3 Forms & Dialogs
 
 | Component              | Purpose                           |
