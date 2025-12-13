@@ -426,7 +426,7 @@ function moveDeviceToRack(
 ): boolean {
 	// In v0.2, there's only one rack
 	if (fromRackId !== toRackId) {
-		console.debug('Cross-rack move blocked in single-rack mode');
+		debug.log('Cross-rack move blocked in single-rack mode');
 		return false;
 	}
 	return moveDevice(fromRackId, deviceIndex, newPosition);

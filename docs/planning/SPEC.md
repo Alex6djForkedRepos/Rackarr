@@ -1064,20 +1064,24 @@ Features that will NOT be implemented:
 
 Rackarr includes a debug logging system for troubleshooting device placement, movement, and collision detection. Logs are only emitted in development mode.
 
-### 18.2 Log Categories
+### 18.2 Log Format Standard
 
-| Category  | Prefix           | Purpose                     |
-| --------- | ---------------- | --------------------------- |
-| Placement | `[DEVICE:PLACE]` | Device placement operations |
-| Movement  | `[DEVICE:MOVE]`  | Device movement within rack |
-| Collision | `[COLLISION]`    | Collision detection results |
+All console messages use the format: `[rackarr:category] message`
+
+| Category         | Prefix                   | Purpose                           |
+| ---------------- | ------------------------ | --------------------------------- |
+| Info             | `[rackarr]`              | Startup and general info messages |
+| Debug            | `[rackarr:debug]`        | Verbose debug (panzoom, etc.)     |
+| Device Placement | `[rackarr:device:place]` | Device placement operations       |
+| Device Movement  | `[rackarr:device:move]`  | Device movement within rack       |
+| Collision        | `[rackarr:collision]`    | Collision detection results       |
 
 ### 18.3 Placement Logs
 
 Logged when `placeDeviceRecorded()` is called:
 
 ```
-[DEVICE:PLACE] slug={slug} pos={position} face={effectiveFace}
+[rackarr:device:place] slug={slug} pos={position} face={effectiveFace}
   deviceType: {name} is_full_depth={is_full_depth}
   passed face={face} → effective face={effectiveFace}
   result: {success|collision|not_found}
@@ -1088,7 +1092,7 @@ Logged when `placeDeviceRecorded()` is called:
 Logged when `moveDeviceRecorded()` is called:
 
 ```
-[DEVICE:MOVE] idx={index} from={oldPosition} to={newPosition}
+[rackarr:device:move] idx={index} from={oldPosition} to={newPosition}
   device: {name} face={face}
   result: {success|collision|out_of_bounds}
 ```
@@ -1098,7 +1102,7 @@ Logged when `moveDeviceRecorded()` is called:
 Logged when collision detection runs:
 
 ```
-[COLLISION] checking pos={position} height={height} face={face} isFullDepth={isFullDepth}
+[rackarr:collision] checking pos={position} height={height} face={face} isFullDepth={isFullDepth}
   existing devices: [{pos, height, face}...]
   result: {clear|blocked by device at U{position}}
 ```
@@ -1109,11 +1113,28 @@ Debug logging uses a centralized logger utility:
 
 ```typescript
 // src/lib/utils/debug.ts
-export function debugLog(category: string, message: string, data?: object): void {
-	if (import.meta.env.DEV) {
-		console.log(`[RACKARR ${category}] ${message}`, data ?? '');
+const PREFIX = 'rackarr';
+
+export const debug = {
+	log(...args: unknown[]) {
+		if (isDebugEnabled()) {
+			console.log(`[${PREFIX}:debug]`, ...args);
+		}
+	},
+
+	info(...args: unknown[]) {
+		if (isDebugEnabled()) {
+			console.log(`[${PREFIX}]`, ...args);
+		}
+	},
+
+	devicePlace(data: PlaceLogData) {
+		if (isDebugEnabled()) {
+			console.log(`[${PREFIX}:device:place]`, formatPlaceLog(data));
+		}
 	}
-}
+	// ... other category methods
+};
 ```
 
 ### 18.7 Enabling/Disabling
@@ -1121,6 +1142,7 @@ export function debugLog(category: string, message: string, data?: object): void
 - **Development mode**: Logs automatically enabled via `import.meta.env.DEV`
 - **Production mode**: Logs stripped at build time (no runtime overhead)
 - **Test mode**: Logs can be mocked/suppressed in test setup
+- **Manual toggle**: `window.enableRackarrDebug()` / `window.disableRackarrDebug()`
 
 ---
 

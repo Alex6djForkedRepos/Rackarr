@@ -865,4 +865,97 @@ npm run test:e2e         # E2E tests (run after major changes)
 
 ---
 
+## Phase 7: Console Log Standardization
+
+### Overview
+
+Standardize all console logging to use consistent `[rackarr:category] message` format.
+
+**Current inconsistent formats:**
+
+- `[RACKARR DEVICE:PLACE]` - device logging
+- `[RACKARR DEBUG]` - general debug
+- `[RACKARR]` - startup messages
+
+**Target format:** `[rackarr:category] message` (lowercase, colon-delimited)
+
+### Prompt 7.1: Update debug.ts Log Prefixes
+
+```text
+Context: Rackarr console logging is inconsistent. Standardize to [rackarr:category] format.
+
+Task: Update src/lib/utils/debug.ts to use standardized prefixes.
+
+Requirements:
+1. Add constant: `const LOG_PREFIX = 'rackarr';`
+2. Update all log methods to use new format:
+   - `debug.log()` → `[rackarr:debug] message`
+   - `debug.warn()` → `[rackarr:debug:warn] message`
+   - `debug.error()` → `[rackarr:debug:error] message`
+   - `debug.group()` → `[rackarr:debug] label`
+   - `debug.devicePlace()` → `[rackarr:device:place] message`
+   - `debug.deviceMove()` → `[rackarr:device:move] message`
+   - `debug.collision()` → `[rackarr:collision] message`
+3. Add `debug.info()` method for general info: `[rackarr] message`
+4. Update startup message to use `[rackarr]` prefix
+5. Update enable/disable messages to use `[rackarr]` prefix
+
+TDD:
+1. Write tests in src/tests/debug.test.ts for:
+   - Each log method outputs correct prefix
+   - Prefix format matches [rackarr:category] pattern
+2. Run tests (should fail)
+3. Implement changes
+4. Run tests (should pass)
+5. Verify: npm run lint && npm run check && npm run build
+```
+
+### Prompt 7.2: Update Canvas.svelte Panzoom Logging
+
+```text
+Context: Canvas.svelte uses debug.log() for panzoom initialization.
+
+Task: Ensure panzoom logging uses correct category.
+
+Requirements:
+1. Check Canvas.svelte panzoom initialization logs
+2. If using debug.log(), the output will automatically be [rackarr:debug]
+3. No code changes needed if already using debug.log()
+4. Verify by running tests
+
+TDD:
+1. Check existing tests cover panzoom logging
+2. Verify output format in test runs
+3. If needed, add test to verify [rackarr:debug] prefix
+```
+
+### Prompt 7.3: Verify All Console Usages
+
+```text
+Context: Ensure no direct console.log calls bypass the debug system.
+
+Task: Audit codebase for direct console.log usage and migrate to debug utility.
+
+Requirements:
+1. Search for console.log/warn/error in src/lib (excluding debug.ts)
+2. Replace any direct calls with debug.* equivalents
+3. Exception: Keep console.log in vitest test setup if needed
+
+TDD:
+1. Run: grep -r "console\." src/lib --include="*.ts" --include="*.svelte" | grep -v debug.ts
+2. For each finding, determine if it should use debug.*
+3. Update and verify tests pass
+```
+
+### Completion Criteria
+
+- [ ] All console output uses `[rackarr:category]` format
+- [ ] debug.ts uses LOG_PREFIX constant
+- [ ] Tests verify correct prefixes
+- [ ] No direct console.log in src/lib (except debug.ts)
+- [ ] All tests pass
+- [ ] Lint and build pass
+
+---
+
 _This plan implements ROADMAP items R-01 through R-05 for Rackarr v0.6.0_
