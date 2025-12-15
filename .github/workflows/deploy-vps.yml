@@ -1,0 +1,23 @@
+name: Deploy to VPS
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull latest image
+        run: docker pull ghcr.io/rackarr/rackarr:latest
+
+      - name: Deploy container
+        run: |
+          cd ~/rackarr-app
+          docker compose pull
+          docker compose up -d --remove-orphans
+          echo "Deployed to app.rackarr.com"
+
+      - name: Cleanup old images
+        run: docker image prune -f
