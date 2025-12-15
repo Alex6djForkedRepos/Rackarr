@@ -211,20 +211,20 @@ npm run lint         # ESLint check
 
 ## Repository
 
-| Location  | URL                                              |
-| --------- | ------------------------------------------------ |
-| Live Demo | https://ggfevans.github.io/rackarr/              |
-| Primary   | https://git.falcon-wahoe.ts.net/ggfevans/rackarr |
-| Mirror    | https://github.com/ggfevans/rackarr              |
+| Location  | URL                                               |
+| --------- | ------------------------------------------------- |
+| Live Demo | https://rackarr.github.io/Rackarr/                |
+| Primary   | https://github.com/Rackarr/Rackarr                |
+| Issues    | https://github.com/Rackarr/Rackarr/issues         |
 
 ## Deployment
 
 GitHub Pages deployment is automated via GitHub Actions on push to `main`.
 
-**Manual deploy:** Push to GitHub mirror triggers deployment:
+**Manual deploy:** Push to main triggers deployment:
 
 ```bash
-git push github main
+git push origin main
 ```
 
 **Analytics:** GoatCounter at `rackarr.goatcounter.com` (privacy-focused, no cookies)
