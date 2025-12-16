@@ -277,12 +277,12 @@ describe('Starter Device Type Library', () => {
 			expect(device).toBeUndefined();
 		});
 
-		it('shelf device types have correct colour', () => {
+		it('shelf device types have Dracula comment colour', () => {
 			const library = getStarterLibrary();
 			const shelves = library.filter((d) => d.rackarr.category === 'shelf');
 
 			shelves.forEach((shelf) => {
-				expect(shelf.rackarr.colour).toBe('#8B4513');
+				expect(shelf.rackarr.colour).toBe('#6272A4');
 			});
 		});
 	});
@@ -304,13 +304,13 @@ describe('Starter Device Type Library', () => {
 			expect(device?.rackarr.category).toBe('cable-management');
 		});
 
-		it('cable-management devices have Steel Blue colour', () => {
+		it('cable-management devices have Dracula comment colour', () => {
 			const library = getStarterLibrary();
 			const cableDevices = library.filter((d) => d.rackarr.category === 'cable-management');
 
 			expect(cableDevices).toHaveLength(2);
 			cableDevices.forEach((device) => {
-				expect(device.rackarr.colour).toBe('#4682B4');
+				expect(device.rackarr.colour).toBe('#6272A4');
 			});
 		});
 	});

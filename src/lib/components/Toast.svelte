@@ -1,6 +1,7 @@
 <!--
   Toast notification component
   Displays a single toast with icon, message, and dismiss button
+  Features: slide-in/out animations, success glow effect
 -->
 <script lang="ts">
 	import type { Toast as ToastType } from '$lib/stores/toast.svelte';
@@ -14,8 +15,16 @@
 
 	const toastStore = getToastStore();
 
+	// Track exit animation state
+	let isExiting = $state(false);
+
 	function handleDismiss() {
-		toastStore.dismissToast(toast.id);
+		// Start exit animation
+		isExiting = true;
+		// Wait for animation to complete, then remove
+		setTimeout(() => {
+			toastStore.dismissToast(toast.id);
+		}, 300); // Match --anim-toast-exit duration
 	}
 
 	// Get icon based on type
@@ -33,7 +42,12 @@
 	}
 </script>
 
-<div class="toast toast--{toast.type}" role="alert">
+<div
+	class="toast toast--{toast.type}"
+	class:toast--exiting={isExiting}
+	class:toast--success-glow={toast.type === 'success' && !isExiting}
+	role="alert"
+>
 	<span class="toast__icon" aria-hidden="true">
 		{getIcon(toast.type)}
 	</span>
@@ -57,9 +71,9 @@
 		gap: 0.75rem;
 		padding: 0.75rem 1rem;
 		border-radius: var(--radius-md);
-		background: var(--colour-panel);
-		border: 1px solid var(--colour-border);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+		background: var(--toast-bg);
+		border: 1px solid var(--toast-border);
+		box-shadow: var(--shadow-md);
 		min-width: 280px;
 		max-width: 420px;
 		animation: slideIn 0.2s ease-out;
@@ -74,6 +88,42 @@
 			opacity: 1;
 			transform: translateX(0);
 		}
+	}
+
+	@keyframes slideOut {
+		from {
+			opacity: 1;
+			transform: translateX(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateX(100%);
+		}
+	}
+
+	@keyframes success-glow {
+		0% {
+			box-shadow:
+				var(--shadow-md),
+				0 0 0 0 rgba(80, 250, 123, 0.4);
+		}
+		100% {
+			box-shadow:
+				var(--shadow-md),
+				0 0 0 8px transparent;
+		}
+	}
+
+	/* Exit animation */
+	.toast--exiting {
+		animation: slideOut var(--anim-toast-exit, 0.3s) ease-in forwards;
+	}
+
+	/* Success glow effect on appear */
+	.toast--success-glow {
+		animation:
+			slideIn 0.2s ease-out,
+			success-glow var(--anim-success-glow, 0.5s) ease-out;
 	}
 
 	.toast--success {

@@ -107,7 +107,7 @@
 	.dialog-backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
+		background: var(--colour-backdrop, rgba(0, 0, 0, 0.6));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -118,7 +118,7 @@
 		background: var(--colour-dialog-bg, var(--colour-bg));
 		border: 1px solid var(--colour-border);
 		border-radius: var(--radius-lg);
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+		box-shadow: var(--shadow-lg);
 		max-width: 90vw;
 		max-height: 90vh;
 		display: flex;

@@ -70,7 +70,7 @@ describe('Token Migration', () => {
 
 		// Check that both dark (default in :root) and light themes are defined
 		expect(tokensCSS).toContain(':root {');
-		expect(tokensCSS).toContain('--colour-bg: var(--neutral-950)'); // dark theme default
+		expect(tokensCSS).toContain('--colour-bg: var(--dracula-bg)'); // dark theme default
 		expect(tokensCSS).toContain("[data-theme='light']");
 	});
 

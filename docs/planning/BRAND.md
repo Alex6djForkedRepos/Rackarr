@@ -386,6 +386,82 @@ Is the coloured area > 100px²?
 }
 ```
 
+### Semantic Animation Tokens
+
+For complex, celebratory, or loading animations that extend beyond simple UI transitions:
+
+| Token                   | Value | Usage                       |
+| ----------------------- | ----- | --------------------------- |
+| `--anim-breathe`        | 4s    | Slow breathing pulse (rest) |
+| `--anim-rainbow`        | 6s    | Rainbow wave celebration    |
+| `--anim-loading`        | 2s    | Slot reveal loading cycle   |
+| `--anim-shimmer`        | 2s    | Light sweep effect          |
+| `--anim-party`          | 0.5s  | Party mode colour cycle     |
+| `--anim-party-duration` | 5s    | Total party mode time       |
+
+```css
+:root {
+	/* Semantic animation durations */
+	--anim-breathe: 4s;
+	--anim-rainbow: 6s;
+	--anim-loading: 2s;
+	--anim-shimmer: 2s;
+	--anim-party: 0.5s;
+	--anim-party-duration: 5s;
+}
+```
+
+### Animation Types
+
+| Name          | Token            | Duration   | Colours                  | Trigger             |
+| ------------- | ---------------- | ---------- | ------------------------ | ------------------- |
+| Breathe       | `--anim-breathe` | 4s cycle   | Purple glow              | Logo at rest        |
+| Rainbow Wave  | `--anim-rainbow` | 6s cycle   | Full Dracula (7 accents) | Success actions     |
+| Loading State | `--anim-loading` | 2s cycle   | Purple + BG              | Export dialog       |
+| Shimmer       | `--anim-shimmer` | 2s sweep   | White highlight          | Preview placeholder |
+| Party Mode    | `--anim-party`   | 0.5s cycle | Full Dracula             | Konami code         |
+
+### Animation UX Applications
+
+| Animation     | Location       | Behaviour                                         |
+| ------------- | -------------- | ------------------------------------------------- |
+| Breathe       | LogoLockup     | Slow glow pulse at rest (4s cycle)                |
+| Loading State | Export dialog  | Logo with slot reveal during export generation    |
+| Shimmer       | Export preview | Light sweep while preview renders                 |
+| Rainbow Wave  | LogoLockup     | 3s celebration on export/save/load success        |
+| Toast Glow    | Success toasts | Green glow pulse on appear                        |
+| Party Mode    | Logo + racks   | 5s fast rainbow + wobble (easter egg)             |
+| Drag Feedback | RackDevice     | Scale 1.02 on pickup, drop shadow, settle on drop |
+
+### Rainbow Wave Gradient
+
+The rainbow wave uses all Dracula accent colours in a cycling gradient:
+
+```css
+/* SVG SMIL animation — 6s infinite cycle */
+<linearGradient id="rainbow-wave">
+	<stop offset="0%">
+		<animate
+			attributeName="stop-color"
+			values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9"
+			dur="6s"
+			repeatCount="indefinite"
+		/>
+	</stop>
+	<!-- Additional stops at 50% and 100% with offset values -->
+</linearGradient>
+```
+
+### Party Mode Easter Egg
+
+| Property      | Value                                                       |
+| ------------- | ----------------------------------------------------------- |
+| Trigger       | Konami code (↑↑↓↓←→←→BA)                                    |
+| Scope         | Toolbar logo + rack frames                                  |
+| Duration      | 5 seconds, auto-disable                                     |
+| Effect        | Fast rainbow cycle (0.5s) + wobble                          |
+| Accessibility | Respects `prefers-reduced-motion`, explicit activation only |
+
 ---
 
 ## Logo Mark
@@ -428,9 +504,11 @@ The logo lockup combines the logo mark with the "Rackarr" wordmark as a unified 
 
 | State          | Appearance                                  |
 | -------------- | ------------------------------------------- |
-| Rest           | Static purple (`#BD93F9`)                   |
+| Rest           | Purple with slow breathing glow (4s cycle)  |
 | Hover          | Animated rainbow gradient (Dracula accents) |
-| Reduced motion | Stays static purple on hover                |
+| Celebrate      | 3s rainbow wave on success actions          |
+| Party Mode     | Fast rainbow (0.5s) + wobble                |
+| Reduced motion | Static purple, no animations                |
 
 ### Animated Gradient
 
@@ -473,6 +551,17 @@ values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#BD93F9"  /* purple → pink → cyan �
 - **Technical:** Assume competence, use proper terminology
 - **Helpful:** Guide without hand-holding
 - **Dry wit:** Understated, never try-hard
+
+---
+
+## Brand Links
+
+Official URLs for use throughout the application:
+
+| Token        | URL                                  | Usage                 |
+| ------------ | ------------------------------------ | --------------------- |
+| `GITHUB_URL` | `https://github.com/rackarr/rackarr` | Repository link, Help |
+| `DEMO_URL`   | `https://rackarr.github.io/Rackarr/` | Live demo link        |
 
 ---
 

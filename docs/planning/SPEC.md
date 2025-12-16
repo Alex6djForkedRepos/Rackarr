@@ -659,9 +659,11 @@ Image exports must meet these quality standards:
 
 ## 9. Design Tokens
 
+> **Note:** For the comprehensive Design System specification including colour palettes, typography, and component patterns, see **Section 19: Design System**.
+
 ### 9.1 Token Layers
 
-1. **Primitives** — Raw values (colors, spacing)
+1. **Primitives** — Raw values (Dracula/Alucard colours, spacing)
 2. **Semantic** — Purpose-based (bg, text, border)
 3. **Component** — Component-specific (rack, toolbar)
 
@@ -719,22 +721,29 @@ Image exports must meet these quality standards:
 
 ## 10. Category Colors & Icons
 
-Each device category has an assigned color and icon from [Lucide](https://lucide.dev).
+Each device category has an assigned color from the Dracula palette and icon from [Lucide](https://lucide.dev). See Section 19.3.3 for full rationale and light mode (Alucard) variants.
 
-| Category           | Color      | Hex     | Lucide Icon            |
-| ------------------ | ---------- | ------- | ---------------------- |
-| `server`           | Blue       | #4A90D9 | `server`               |
-| `network`          | Purple     | #7B68EE | `network`              |
-| `patch-panel`      | Slate      | #708090 | `ethernet-port`        |
-| `power`            | Red        | #DC143C | `zap`                  |
-| `storage`          | Green      | #228B22 | `hard-drive`           |
-| `kvm`              | Orange     | #FF8C00 | `monitor`              |
-| `av-media`         | Purple     | #9932CC | `speaker`              |
-| `cooling`          | Teal       | #00CED1 | `fan`                  |
-| `shelf`            | Brown      | #8B4513 | `align-end-horizontal` |
-| `blank`            | Dark Slate | #2F4F4F | `circle-off`           |
-| `cable-management` | Steel Blue | #4682B4 | `cable`                |
-| `other`            | Gray       | #808080 | `circle-help`          |
+**Active Categories** (vibrant Dracula accents):
+
+| Category   | Color  | Dark Hex  | Light Hex | Lucide Icon  |
+| ---------- | ------ | --------- | --------- | ------------ |
+| `server`   | Cyan   | `#8BE9FD` | `#036A96` | `server`     |
+| `network`  | Purple | `#BD93F9` | `#644AC9` | `network`    |
+| `storage`  | Green  | `#50FA7B` | `#14710A` | `hard-drive` |
+| `power`    | Red    | `#FF5555` | `#CB3A2A` | `zap`        |
+| `kvm`      | Orange | `#FFB86C` | `#A34D14` | `monitor`    |
+| `av-media` | Pink   | `#FF79C6` | `#A3144D` | `speaker`    |
+| `cooling`  | Yellow | `#F1FA8C` | `#846E15` | `fan`        |
+
+**Passive Categories** (neutral comment colors):
+
+| Category           | Color     | Dark Hex  | Light Hex | Lucide Icon            |
+| ------------------ | --------- | --------- | --------- | ---------------------- |
+| `shelf`            | Comment   | `#6272A4` | `#6C664B` | `align-end-horizontal` |
+| `blank`            | Selection | `#44475A` | `#CFCFDE` | `circle-off`           |
+| `cable-management` | Comment   | `#6272A4` | `#6C664B` | `cable`                |
+| `patch-panel`      | Comment   | `#6272A4` | `#6C664B` | `ethernet-port`        |
+| `other`            | Comment   | `#6272A4` | `#6C664B` | `circle-help`          |
 
 ---
 
@@ -1179,6 +1188,683 @@ export const debug = {
 - **Production mode**: Logs stripped at build time (no runtime overhead)
 - **Test mode**: Logs can be mocked/suppressed in test setup
 - **Manual toggle**: `window.enableRackarrDebug()` / `window.disableRackarrDebug()`
+
+---
+
+## 19. Design System
+
+### 19.1 Overview
+
+Rackarr's visual identity is rooted in the **Dracula colour scheme** (dark mode) and **Alucard** (light mode). The design communicates technical precision, clarity, and the organised planning that homelabbers aspire to.
+
+**Design Philosophy:**
+
+- Tom Geismar's approach — strip to pure geometry, timeless, works at any size
+- Three-layer token architecture: primitives → semantic → component
+- WCAG AA compliance as a hard requirement
+- British spelling for CSS variables: `--colour-*`
+
+**Theme Behavior:**
+
+- Dark theme (Dracula) is the default
+- Light theme (Alucard) activated via `[data-theme="light"]` attribute
+- Rack elements intentionally stay dark in both themes (dark racks on light canvas)
+- System preference respected via `prefers-color-scheme` media query fallback
+
+### 19.2 Brand Identity
+
+**Logo Mark:**
+
+A sharp-cornered rectangle containing three equal-height horizontal slots as negative space. Represents a server rack front view.
+
+| Property               | Value               | Notes                         |
+| ---------------------- | ------------------- | ----------------------------- |
+| ViewBox                | `0 0 32 32`         | Square container              |
+| Frame                  | `x:6 y:4 w:20 h:24` | Subtly taller than wide       |
+| Corner radius          | `0`                 | Sharp corners (Geismar style) |
+| Slots                  | 3 equal-height      | Represents organised devices  |
+| Primary colour (dark)  | `#BD93F9`           | Dracula purple                |
+| Primary colour (light) | `#644AC9`           | Alucard purple                |
+
+**Logo Usage:**
+
+| Variant              | Use Case                               | Colour           |
+| -------------------- | -------------------------------------- | ---------------- |
+| Solid purple (dark)  | Favicon, titlebar on dark backgrounds  | `#BD93F9`        |
+| Solid purple (light) | Favicon, titlebar on light backgrounds | `#644AC9`        |
+| Gradient (dark)      | Marketing, hero sections, 64px+        | Dracula gradient |
+| Gradient (light)     | Marketing on light backgrounds         | Alucard gradient |
+
+**Clear Space:** Minimum 25% of mark width on all sides.
+
+### 19.3 Colour System
+
+#### 19.3.1 Dracula Theme (Dark) — Primitives
+
+```css
+:root {
+	/* Backgrounds */
+	--dracula-bg-darkest: #191a21; /* Deepest background */
+	--dracula-bg-darker: #21222c; /* Page background */
+	--dracula-bg: #282a36; /* Card/panel background */
+	--dracula-bg-light: #343746; /* Elevated surfaces */
+	--dracula-bg-lighter: #424450; /* Hover states */
+	--dracula-selection: #44475a; /* Selection highlight */
+
+	/* Text */
+	--dracula-foreground: #f8f8f2; /* Primary text */
+	--dracula-comment: #6272a4; /* Muted/secondary text */
+
+	/* Accent Colours */
+	--dracula-purple: #bd93f9; /* Primary brand, links */
+	--dracula-pink: #ff79c6; /* Secondary accent */
+	--dracula-cyan: #8be9fd; /* Interactive elements, CTAs */
+	--dracula-green: #50fa7b; /* Success, valid states */
+	--dracula-orange: #ffb86c; /* Warnings */
+	--dracula-red: #ff5555; /* Errors, destructive */
+	--dracula-yellow: #f1fa8c; /* Highlights, caution */
+}
+```
+
+#### 19.3.2 Alucard Theme (Light) — Primitives
+
+```css
+:root[data-theme='light'] {
+	/* Backgrounds — warm cream tones */
+	--alucard-bg-darkest: #bcbab3; /* Deepest (inverted from dark) */
+	--alucard-bg-darker: #ceccc0; /* Page background */
+	--alucard-bg: #fffbeb; /* Card/panel background — main */
+	--alucard-bg-light: #dedccf; /* Elevated surfaces */
+	--alucard-bg-lighter: #ece9df; /* Hover states */
+	--alucard-selection: #cfcfde; /* Selection highlight */
+	--alucard-floating: #efeddc; /* Floating interactive elements */
+
+	/* Text */
+	--alucard-foreground: #1f1f1f; /* Primary text — near black */
+	--alucard-comment: #6c664b; /* Muted/secondary text — warm grey */
+
+	/* Accent Colours — darker for light background contrast */
+	--alucard-purple: #644ac9; /* Primary brand, links */
+	--alucard-pink: #a3144d; /* Secondary accent */
+	--alucard-cyan: #036a96; /* Interactive elements, CTAs */
+	--alucard-green: #14710a; /* Success, valid states */
+	--alucard-orange: #a34d14; /* Warnings */
+	--alucard-red: #cb3a2a; /* Errors, destructive */
+	--alucard-yellow: #846e15; /* Highlights, caution */
+}
+```
+
+#### 19.3.3 Category Colour Mapping
+
+Device categories use a hybrid mapping: active infrastructure uses vibrant Dracula accents, passive items use neutral comment colours.
+
+| Category           | Type    | Dracula Hex           | Alucard Hex | Rationale              |
+| ------------------ | ------- | --------------------- | ----------- | ---------------------- |
+| `server`           | Active  | `#8BE9FD` (cyan)      | `#036A96`   | Core infrastructure    |
+| `network`          | Active  | `#BD93F9` (purple)    | `#644AC9`   | Primary accent         |
+| `storage`          | Active  | `#50FA7B` (green)     | `#14710A`   | Data/growth            |
+| `power`            | Active  | `#FF5555` (red)       | `#CB3A2A`   | Critical/energy        |
+| `kvm`              | Active  | `#FFB86C` (orange)    | `#A34D14`   | Control/interactive    |
+| `av-media`         | Active  | `#FF79C6` (pink)      | `#A3144D`   | Media/entertainment    |
+| `cooling`          | Active  | `#F1FA8C` (yellow)    | `#846E15`   | Distinct from server   |
+| `shelf`            | Passive | `#6272A4` (comment)   | `#6C664B`   | Reduced visual noise   |
+| `blank`            | Passive | `#44475A` (selection) | `#CFCFDE`   | Fades into background  |
+| `cable-management` | Passive | `#6272A4` (comment)   | `#6C664B`   | Utility item           |
+| `patch-panel`      | Passive | `#6272A4` (comment)   | `#6C664B`   | Passive infrastructure |
+| `other`            | Passive | `#6272A4` (comment)   | `#6C664B`   | Generic fallback       |
+
+**Design Rationale:** Active equipment (servers, networking, storage, power) uses vibrant Dracula accents for visual prominence. Passive items (shelves, blanks, cable management) use neutral comment colours to reduce visual noise and draw attention to active equipment.
+
+#### 19.3.4 Semantic Colour Tokens
+
+Semantic tokens map primitives to UI purposes:
+
+```css
+:root {
+	/* Brand */
+	--colour-brand-primary: var(--dracula-purple);
+	--colour-brand-secondary: var(--dracula-pink);
+	--colour-brand-accent: var(--dracula-cyan);
+
+	/* Backgrounds */
+	--colour-bg: var(--dracula-bg);
+	--colour-bg-darker: var(--dracula-bg-darker);
+	--colour-surface: var(--dracula-bg-light);
+	--colour-surface-hover: var(--dracula-bg-lighter);
+
+	/* Text */
+	--colour-text: var(--dracula-foreground);
+	--colour-text-muted: var(--dracula-comment);
+
+	/* Interactive */
+	--colour-interactive: var(--dracula-cyan);
+	--colour-interactive-hover: var(--dracula-purple);
+	--colour-link: var(--dracula-cyan);
+	--colour-link-hover: var(--dracula-purple);
+	--colour-selection: var(--dracula-selection);
+	--colour-focus-ring: var(--dracula-purple);
+
+	/* Feedback */
+	--colour-success: var(--dracula-green);
+	--colour-warning: var(--dracula-orange);
+	--colour-error: var(--dracula-red);
+	--colour-info: var(--dracula-cyan);
+
+	/* Borders */
+	--colour-border: var(--dracula-selection);
+	--colour-border-hover: var(--dracula-comment);
+	--colour-border-focus: var(--dracula-purple);
+	--colour-border-error: var(--dracula-red);
+}
+```
+
+Light mode overrides these semantic tokens to use Alucard primitives.
+
+#### 19.3.5 Airflow Colours
+
+See Section 15.2 for airflow visualisation colours. Summary:
+
+| Airflow  | Dark Mode               | Light Mode | Purpose                  |
+| -------- | ----------------------- | ---------- | ------------------------ |
+| Intake   | `#60a5fa` (blue-400)    | `#036A96`  | Air entering device      |
+| Exhaust  | `#f87171` (red-400)     | `#CB3A2A`  | Hot air exiting          |
+| Passive  | `#9ca3af` (neutral-400) | `#6C664B`  | No active cooling        |
+| Conflict | `#f59e0b` (amber-500)   | `#A34D14`  | Thermal conflict warning |
+
+### 19.4 Typography
+
+#### 19.4.1 Font Stack
+
+```css
+:root {
+	/* Monospace — code, UI chrome, headings */
+	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+	/* Sans — body text, descriptions */
+	--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+```
+
+#### 19.4.2 Type Scale
+
+```css
+:root {
+	--text-xs: 0.75rem; /* 12px — captions, labels */
+	--text-sm: 0.875rem; /* 14px — secondary text */
+	--text-base: 1rem; /* 16px — body */
+	--text-lg: 1.125rem; /* 18px — lead text */
+	--text-xl: 1.25rem; /* 20px — section headers */
+	--text-2xl: 1.5rem; /* 24px — page headers */
+	--text-3xl: 2rem; /* 32px — hero text */
+	--text-4xl: 3rem; /* 48px — marketing hero */
+}
+```
+
+#### 19.4.3 Font Weights
+
+```css
+:root {
+	--font-normal: 400;
+	--font-medium: 500;
+	--font-semibold: 600;
+	--font-bold: 700;
+}
+```
+
+#### 19.4.4 Usage Guidelines
+
+| Element         | Font | Weight | Size          |
+| --------------- | ---- | ------ | ------------- |
+| Hero title      | Mono | 600    | `--text-4xl`  |
+| Page heading    | Mono | 600    | `--text-2xl`  |
+| Section heading | Mono | 500    | `--text-lg`   |
+| Body text       | Sans | 400    | `--text-base` |
+| UI labels       | Mono | 500    | `--text-sm`   |
+| Code/values     | Mono | 400    | `--text-sm`   |
+| Captions        | Sans | 400    | `--text-xs`   |
+
+### 19.5 Spacing & Layout
+
+Base unit: 4px. All spacing derives from this unit.
+
+```css
+:root {
+	--space-unit: 0.25rem; /* 4px base unit */
+
+	--space-1: calc(var(--space-unit) * 1); /* 4px */
+	--space-2: calc(var(--space-unit) * 2); /* 8px */
+	--space-3: calc(var(--space-unit) * 3); /* 12px */
+	--space-4: calc(var(--space-unit) * 4); /* 16px */
+	--space-5: calc(var(--space-unit) * 5); /* 20px */
+	--space-6: calc(var(--space-unit) * 6); /* 24px */
+	--space-8: calc(var(--space-unit) * 8); /* 32px */
+	--space-10: calc(var(--space-unit) * 10); /* 40px */
+	--space-12: calc(var(--space-unit) * 12); /* 48px */
+	--space-16: calc(var(--space-unit) * 16); /* 64px */
+}
+```
+
+**Semantic Spacing:**
+
+```css
+:root {
+	/* Component internal padding */
+	--padding-xs: var(--space-1);
+	--padding-sm: var(--space-2);
+	--padding-md: var(--space-4);
+	--padding-lg: var(--space-6);
+	--padding-xl: var(--space-8);
+
+	/* Gaps between elements */
+	--gap-xs: var(--space-1);
+	--gap-sm: var(--space-2);
+	--gap-md: var(--space-4);
+	--gap-lg: var(--space-6);
+	--gap-xl: var(--space-8);
+
+	/* Section margins */
+	--section-gap: var(--space-12);
+	--page-margin: var(--space-6);
+}
+```
+
+### 19.6 Borders & Radius
+
+#### 19.6.1 Border Widths
+
+```css
+:root {
+	--border-thin: 1px;
+	--border-medium: 2px;
+	--border-thick: 3px;
+}
+```
+
+#### 19.6.2 Border Radii
+
+```css
+:root {
+	--radius-none: 0;
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--radius-lg: 8px;
+	--radius-xl: 12px;
+	--radius-full: 9999px;
+}
+```
+
+| Element       | Radius                  |
+| ------------- | ----------------------- |
+| Logo mark     | `--radius-none` (sharp) |
+| Buttons       | `--radius-md`           |
+| Cards/panels  | `--radius-md`           |
+| Input fields  | `--radius-md`           |
+| Pills/tags    | `--radius-full`         |
+| Modal dialogs | `--radius-lg`           |
+
+### 19.7 Shadows & Glow Effects
+
+#### 19.7.1 Box Shadows
+
+```css
+:root {
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+	--shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] {
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12);
+}
+```
+
+#### 19.7.2 Glow Effects (Dracula Style)
+
+```css
+:root {
+	/* Cyan glow for interactive elements */
+	--glow-sm: 0 0 12px rgba(139, 233, 253, 0.3);
+	--glow-md: 0 0 20px rgba(139, 233, 253, 0.3);
+	--glow-lg: 0 0 30px rgba(139, 233, 253, 0.3);
+
+	/* Purple glow for focus/selection */
+	--glow-purple-sm: 0 0 12px rgba(189, 147, 249, 0.3);
+	--glow-purple-md: 0 0 20px rgba(189, 147, 249, 0.3);
+	--glow-purple-lg: 0 0 30px rgba(189, 147, 249, 0.3);
+
+	/* Green glow for success states */
+	--glow-green-sm: 0 0 12px rgba(80, 250, 123, 0.3);
+}
+
+:root[data-theme='light'] {
+	/* Softer glows for light backgrounds */
+	--glow-sm: 0 0 8px rgba(3, 106, 150, 0.2);
+	--glow-md: 0 0 16px rgba(3, 106, 150, 0.2);
+	--glow-lg: 0 0 24px rgba(3, 106, 150, 0.2);
+
+	--glow-purple-sm: 0 0 8px rgba(100, 74, 201, 0.2);
+	--glow-purple-md: 0 0 16px rgba(100, 74, 201, 0.2);
+	--glow-purple-lg: 0 0 24px rgba(100, 74, 201, 0.2);
+
+	--glow-green-sm: 0 0 8px rgba(20, 113, 10, 0.2);
+}
+```
+
+#### 19.7.3 Focus Ring
+
+```css
+:root {
+	--focus-ring: 0 0 0 2px var(--colour-bg), 0 0 0 4px var(--colour-focus-ring);
+}
+```
+
+### 19.8 Motion & Animation
+
+#### 19.8.1 Timing
+
+```css
+:root {
+	--duration-fast: 150ms;
+	--duration-normal: 200ms;
+	--duration-slow: 300ms;
+	--duration-slower: 500ms;
+
+	--ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+	--ease-in: cubic-bezier(0.4, 0, 1, 1);
+	--ease-out: cubic-bezier(0, 0, 0.2, 1);
+	--ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+```
+
+#### 19.8.2 Standard Transitions
+
+```css
+:root {
+	--transition-colours:
+		color var(--duration-fast) var(--ease-default),
+		background-color var(--duration-fast) var(--ease-default),
+		border-color var(--duration-fast) var(--ease-default);
+
+	--transition-transform: transform var(--duration-normal) var(--ease-default);
+
+	--transition-all: all var(--duration-normal) var(--ease-default);
+}
+```
+
+#### 19.8.3 Logo Animations
+
+```css
+/* Slot pulse — use for loading states */
+@keyframes slot-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+/* Slot reveal — use for building/progress */
+@keyframes slot-reveal {
+	0% {
+		width: 0;
+	}
+	100% {
+		width: 12px;
+	}
+}
+```
+
+#### 19.8.4 Semantic Animation Tokens
+
+For complex, celebratory, or loading animations:
+
+```css
+:root {
+	--anim-rainbow: 6s; /* Rainbow wave celebration */
+	--anim-loading: 2s; /* Slot reveal loading cycle */
+	--anim-shimmer: 2s; /* Light sweep effect */
+	--anim-party: 0.5s; /* Party mode colour cycle */
+	--anim-party-duration: 5s; /* Total party mode time */
+}
+```
+
+#### 19.8.5 Export Feedback UX
+
+Animations provide visual feedback during async export operations:
+
+| State             | Animation    | Location       | Behaviour                                    |
+| ----------------- | ------------ | -------------- | -------------------------------------------- |
+| Exporting         | LogoLoader   | Export dialog  | Logo with slot reveal animation (2s cycle)   |
+| Preview rendering | Shimmer      | Export preview | Light sweep overlay while rendering          |
+| Export complete   | Rainbow Wave | LogoLockup     | 3s celebration with Dracula gradient cycling |
+| Save/Load success | Rainbow Wave | LogoLockup     | Same celebration as export                   |
+
+**LogoLoader Component:**
+
+- Displays logo mark with animated slot fills
+- Slots fill sequentially with stagger: 0s, 0.3s, 0.6s
+- Optional message text below logo
+- Purple colour scheme matching brand
+
+**Shimmer Effect:**
+
+- CSS-based light sweep overlay
+- Gradient: `transparent → rgba(255,255,255,0.1) → transparent`
+- Background-size: 200%, animates position
+- Respects `prefers-reduced-motion`
+
+#### 19.8.6 Success Toast Feedback
+
+Success toasts include visual enhancements:
+
+| Element       | Effect                     | Duration |
+| ------------- | -------------------------- | -------- |
+| Success toast | Green glow pulse on appear | 0.5s     |
+| Toast exit    | Slide out animation        | 0.3s     |
+
+```css
+@keyframes success-glow {
+	0% {
+		box-shadow: 0 0 0 0 rgba(80, 250, 123, 0.4);
+	}
+	100% {
+		box-shadow: 0 0 0 8px transparent;
+	}
+}
+
+@keyframes slideOut {
+	to {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+```
+
+#### 19.8.7 Interactive Drag Feedback
+
+Visual feedback during device drag-and-drop operations:
+
+| State             | Effect         | Details                                                 |
+| ----------------- | -------------- | ------------------------------------------------------- |
+| Device pickup     | Scale + shadow | `scale(1.02)`, `drop-shadow(0 4px 8px rgba(0,0,0,0.3))` |
+| Valid drop zone   | Green pulse    | Zone border pulses with success colour                  |
+| Invalid drop zone | Red flash      | Brief red border flash                                  |
+| Drop settle       | Ease return    | `ease-out` transition back to `scale(1)`                |
+
+```css
+.device-rect.dragging {
+	transform: scale(1.02);
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+	transition: transform 0.1s ease-out;
+}
+```
+
+#### 19.8.8 Party Mode Easter Egg
+
+Hidden feature activated by Konami code (↑↑↓↓←→←→BA):
+
+| Property    | Value                                     |
+| ----------- | ----------------------------------------- |
+| Trigger     | Konami code sequence                      |
+| Scope       | Toolbar logo + rack frames                |
+| Duration    | 5 seconds, auto-disable                   |
+| Logo effect | Fast rainbow cycle (0.5s) + subtle wobble |
+| Rack effect | Rainbow border cycling                    |
+| Toast       | "Party Mode!" (info type)                 |
+
+**Implementation:**
+
+```typescript
+const KONAMI = [
+	'ArrowUp',
+	'ArrowUp',
+	'ArrowDown',
+	'ArrowDown',
+	'ArrowLeft',
+	'ArrowRight',
+	'ArrowLeft',
+	'ArrowRight',
+	'KeyB',
+	'KeyA'
+];
+```
+
+**Accessibility:**
+
+- Respects `prefers-reduced-motion: reduce`
+- Explicit activation only (no auto-trigger)
+- 5-second timeout prevents seizure risk
+- Not announced to screen readers (decorative)
+
+### 19.9 Focus States & Accessibility
+
+#### 19.9.1 Focus Indicators
+
+All interactive elements must have visible focus indicators:
+
+```css
+:focus-visible {
+	outline: 2px solid var(--colour-focus-ring);
+	outline-offset: 2px;
+	box-shadow: var(--glow-purple-sm);
+}
+```
+
+#### 19.9.2 Keyboard Navigation
+
+- Tab/Shift+Tab: Navigate between interactive elements
+- Enter/Space: Activate buttons and links
+- Arrow keys: Navigate within components (accordions, lists)
+- Escape: Close modals, clear selection
+
+#### 19.9.3 Reduced Motion
+
+Respect user preference for reduced motion:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+```
+
+### 19.10 Component Token Mappings
+
+| Component          | Background             | Border             | Text            |
+| ------------------ | ---------------------- | ------------------ | --------------- |
+| Toolbar            | `--colour-surface`     | `--colour-border`  | `--colour-text` |
+| Sidebar            | `--colour-surface`     | `--colour-border`  | `--colour-text` |
+| Dialog             | `--colour-bg`          | `--colour-border`  | `--colour-text` |
+| Input              | `--colour-surface`     | `--colour-border`  | `--colour-text` |
+| Button (primary)   | `--colour-interactive` | transparent        | `--colour-bg`   |
+| Button (secondary) | `--colour-surface`     | `--colour-border`  | `--colour-text` |
+| Toast (success)    | `--colour-surface`     | `--colour-success` | `--colour-text` |
+| Toast (error)      | `--colour-surface`     | `--colour-error`   | `--colour-text` |
+
+**Note:** Rack elements use dedicated rack tokens that stay dark in both themes:
+
+```css
+--rack-bg: var(--neutral-900);
+--rack-rail: var(--neutral-700);
+--rack-interior: var(--neutral-800);
+--rack-text: var(--neutral-400);
+```
+
+### 19.11 WCAG Compliance Requirements
+
+All colour combinations must meet WCAG 2.1 AA standards:
+
+| Requirement   | Ratio   | Applies To                       |
+| ------------- | ------- | -------------------------------- |
+| Normal text   | ≥ 4.5:1 | Body text, labels                |
+| Large text    | ≥ 3:1   | Headings 18px+, bold 14px+       |
+| UI components | ≥ 3:1   | Borders, icons, focus indicators |
+| Decorative    | N/A     | Non-essential visual elements    |
+
+**Required Contrast Verification:**
+
+| Combination              | Dark Mode              | Light Mode             | Required |
+| ------------------------ | ---------------------- | ---------------------- | -------- |
+| Text on background       | `#F8F8F2` on `#282A36` | `#1F1F1F` on `#FFFBEB` | ≥ 4.5:1  |
+| Muted text on background | `#6272A4` on `#282A36` | `#6C664B` on `#FFFBEB` | ≥ 4.5:1  |
+| Link on background       | `#8BE9FD` on `#282A36` | `#036A96` on `#FFFBEB` | ≥ 4.5:1  |
+| Focus ring               | `#BD93F9` on any       | `#644AC9` on any       | ≥ 3:1    |
+| Error text               | `#FF5555` on `#282A36` | `#CB3A2A` on `#FFFBEB` | ≥ 4.5:1  |
+
+### 19.12 Font Bundling Strategy
+
+Self-hosted fonts for performance and privacy:
+
+**Location:** `/static/fonts/`
+
+**Files:**
+
+- `JetBrainsMono-Regular.woff2` (400)
+- `JetBrainsMono-Medium.woff2` (500)
+- `JetBrainsMono-SemiBold.woff2` (600)
+- `JetBrainsMono-Bold.woff2` (700)
+- `Inter-Regular.woff2` (400)
+- `Inter-Medium.woff2` (500)
+- `Inter-SemiBold.woff2` (600)
+- `Inter-Bold.woff2` (700)
+
+**Font Loading:**
+
+```css
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Inter';
+	src: url('/fonts/Inter-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+/* ... additional weights */
+```
+
+**Performance Notes:**
+
+- `font-display: swap` prevents FOIT (flash of invisible text)
+- woff2 format for modern browser support
+- Subset fonts if needed for CJK or extended Latin
 
 ---
 

@@ -1,24 +1,59 @@
 <!--
   LogoLockup Component
   Animated logo + title lockup for toolbar branding
-  Static pink at rest, rainbow gradient on hover
+  Breathing glow at rest, rainbow gradient on hover, celebrate on success
+  Showcase mode: slow rainbow wave for About/Help display
 -->
 <script lang="ts">
 	interface Props {
 		size?: number;
+		celebrate?: boolean;
+		partyMode?: boolean;
+		showcase?: boolean;
 	}
 
-	let { size = 36 }: Props = $props();
+	let { size = 36, celebrate = false, partyMode = false, showcase = false }: Props = $props();
 
 	// Calculate proportional title height (logo should be slightly taller)
 	const titleHeight = $derived(size * 1.2);
+
+	// Determine which gradient to use based on state
+	const gradientId = $derived(
+		partyMode
+			? 'url(#lockup-party)'
+			: celebrate
+				? 'url(#lockup-celebrate)'
+				: showcase
+					? 'url(#lockup-showcase)'
+					: null
+	);
 </script>
 
 <div class="logo-lockup">
 	<!-- Hidden SVG for gradient definitions -->
 	<svg width="0" height="0" style="position: absolute;" aria-hidden="true">
 		<defs>
-			<!-- Animated rainbow gradient (Dracula colors) -->
+			<!-- Idle gradient: very slow rotating purple tones (30s cycle) -->
+			<linearGradient id="lockup-idle" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%">
+					<animate
+						attributeName="stop-color"
+						values="#BD93F9;#9580FF;#FF79C6;#BD93F9"
+						dur="30s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+				<stop offset="100%">
+					<animate
+						attributeName="stop-color"
+						values="#9580FF;#FF79C6;#BD93F9;#9580FF"
+						dur="30s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+			</linearGradient>
+
+			<!-- Animated rainbow gradient for hover (Dracula colors, 6s cycle) -->
 			<linearGradient id="lockup-rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
 				<stop offset="0%">
 					<animate
@@ -45,23 +80,124 @@
 					/>
 				</stop>
 			</linearGradient>
+
+			<!-- Celebrate gradient (3s one-shot rainbow wave) -->
+			<linearGradient id="lockup-celebrate" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%">
+					<animate
+						attributeName="stop-color"
+						values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#BD93F9"
+						dur="3s"
+						repeatCount="1"
+						fill="freeze"
+					/>
+				</stop>
+				<stop offset="50%">
+					<animate
+						attributeName="stop-color"
+						values="#FF79C6;#8BE9FD;#50FA7B;#BD93F9;#FF79C6"
+						dur="3s"
+						repeatCount="1"
+						fill="freeze"
+					/>
+				</stop>
+				<stop offset="100%">
+					<animate
+						attributeName="stop-color"
+						values="#8BE9FD;#50FA7B;#BD93F9;#FF79C6;#8BE9FD"
+						dur="3s"
+						repeatCount="1"
+						fill="freeze"
+					/>
+				</stop>
+			</linearGradient>
+
+			<!-- Party mode gradient (fast 0.5s rainbow cycle) -->
+			<linearGradient id="lockup-party" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%">
+					<animate
+						attributeName="stop-color"
+						values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9"
+						dur="0.5s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+				<stop offset="50%">
+					<animate
+						attributeName="stop-color"
+						values="#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9;#FF79C6;#8BE9FD"
+						dur="0.5s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+				<stop offset="100%">
+					<animate
+						attributeName="stop-color"
+						values="#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9;#FF79C6;#8BE9FD;#50FA7B"
+						dur="0.5s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+			</linearGradient>
+
+			<!-- Showcase gradient (slow 12s rainbow wave for About/Help) -->
+			<linearGradient id="lockup-showcase" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%">
+					<animate
+						attributeName="stop-color"
+						values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9"
+						dur="12s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+				<stop offset="50%">
+					<animate
+						attributeName="stop-color"
+						values="#FF79C6;#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9;#FF79C6"
+						dur="12s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+				<stop offset="100%">
+					<animate
+						attributeName="stop-color"
+						values="#8BE9FD;#50FA7B;#FFB86C;#FF5555;#F1FA8C;#BD93F9;#FF79C6;#8BE9FD"
+						dur="12s"
+						repeatCount="indefinite"
+					/>
+				</stop>
+			</linearGradient>
 		</defs>
 	</svg>
 
 	<!-- Logo mark (simple rack outline from rackarr-site) -->
 	<svg
 		class="logo-mark"
+		class:logo-mark--celebrate={celebrate}
+		class:logo-mark--party={partyMode}
+		class:logo-mark--showcase={showcase}
 		viewBox="0 0 32 32"
 		width={size}
 		height={size}
 		aria-hidden="true"
 		fill-rule="evenodd"
+		style={gradientId ? `--active-gradient: ${gradientId}` : undefined}
 	>
 		<path d="M6 4 h20 v24 h-20 z M10 8 h12 v4 h-12 z M10 14 h12 v4 h-12 z M10 20 h12 v4 h-12 z" />
 	</svg>
 
 	<!-- Title (SVG text for gradient support) -->
-	<svg class="logo-title" viewBox="0 0 200 50" height={titleHeight} role="img" aria-label="Rackarr">
+	<svg
+		class="logo-title"
+		class:logo-title--celebrate={celebrate}
+		class:logo-title--party={partyMode}
+		class:logo-title--showcase={showcase}
+		viewBox="0 0 200 50"
+		height={titleHeight}
+		role="img"
+		aria-label="Rackarr"
+		style={gradientId ? `--active-gradient: ${gradientId}` : undefined}
+	>
 		<text x="0" y="38">Rackarr</text>
 	</svg>
 </div>
@@ -75,18 +211,19 @@
 
 	.logo-mark,
 	.logo-title text {
-		fill: var(--dracula-purple);
+		/* Slow rotating gradient at rest */
+		fill: url(#lockup-idle);
 		transition: fill 0.3s ease;
 	}
 
 	.logo-mark {
-		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.2));
 		flex-shrink: 0;
+		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.3));
 	}
 
 	.logo-title {
 		width: auto;
-		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.2));
+		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.3));
 	}
 
 	.logo-title text {
@@ -95,23 +232,56 @@
 		font-weight: 600;
 	}
 
-	/* Hover: activate rainbow gradient */
-	.logo-lockup:hover .logo-mark,
-	.logo-lockup:hover .logo-title text {
-		fill: url(#lockup-rainbow);
+	/* Celebrate state: rainbow wave for 3s */
+	.logo-mark--celebrate,
+	.logo-title--celebrate text {
+		fill: var(--active-gradient, url(#lockup-celebrate)) !important;
 	}
 
-	.logo-lockup:hover .logo-mark,
-	.logo-lockup:hover .logo-title {
-		filter: drop-shadow(0 0 16px rgba(189, 147, 249, 0.3));
+	.logo-mark--celebrate,
+	.logo-title--celebrate {
+		filter: drop-shadow(0 0 20px rgba(189, 147, 249, 0.4));
+	}
+
+	/* Party mode: fast rainbow + wobble */
+	.logo-mark--party,
+	.logo-title--party text {
+		fill: var(--active-gradient, url(#lockup-party)) !important;
+	}
+
+	.logo-mark--party,
+	.logo-title--party {
+		filter: drop-shadow(0 0 24px rgba(189, 147, 249, 0.5));
+		animation: wobble var(--anim-party, 0.5s) ease-in-out infinite;
+	}
+
+	/* Showcase mode: slow rainbow wave for About/Help */
+	.logo-mark--showcase,
+	.logo-title--showcase text {
+		fill: var(--active-gradient, url(#lockup-showcase)) !important;
+	}
+
+	.logo-mark--showcase,
+	.logo-title--showcase {
+		filter: drop-shadow(0 0 16px rgba(189, 147, 249, 0.4));
 	}
 
 	/* Respect reduced motion preference */
 	@media (prefers-reduced-motion: reduce) {
-		.logo-lockup:hover .logo-mark,
-		.logo-lockup:hover .logo-title text {
-			/* Keep static purple instead of animated gradient */
-			fill: var(--dracula-purple);
+		.logo-mark,
+		.logo-title text {
+			/* Static purple when motion reduced */
+			fill: var(--dracula-purple) !important;
+		}
+
+		.logo-mark,
+		.logo-title {
+			filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.2));
+		}
+
+		.logo-mark--party,
+		.logo-title--party {
+			animation: none;
 		}
 	}
 
@@ -119,6 +289,20 @@
 	@media (max-width: 600px) {
 		.logo-title {
 			display: none;
+		}
+	}
+
+	/* Wobble keyframe for party mode */
+	@keyframes wobble {
+		0%,
+		100% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(-3deg);
+		}
+		75% {
+			transform: rotate(3deg);
 		}
 	}
 </style>

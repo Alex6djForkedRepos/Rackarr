@@ -1,10 +1,12 @@
 <!--
-  Help Panel Component
+  About Panel Component
   Shows app information, keyboard shortcuts, and links
 -->
 <script lang="ts">
 	import { VERSION } from '$lib/version';
 	import Dialog from './Dialog.svelte';
+	import LogoLockup from './LogoLockup.svelte';
+	import { getToastStore } from '$lib/stores/toast.svelte';
 
 	interface Props {
 		open: boolean;
@@ -13,31 +15,70 @@
 
 	let { open, onclose }: Props = $props();
 
-	// Keyboard shortcuts
-	const shortcuts = [
-		{ key: 'Escape', action: 'Clear selection / Close dialog' },
-		{ key: 'Delete / Backspace', action: 'Delete selected rack or device' },
-		{ key: 'Arrow Up', action: 'Move device up 1U' },
-		{ key: 'Arrow Down', action: 'Move device down 1U' },
-		{ key: 'I', action: 'Toggle display mode (Label/Image)' },
-		{ key: 'A', action: 'Toggle airflow visualization' },
-		{ key: 'F', action: 'Fit all (zoom to fit)' },
-		{ key: 'Ctrl/Cmd + Z', action: 'Undo' },
-		{ key: 'Ctrl/Cmd + Shift + Z', action: 'Redo' },
-		{ key: 'Ctrl/Cmd + Y', action: 'Redo (alternative)' },
-		{ key: 'Ctrl/Cmd + S', action: 'Save layout (.rackarr.zip)' },
-		{ key: 'Ctrl/Cmd + O', action: 'Load layout' },
-		{ key: 'Ctrl/Cmd + E', action: 'Export image' },
-		{ key: '?', action: 'Show help' }
-	];
+	const toastStore = getToastStore();
 
-	// Repository links
-	const links = [
+	// Get browser user agent for troubleshooting
+	const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown';
+
+	// Toggle for showing debug info
+	let showDebugInfo = $state(false);
+
+	async function copyDebugInfo() {
+		const text = `Rackarr v${VERSION} on ${userAgent}`;
+		try {
+			if (navigator.clipboard && window.isSecureContext) {
+				await navigator.clipboard.writeText(text);
+			} else {
+				const textArea = document.createElement('textarea');
+				textArea.value = text;
+				textArea.style.position = 'fixed';
+				textArea.style.left = '-9999px';
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand('copy');
+				document.body.removeChild(textArea);
+			}
+			toastStore.showToast('Debug info copied', 'success', 2000);
+		} catch {
+			toastStore.showToast('Failed to copy', 'error');
+		}
+	}
+
+	function toggleDebugInfo() {
+		showDebugInfo = !showDebugInfo;
+	}
+
+	// Keyboard shortcuts grouped by category
+	const shortcutGroups = [
 		{
-			name: 'GitHub Repository',
-			url: 'https://github.com/ggfevans/rackarr'
+			name: 'General',
+			shortcuts: [
+				{ key: 'Escape', action: 'Clear selection / Close dialog' },
+				{ key: 'I', action: 'Toggle display mode' },
+				{ key: 'A', action: 'Toggle airflow' },
+				{ key: 'F', action: 'Fit all (zoom to fit)' }
+			]
+		},
+		{
+			name: 'Editing',
+			shortcuts: [
+				{ key: 'Delete', action: 'Delete selected' },
+				{ key: '↑ / ↓', action: 'Move device up/down 1U' }
+			]
+		},
+		{
+			name: 'File',
+			shortcuts: [
+				{ key: 'Ctrl/Cmd + S', action: 'Save layout' },
+				{ key: 'Ctrl/Cmd + O', action: 'Load layout' },
+				{ key: 'Ctrl/Cmd + E', action: 'Export image' },
+				{ key: 'Ctrl/Cmd + Z', action: 'Undo' },
+				{ key: 'Ctrl/Cmd + Shift + Z', action: 'Redo' }
+			]
 		}
 	];
+
+	const GITHUB_URL = 'https://github.com/rackarr/rackarr';
 
 	function handleClose() {
 		onclose?.();
@@ -59,208 +100,245 @@
 	});
 </script>
 
-<Dialog {open} title="Help" width="500px" onclose={handleClose}>
-	<div class="help-content">
-		<section class="help-section">
-			<div class="app-header">
-				<h3 class="app-name">Rackarr</h3>
-				<span class="version">v{VERSION}</span>
+<Dialog {open} title="About" width="600px" onclose={handleClose}>
+	<div class="about-content">
+		<!-- Header: Logo + Version + GitHub -->
+		<header class="about-header">
+			<div class="brand-row">
+				<LogoLockup size={48} />
+				<button
+					type="button"
+					class="version-btn"
+					onclick={toggleDebugInfo}
+					title="Click to show debug info"
+				>
+					v{VERSION}
+					<svg
+						class="chevron-icon"
+						class:expanded={showDebugInfo}
+						viewBox="0 0 16 16"
+						width="12"
+						height="12"
+						aria-hidden="true"
+					>
+						<path
+							fill="currentColor"
+							d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z"
+						/>
+					</svg>
+				</button>
 			</div>
-			<p class="description">
-				A visual rack layout designer for homelabbers. Plan and document your server rack
-				configurations with an intuitive drag-and-drop interface.
-			</p>
-		</section>
+			<a
+				href={GITHUB_URL}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="github-link"
+				title="View on GitHub"
+			>
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-label="GitHub">
+					<path
+						fill="currentColor"
+						d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"
+					/>
+				</svg>
+			</a>
+		</header>
 
-		<section class="help-section">
-			<h4>Features</h4>
-			<ul class="features-list">
-				<li>Drag and drop devices from the library to build your rack</li>
-				<li>10" and 19" rack width support</li>
-				<li>Device images (front/rear) with Label/Image display toggle</li>
-				<li>Airflow visualization with conflict detection</li>
-				<li>Export as PNG, JPEG, SVG, or PDF with optional bundled metadata</li>
-				<li>Save layouts as .rackarr.zip with embedded images</li>
-			</ul>
-		</section>
+		<!-- Debug info (expandable) -->
+		{#if showDebugInfo}
+			<div class="debug-info">
+				<code class="user-agent">{userAgent}</code>
+				<button type="button" class="copy-btn" onclick={copyDebugInfo} title="Copy debug info">
+					<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+						<path
+							fill="currentColor"
+							d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
+						/>
+						<path
+							fill="currentColor"
+							d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
+						/>
+					</svg>
+				</button>
+			</div>
+		{/if}
 
-		<section class="help-section">
-			<h4>Keyboard Shortcuts</h4>
-			<table class="shortcuts-table">
-				<thead>
-					<tr>
-						<th>Key</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each shortcuts as { key, action } (key)}
-						<tr>
-							<td class="key-cell">{key}</td>
-							<td>{action}</td>
-						</tr>
+		<!-- Keyboard Shortcuts (grouped) -->
+		{#each shortcutGroups as group (group.name)}
+			<section class="shortcut-group">
+				<h4>{group.name}</h4>
+				<div class="shortcuts-list">
+					{#each group.shortcuts as { key, action } (key)}
+						<div class="shortcut-row">
+							<kbd class="key-cell">{key}</kbd>
+							<span class="action">{action}</span>
+						</div>
 					{/each}
-				</tbody>
-			</table>
-		</section>
+				</div>
+			</section>
+		{/each}
 
-		<section class="help-section">
-			<h4>Links</h4>
-			<ul class="links-list">
-				{#each links as { name, url } (url)}
-					<li>
-						<a href={url} target="_blank" rel="noopener noreferrer">{name}</a>
-					</li>
-				{/each}
-			</ul>
-		</section>
-
-		<section class="help-section">
-			<h4>License</h4>
-			<p class="license">MIT License</p>
-		</section>
-	</div>
-
-	<div class="dialog-actions">
-		<button type="button" class="btn-primary" onclick={handleClose} aria-label="Close">
-			Close
-		</button>
+		<p class="made-in">Made in Canada 🇨🇦 with ❤️</p>
 	</div>
 </Dialog>
 
 <style>
-	.help-content {
+	.about-content {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-5);
+		gap: var(--space-4);
 	}
 
-	.help-section {
+	/* Header row: Logo + Version + GitHub */
+	.about-header {
 		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-	}
-
-	.help-section h4 {
-		margin: 0;
-		font-size: var(--font-size-base);
-		font-weight: 600;
-		color: var(--colour-text);
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: var(--space-3);
 		border-bottom: 1px solid var(--colour-border);
-		padding-bottom: var(--space-2);
 	}
 
-	.app-header {
+	.brand-row {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		gap: var(--space-3);
 	}
 
-	.app-name {
-		margin: 0;
-		font-size: var(--font-size-2xl);
-		font-weight: 700;
-		color: var(--colour-text);
-	}
-
-	.version {
-		font-size: var(--font-size-base);
-		color: var(--colour-text-muted);
-	}
-
-	.description {
-		margin: 0;
-		font-size: var(--font-size-base);
-		color: var(--colour-text-muted);
-		line-height: 1.5;
-	}
-
-	.shortcuts-table {
-		width: 100%;
-		border-collapse: collapse;
+	.version-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		padding: var(--space-1) var(--space-2);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: var(--radius-sm);
+		cursor: pointer;
 		font-size: var(--font-size-sm);
-	}
-
-	.shortcuts-table th,
-	.shortcuts-table td {
-		padding: var(--space-2);
-		text-align: left;
-		border-bottom: 1px solid var(--colour-border);
-	}
-
-	.shortcuts-table th {
-		font-weight: 600;
+		font-family: var(--font-mono, monospace);
 		color: var(--colour-text-muted);
+		transition: all 0.15s ease;
 	}
 
-	.shortcuts-table td {
+	.version-btn:hover {
+		background: var(--colour-surface);
+		border-color: var(--colour-border);
 		color: var(--colour-text);
 	}
 
-	.key-cell {
-		font-family: monospace;
+	.chevron-icon {
+		transition: transform 0.15s ease;
+	}
+
+	.chevron-icon.expanded {
+		transform: rotate(180deg);
+	}
+
+	.github-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--colour-text-muted);
+		transition:
+			color 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.github-link:hover {
+		color: var(--colour-text);
+		transform: scale(1.1);
+	}
+
+	/* Debug info panel */
+	.debug-info {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-2);
 		background: var(--colour-surface);
 		border-radius: var(--radius-sm);
-		padding: 4px var(--space-2) !important;
-		white-space: nowrap;
+		border: 1px solid var(--colour-border);
 	}
 
-	.features-list {
-		margin: 0;
-		padding: 0 0 0 var(--space-5);
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		font-size: var(--font-size-sm);
+	.debug-info .user-agent {
+		flex: 1;
+		font-size: var(--font-size-xs);
 		color: var(--colour-text-muted);
+		font-family: var(--font-mono, monospace);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
-	.links-list {
-		margin: 0;
-		padding: 0;
-		list-style: none;
+	.copy-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--space-1);
+		background: transparent;
+		border: none;
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+		color: var(--colour-text-muted);
+		transition:
+			color 0.15s ease,
+			background 0.15s ease;
+	}
+
+	.copy-btn:hover {
+		color: var(--colour-selection);
+		background: var(--colour-surface-hover);
+	}
+
+	/* Shortcut groups */
+	.shortcut-group {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
 	}
 
-	.links-list a {
-		color: var(--colour-selection);
-		text-decoration: none;
-		font-size: var(--font-size-base);
-	}
-
-	.links-list a:hover {
-		text-decoration: underline;
-	}
-
-	.license {
+	.shortcut-group h4 {
 		margin: 0;
-		font-size: var(--font-size-base);
+		font-size: var(--font-size-sm);
+		font-weight: 500;
+		color: var(--colour-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.shortcuts-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.shortcut-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		font-size: var(--font-size-sm);
+	}
+
+	.key-cell {
+		min-width: 140px;
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-xs);
+		background: var(--colour-surface);
+		border: 1px solid var(--colour-border);
+		border-radius: var(--radius-sm);
+		padding: 2px var(--space-2);
+		color: var(--colour-text);
+	}
+
+	.action {
 		color: var(--colour-text-muted);
 	}
 
-	.dialog-actions {
-		display: flex;
-		justify-content: flex-end;
-		margin-top: var(--space-5);
-		padding-top: var(--space-4);
+	.made-in {
+		margin: 0;
+		padding-top: var(--space-3);
+		font-size: var(--font-size-sm);
+		color: var(--colour-text-muted);
+		text-align: center;
 		border-top: 1px solid var(--colour-border);
-	}
-
-	.btn-primary {
-		padding: var(--space-2) var(--space-5);
-		border-radius: var(--radius-sm);
-		font-size: var(--font-size-base);
-		font-weight: 500;
-		cursor: pointer;
-		background: var(--colour-selection);
-		border: none;
-		color: var(--neutral-50);
-		transition: background-color 0.15s ease;
-	}
-
-	.btn-primary:hover {
-		background: var(--colour-selection-hover);
 	}
 </style>

@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import AnimationDefs from '$lib/components/AnimationDefs.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
@@ -23,6 +24,7 @@
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getToastStore } from '$lib/stores/toast.svelte';
 	import { getImageStore } from '$lib/stores/images.svelte';
+	import { createKonamiDetector } from '$lib/utils/konami';
 	import type { ImageData } from '$lib/types/images';
 	import { openFilePicker } from '$lib/utils/file';
 	import {
@@ -58,6 +60,37 @@
 	let deleteTarget: { type: 'rack' | 'device'; name: string } | null = $state(null);
 	let showReplaceDialog = $state(false);
 	let pendingSaveFirst = $state(false);
+
+	// Party Mode easter egg (triggered by Konami code)
+	let partyMode = $state(false);
+	let partyModeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	// Konami detector for party mode
+	const konamiDetector = createKonamiDetector(() => {
+		activatePartyMode();
+	});
+
+	function activatePartyMode() {
+		// Check for reduced motion preference
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			toastStore.showToast('Party Mode disabled (reduced motion preference)', 'info');
+			return;
+		}
+
+		// Clear existing timeout if party mode is re-triggered
+		if (partyModeTimeout) {
+			clearTimeout(partyModeTimeout);
+		}
+
+		partyMode = true;
+		toastStore.showToast('Party Mode!', 'info', 3000);
+
+		// Auto-disable after 5 seconds
+		partyModeTimeout = setTimeout(() => {
+			partyMode = false;
+			partyModeTimeout = null;
+		}, 5000);
+	}
 
 	// Auto-open new rack dialog when no racks exist (first-load experience)
 	// Uses onMount to run once on initial load, not reactively
@@ -388,7 +421,10 @@
 	});
 </script>
 
-<svelte:window onbeforeunload={handleBeforeUnload} />
+<svelte:window
+	onbeforeunload={handleBeforeUnload}
+	onkeydown={(e) => konamiDetector.handleKeyDown(e)}
+/>
 
 <div class="app-layout">
 	<Toolbar
@@ -397,6 +433,7 @@
 		theme={uiStore.theme}
 		displayMode={uiStore.displayMode}
 		airflowMode={uiStore.airflowMode}
+		{partyMode}
 		onnewrack={handleNewRack}
 		onsave={handleSave}
 		onload={handleLoad}
@@ -410,7 +447,7 @@
 	/>
 
 	<main class="app-main">
-		<Sidebar side="left" title="Device Library">
+		<Sidebar side="left">
 			<DevicePalette onadddevice={handleAddDevice} />
 		</Sidebar>
 
@@ -475,6 +512,9 @@
 		onhelp={handleHelp}
 		ontoggledisplaymode={handleToggleDisplayMode}
 	/>
+
+	<!-- Global SVG gradient definitions for animations -->
+	<AnimationDefs />
 </div>
 
 <style>

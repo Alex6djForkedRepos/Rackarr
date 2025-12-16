@@ -351,9 +351,10 @@ describe('Export Utilities', () => {
 
 	describe('generateExportFilename', () => {
 		// Mock date for consistent test results
+		// Use noon UTC to avoid timezone issues (works for UTC-11 to UTC+12)
 		beforeEach(() => {
 			vi.useFakeTimers();
-			vi.setSystemTime(new Date('2025-12-12'));
+			vi.setSystemTime(new Date('2025-12-12T12:00:00Z'));
 		});
 
 		afterEach(() => {

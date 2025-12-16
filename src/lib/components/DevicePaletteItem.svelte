@@ -144,12 +144,12 @@
 	}
 
 	.device-height {
-		background-color: var(--colour-surface-raised);
+		background-color: var(--colour-surface-active);
 		padding: 2px var(--space-2);
 		border-radius: var(--radius-full);
 		font-size: var(--font-size-xs);
-		font-weight: var(--font-weight-medium);
-		color: var(--colour-text-muted);
+		font-weight: var(--font-weight-semibold);
+		color: var(--colour-text);
 		flex-shrink: 0;
 	}
 </style>

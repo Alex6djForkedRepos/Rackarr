@@ -145,12 +145,12 @@
 	}
 
 	.btn-choose {
-		background: var(--colour-button-bg, #3a3a3a);
+		background: var(--button-bg);
 		color: var(--colour-text);
 	}
 
 	.btn-choose:hover {
-		background: var(--colour-button-hover);
+		background: var(--button-bg-hover);
 	}
 
 	.btn-remove {

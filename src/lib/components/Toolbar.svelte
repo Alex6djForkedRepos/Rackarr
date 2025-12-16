@@ -33,6 +33,7 @@
 		theme?: 'dark' | 'light';
 		displayMode?: DisplayMode;
 		airflowMode?: boolean;
+		partyMode?: boolean;
 		onnewrack?: () => void;
 		onsave?: () => void;
 		onload?: () => void;
@@ -51,6 +52,7 @@
 		theme = 'dark',
 		displayMode = 'label',
 		airflowMode = false,
+		partyMode = false,
 		onnewrack,
 		onsave,
 		onload,
@@ -139,14 +141,14 @@
 				aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
 				onclick={toggleDrawer}
 			>
-				<LogoLockup size={36} />
+				<LogoLockup size={36} {partyMode} />
 				<span class="hamburger-icon" aria-hidden="true">
 					<IconMenu size={20} />
 				</span>
 			</button>
 		{:else}
 			<div class="toolbar-brand">
-				<LogoLockup size={36} />
+				<LogoLockup size={36} {partyMode} />
 			</div>
 		{/if}
 	</div>
@@ -342,7 +344,8 @@
 	}
 
 	.toolbar-left {
-		flex: 0 0 auto;
+		flex: 0 0 var(--sidebar-width);
+		justify-content: center;
 	}
 
 	.toolbar-center {
@@ -362,7 +365,7 @@
 		align-items: center;
 		gap: var(--space-2);
 		color: var(--colour-text);
-		padding: var(--space-2) var(--space-4) var(--space-2) 0;
+		padding: var(--space-2);
 		cursor: default;
 		border-radius: var(--radius-md);
 		transition: background-color var(--duration-fast) var(--ease-out);

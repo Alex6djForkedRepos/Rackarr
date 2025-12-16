@@ -27,8 +27,10 @@
 		return false;
 	});
 
-	// Stripe color based on intake/exhaust
-	const stripeColor = $derived(isIntakeSide ? '#60a5fa' : '#f87171');
+	// Stripe color based on intake/exhaust (uses CSS custom properties from tokens)
+	const stripeColor = $derived(
+		isIntakeSide ? 'var(--colour-airflow-intake)' : 'var(--colour-airflow-exhaust)'
+	);
 
 	// Stripe position: LEFT for front view, RIGHT for rear view
 	const stripeX = $derived(view === 'front' ? 0 : width - STRIPE_WIDTH);
@@ -76,7 +78,7 @@
 			cx={width / 2}
 			cy={height / 2}
 			r={circleRadius}
-			stroke="#9ca3af"
+			stroke="var(--colour-airflow-passive)"
 			stroke-width="2"
 			fill="none"
 			opacity="0.7"

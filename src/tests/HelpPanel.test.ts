@@ -30,28 +30,23 @@ describe('HelpPanel', () => {
 
 			expect(screen.getByText(new RegExp(VERSION))).toBeInTheDocument();
 		});
-
-		it('shows app description', () => {
-			render(HelpPanel, { props: { open: true } });
-
-			expect(screen.getByText(/rack layout designer/i)).toBeInTheDocument();
-		});
 	});
 
 	describe('Keyboard Shortcuts', () => {
-		it('shows keyboard shortcuts section', () => {
+		it('shows shortcut categories', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			expect(screen.getByText(/keyboard shortcuts/i)).toBeInTheDocument();
+			expect(screen.getByText('General')).toBeInTheDocument();
+			expect(screen.getByText('Editing')).toBeInTheDocument();
+			expect(screen.getByText('File')).toBeInTheDocument();
 		});
 
 		it('lists common shortcuts', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			// Check for some key shortcuts from spec Section 8
-			expect(screen.getByText(/escape/i)).toBeInTheDocument();
-			// Check for Delete key in key-cell
-			expect(screen.getByText(/delete.*backspace/i)).toBeInTheDocument();
+			// Check for some key shortcuts
+			expect(screen.getByText('Escape')).toBeInTheDocument();
+			expect(screen.getByText('Delete')).toBeInTheDocument();
 		});
 
 		it('shows Ctrl/Cmd shortcuts', () => {
@@ -63,77 +58,35 @@ describe('HelpPanel', () => {
 	});
 
 	describe('Links', () => {
-		it('shows repository links', () => {
-			render(HelpPanel, { props: { open: true } });
-
-			const links = screen.getAllByRole('link');
-			const repoLinks = links.filter(
-				(link) =>
-					link.getAttribute('href')?.includes('git') ||
-					link.getAttribute('href')?.includes('github')
-			);
-
-			expect(repoLinks.length).toBeGreaterThan(0);
-		});
-
-		it('shows GitHub repository link', () => {
+		it('shows GitHub link icon', () => {
 			render(HelpPanel, { props: { open: true } });
 
 			expect(screen.getByRole('link', { name: /github/i })).toBeInTheDocument();
 		});
 
-		it('does not show Forgejo link', () => {
+		it('GitHub link points to correct repository', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			expect(screen.queryByText(/forgejo/i)).not.toBeInTheDocument();
-			expect(screen.queryByText(/primary repository/i)).not.toBeInTheDocument();
+			const githubLink = screen.getByRole('link', { name: /github/i });
+			expect(githubLink.getAttribute('href')).toBe('https://github.com/rackarr/rackarr');
 		});
 
-		it('links open in new tab', () => {
+		it('GitHub link opens in new tab', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			const links = screen.getAllByRole('link');
-			links.forEach((link) => {
-				expect(link.getAttribute('target')).toBe('_blank');
-			});
+			const githubLink = screen.getByRole('link', { name: /github/i });
+			expect(githubLink.getAttribute('target')).toBe('_blank');
 		});
 
-		it('links have rel="noopener noreferrer" for security', () => {
+		it('GitHub link has rel="noopener noreferrer" for security', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			const links = screen.getAllByRole('link');
-			links.forEach((link) => {
-				expect(link.getAttribute('rel')).toContain('noopener');
-			});
-		});
-	});
-
-	describe('License', () => {
-		it('shows MIT license', () => {
-			render(HelpPanel, { props: { open: true } });
-
-			expect(screen.getByText(/mit license/i)).toBeInTheDocument();
+			const githubLink = screen.getByRole('link', { name: /github/i });
+			expect(githubLink.getAttribute('rel')).toContain('noopener');
 		});
 	});
 
 	describe('Close Actions', () => {
-		it('close button dispatches close event', async () => {
-			const onClose = vi.fn();
-
-			render(HelpPanel, {
-				props: { open: true, onclose: onClose }
-			});
-
-			// Get the primary close button (not the dialog X button)
-			const closeButtons = screen.getAllByRole('button', { name: /close/i });
-			// The main close button is the btn-primary one
-			const mainCloseButton = closeButtons.find((btn) => btn.classList.contains('btn-primary'));
-			expect(mainCloseButton).toBeDefined();
-			await fireEvent.click(mainCloseButton!);
-
-			expect(onClose).toHaveBeenCalledTimes(1);
-		});
-
 		it('escape key dispatches close event', async () => {
 			const onClose = vi.fn();
 

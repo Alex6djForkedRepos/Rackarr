@@ -257,8 +257,25 @@
 </g>
 
 <style>
+	.rack-device {
+		/* Enable GPU-accelerated transforms for smooth animations */
+		will-change: transform, filter;
+		transition:
+			transform var(--anim-drag-settle, 0.15s) ease-out,
+			filter var(--anim-drag-settle, 0.15s) ease-out;
+	}
+
 	.rack-device.dragging {
-		opacity: 0.5;
+		opacity: 0.7;
+		/* Scale up slightly and add drop shadow on drag */
+		transform: scale(1.02);
+		transform-origin: center center;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+	}
+
+	/* Hover state: subtle lift before dragging */
+	.rack-device:hover:not(.dragging) {
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 	}
 
 	.drag-overlay {
@@ -304,7 +321,7 @@
 
 	.airflow-conflict {
 		fill: none;
-		stroke: var(--colour-airflow-conflict, #f59e0b);
+		stroke: var(--colour-airflow-conflict);
 		stroke-width: 2;
 		pointer-events: none;
 	}
@@ -388,5 +405,16 @@
 
 	.device-image {
 		pointer-events: none;
+	}
+
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.rack-device {
+			transition: none;
+		}
+
+		.rack-device.dragging {
+			transform: none;
+		}
 	}
 </style>

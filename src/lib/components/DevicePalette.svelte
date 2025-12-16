@@ -228,7 +228,6 @@
 
 	.search-container {
 		padding: var(--space-4) var(--space-2) var(--space-3);
-		border-bottom: 1px solid var(--colour-border);
 	}
 
 	.search-input {
@@ -262,14 +261,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		width: 100%;
+		width: calc(100% - var(--space-4));
 		padding: var(--space-2) var(--space-3);
 		font-size: var(--font-size-sm);
 		font-weight: 600;
 		text-align: left;
 		background: var(--colour-surface-secondary);
 		border: none;
-		border-bottom: 1px solid var(--colour-border);
+		border-radius: var(--radius-sm);
+		margin: var(--space-1) var(--space-2);
 		cursor: pointer;
 		color: var(--colour-text);
 		transition:
@@ -375,7 +375,6 @@
 
 	.actions {
 		padding: var(--space-3);
-		border-top: 1px solid var(--colour-border);
 	}
 
 	.actions-row {

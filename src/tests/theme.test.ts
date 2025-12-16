@@ -1,10 +1,33 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi, beforeAll, afterAll } from 'vitest';
 import { loadThemeFromStorage, saveThemeToStorage, applyThemeToDocument } from '$lib/utils/theme';
 
+// Mock localStorage for tests
+const mockStorage: Record<string, string> = {};
+const mockLocalStorage = {
+	getItem: (key: string) => mockStorage[key] ?? null,
+	setItem: (key: string, value: string) => {
+		mockStorage[key] = value;
+	},
+	removeItem: (key: string) => {
+		delete mockStorage[key];
+	},
+	clear: () => {
+		Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+	}
+};
+
 describe('theme utilities', () => {
+	beforeAll(() => {
+		vi.stubGlobal('localStorage', mockLocalStorage);
+	});
+
+	afterAll(() => {
+		vi.unstubAllGlobals();
+	});
+
 	describe('loadThemeFromStorage', () => {
-		beforeEach(() => {
-			localStorage.clear();
+		afterEach(() => {
+			delete mockStorage['rackarr_theme'];
 		});
 
 		it('returns dark as default when no theme is stored', () => {
@@ -12,30 +35,30 @@ describe('theme utilities', () => {
 		});
 
 		it('returns stored theme when valid', () => {
-			localStorage.setItem('rackarr_theme', 'light');
+			mockStorage['rackarr_theme'] = 'light';
 			expect(loadThemeFromStorage()).toBe('light');
 
-			localStorage.setItem('rackarr_theme', 'dark');
+			mockStorage['rackarr_theme'] = 'dark';
 			expect(loadThemeFromStorage()).toBe('dark');
 		});
 
 		it('returns dark for invalid stored value', () => {
-			localStorage.setItem('rackarr_theme', 'invalid');
+			mockStorage['rackarr_theme'] = 'invalid';
 			expect(loadThemeFromStorage()).toBe('dark');
 		});
 	});
 
 	describe('saveThemeToStorage', () => {
-		beforeEach(() => {
-			localStorage.clear();
+		afterEach(() => {
+			delete mockStorage['rackarr_theme'];
 		});
 
 		it('saves theme to localStorage', () => {
 			saveThemeToStorage('light');
-			expect(localStorage.getItem('rackarr_theme')).toBe('light');
+			expect(mockStorage['rackarr_theme']).toBe('light');
 
 			saveThemeToStorage('dark');
-			expect(localStorage.getItem('rackarr_theme')).toBe('dark');
+			expect(mockStorage['rackarr_theme']).toBe('dark');
 		});
 	});
 
