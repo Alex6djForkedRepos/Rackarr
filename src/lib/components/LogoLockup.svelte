@@ -75,18 +75,18 @@
 
 	.logo-mark,
 	.logo-title text {
-		fill: var(--dracula-pink);
+		fill: var(--dracula-purple);
 		transition: fill 0.3s ease;
 	}
 
 	.logo-mark {
-		filter: drop-shadow(0 0 8px rgba(255, 121, 198, 0.2));
+		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.2));
 		flex-shrink: 0;
 	}
 
 	.logo-title {
 		width: auto;
-		filter: drop-shadow(0 0 8px rgba(255, 121, 198, 0.2));
+		filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.2));
 	}
 
 	.logo-title text {
@@ -110,8 +110,8 @@
 	@media (prefers-reduced-motion: reduce) {
 		.logo-lockup:hover .logo-mark,
 		.logo-lockup:hover .logo-title text {
-			/* Keep static pink instead of animated gradient */
-			fill: var(--dracula-pink);
+			/* Keep static purple instead of animated gradient */
+			fill: var(--dracula-purple);
 		}
 	}
 

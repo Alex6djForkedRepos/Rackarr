@@ -428,9 +428,9 @@ The logo lockup combines the logo mark with the "Rackarr" wordmark as a unified 
 
 | State          | Appearance                                  |
 | -------------- | ------------------------------------------- |
-| Rest           | Static pink (`#FF79C6`)                     |
+| Rest           | Static purple (`#BD93F9`)                   |
 | Hover          | Animated rainbow gradient (Dracula accents) |
-| Reduced motion | Stays static pink on hover                  |
+| Reduced motion | Stays static purple on hover                |
 
 ### Animated Gradient
 
