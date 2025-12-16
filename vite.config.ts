@@ -14,7 +14,11 @@ export default defineConfig(() => ({
 	plugins: [svelte()],
 	define: {
 		// Inject version at build time
-		__APP_VERSION__: JSON.stringify(pkg.version)
+		__APP_VERSION__: JSON.stringify(pkg.version),
+		// Umami analytics configuration
+		__UMAMI_ENABLED__: JSON.stringify(process.env.VITE_UMAMI_ENABLED === 'true'),
+		__UMAMI_SCRIPT_URL__: JSON.stringify(process.env.VITE_UMAMI_SCRIPT_URL || ''),
+		__UMAMI_WEBSITE_ID__: JSON.stringify(process.env.VITE_UMAMI_WEBSITE_ID || '')
 	},
 	resolve: {
 		alias: {

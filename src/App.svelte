@@ -43,6 +43,7 @@
 		generateExportFilename
 	} from '$lib/utils/export';
 	import type { ExportOptions } from '$lib/types';
+	import { analytics } from '$lib/utils/analytics';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -148,6 +149,10 @@
 			layoutStore.markClean();
 			toastStore.showToast(`Saved ${filename}`, 'success', 3000);
 
+			// Track save event
+			const deviceCount = layoutStore.rack?.devices.length ?? 0;
+			analytics.trackSave(deviceCount);
+
 			// After save, if pendingSaveFirst, reset and open new rack form
 			if (pendingSaveFirst) {
 				pendingSaveFirst = false;
@@ -195,6 +200,10 @@
 			});
 
 			toastStore.showToast('Layout loaded successfully', 'success');
+
+			// Track load event
+			const deviceCount = layoutStore.rack?.devices.length ?? 0;
+			analytics.trackLoad(deviceCount);
 		} catch (error) {
 			console.error('Failed to load layout:', error);
 			toastStore.showToast(
@@ -246,6 +255,7 @@
 				);
 				downloadBlob(blob, filename);
 				toastStore.showToast('SVG exported successfully', 'success');
+				analytics.trackExportImage('svg', exportViewOrDefault);
 			} else if (options.format === 'png') {
 				const imageBlob = await exportAsPNG(svg);
 				const filename = generateExportFilename(
@@ -255,6 +265,7 @@
 				);
 				downloadBlob(imageBlob, filename);
 				toastStore.showToast('PNG exported successfully', 'success');
+				analytics.trackExportImage('png', exportViewOrDefault);
 			} else if (options.format === 'jpeg') {
 				const imageBlob = await exportAsJPEG(svg);
 				const filename = generateExportFilename(
@@ -264,6 +275,7 @@
 				);
 				downloadBlob(imageBlob, filename);
 				toastStore.showToast('JPEG exported successfully', 'success');
+				analytics.trackExportImage('jpeg', exportViewOrDefault);
 			} else if (options.format === 'pdf') {
 				const svgString = exportAsSVG(svg);
 				const pdfBlob = await exportAsPDF(svgString, options.background);
@@ -274,6 +286,7 @@
 				);
 				downloadBlob(pdfBlob, filename);
 				toastStore.showToast('PDF exported successfully', 'success');
+				analytics.trackExportPDF(exportViewOrDefault);
 			} else if (options.format === 'csv') {
 				// CSV export uses null view (no view in filename)
 				const csvContent = exportToCSV(racksToExport[0]!, layoutStore.device_types);
@@ -281,6 +294,7 @@
 				const filename = generateExportFilename(layoutStore.layout.name, null, options.format);
 				downloadBlob(blob, filename);
 				toastStore.showToast('CSV exported successfully', 'success');
+				analytics.trackExportCSV();
 			}
 		} catch (error) {
 			console.error('Export failed:', error);
@@ -350,10 +364,14 @@
 		layoutStore.updateDisplayMode(uiStore.displayMode);
 		// Also sync showLabelsOnImages for backward compatibility
 		layoutStore.updateShowLabelsOnImages(uiStore.showLabelsOnImages);
+		// Track display mode change
+		analytics.trackDisplayModeToggle(uiStore.displayMode);
 	}
 
 	function handleToggleAirflowMode() {
 		uiStore.toggleAirflowMode();
+		// Track airflow view toggle
+		analytics.trackAirflowView(uiStore.airflowMode);
 	}
 
 	function handleHelp() {
@@ -394,6 +412,9 @@
 		if (data.rearImage) {
 			imageStore.setDeviceImage(device.slug, 'rear', data.rearImage);
 		}
+
+		// Track custom device creation
+		analytics.trackCustomDeviceCreate(data.category);
 
 		addDeviceFormOpen = false;
 	}

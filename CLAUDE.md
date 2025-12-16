@@ -213,7 +213,7 @@ npm run lint         # ESLint check
 
 | Location  | URL                                               |
 | --------- | ------------------------------------------------- |
-| Live Demo | https://rackarr.github.io/Rackarr/                |
+| Live Demo | https://app.rackarr.com/                          |
 | Primary   | https://github.com/Rackarr/Rackarr                |
 | Issues    | https://github.com/Rackarr/Rackarr/issues         |
 
@@ -227,4 +227,4 @@ GitHub Pages deployment is automated via GitHub Actions on push to `main`.
 git push origin main
 ```
 
-**Analytics:** GoatCounter at `rackarr.goatcounter.com` (privacy-focused, no cookies)
+**Analytics:** Umami (self-hosted at `analytics.rackarr.com`) - privacy-focused, no cookies. Configure via `VITE_UMAMI_*` env vars. Analytics utility at `src/lib/utils/analytics.ts`.

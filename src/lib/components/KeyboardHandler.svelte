@@ -9,6 +9,7 @@
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getToastStore } from '$lib/stores/toast.svelte';
 	import { canPlaceDevice } from '$lib/utils/collision';
+	import { analytics } from '$lib/utils/analytics';
 
 	interface Props {
 		onsave?: () => void;
@@ -297,6 +298,17 @@
 		}
 	}
 
+	/**
+	 * Format a shortcut for analytics tracking
+	 */
+	function formatShortcutName(shortcut: ShortcutHandler): string {
+		const parts: string[] = [];
+		if (shortcut.ctrl || shortcut.meta) parts.push('Ctrl');
+		if (shortcut.shift) parts.push('Shift');
+		parts.push(shortcut.key.toUpperCase());
+		return parts.join('+');
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		// Ignore if in input field
 		if (shouldIgnoreKeyboard(event)) return;
@@ -307,6 +319,10 @@
 			if (matchesShortcut(event, shortcut)) {
 				event.preventDefault();
 				shortcut.action();
+
+				// Track keyboard shortcut usage
+				const shortcutName = formatShortcutName(shortcut);
+				analytics.trackKeyboardShortcut(shortcutName);
 				return;
 			}
 		}

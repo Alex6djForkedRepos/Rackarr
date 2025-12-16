@@ -1,6 +1,6 @@
 {
 	"name": "rackarr",
-	"version": "0.5.7",
+	"version": "0.5.8",
 	"description": "Rack Layout Designer for Homelabbers - A browser-based visual tool for planning server rack layouts",
 	"author": "ggfevans",
 	"license": "MIT",
@@ -37,6 +37,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^24.10.3",
+		"@types/umami-browser": "^2.18.0",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.0",

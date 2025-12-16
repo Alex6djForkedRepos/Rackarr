@@ -4,7 +4,7 @@
 
 A browser-based visual tool for planning and documenting server rack layouts. Design your homelab rack configurations with an intuitive drag-and-drop interface, then export them for documentation.
 
-**[Live Demo](https://ggfevans.github.io/rackarr/)**
+**[Live Demo](https://app.rackarr.com/)**
 
 ## Features
 
@@ -123,14 +123,31 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 ## Privacy & Analytics
 
-The hosted demo uses [GoatCounter](https://www.goatcounter.com/) for basic, privacy-focused analytics:
+The hosted demo uses [Umami](https://umami.is/) for privacy-focused analytics:
 
 - **No cookies** - No consent banner needed
-- **No personal data** - Only page views, referrers, and browser/device stats
-- **Open source** - GoatCounter is fully open source
-- **Minimal tracking** - Just basic usage metrics to understand if people find this useful
+- **No personal data** - Only page views, feature usage, and browser stats
+- **Self-hosted** - Analytics server at analytics.rackarr.com
+- **Open source** - Umami is fully open source
+- **Privacy first** - GDPR/CCPA compliant by design
 
-Self-hosted or local instances have no analytics. The GoatCounter script only runs on the GitHub Pages demo.
+Self-hosted or local instances have analytics disabled by default. Configure via environment variables:
+
+```bash
+VITE_UMAMI_ENABLED=true
+VITE_UMAMI_SCRIPT_URL=https://your-umami-instance.com/script.js
+VITE_UMAMI_WEBSITE_ID=your-website-id
+```
+
+### Events Tracked
+
+| Event | Purpose |
+|-------|---------|
+| File save/load | Usage patterns |
+| Export (image/PDF/CSV) | Feature adoption |
+| Custom device creation | Workflow insights |
+| Display mode toggle | UI preferences |
+| Keyboard shortcuts | Power user metrics |
 
 ## License
 

@@ -32,7 +32,7 @@ Homelabbers planning rack layouts. Desktop browser users (mobile support planned
 
 | Resource   | URL                                 |
 | ---------- | ----------------------------------- |
-| Live Demo  | https://ggfevans.github.io/rackarr/ |
+| Live Demo  | https://app.rackarr.com/            |
 | Repository | https://github.com/ggfevans/rackarr |
 
 ---
@@ -49,6 +49,7 @@ Homelabbers planning rack layouts. Desktop browser users (mobile support planned
 | Data Format | YAML (js-yaml)                                    |
 | Validation  | Zod                                               |
 | Styling     | CSS custom properties (design tokens)             |
+| Analytics   | Umami (self-hosted, privacy-focused)              |
 | Testing     | Vitest + @testing-library/svelte + Playwright     |
 | Build       | Vite                                              |
 
@@ -69,6 +70,7 @@ Homelabbers planning rack layouts. Desktop browser users (mobile support planned
 - `vite` ^7.2
 - `vitest` ^3.2
 - `playwright` ^1.56
+- `@types/umami-browser` ^2.18 — Umami TypeScript definitions
 
 ---
 
@@ -952,6 +954,7 @@ npm run check        # Svelte type check
 | Version | Changes                                                                      |
 | ------- | ---------------------------------------------------------------------------- |
 | 0.6.0   | Brand starter packs, export UX overhaul, CSV export, power device properties |
+| 0.5.8   | Umami analytics integration with TypeScript support and custom event tracking|
 | 0.5.0   | Type system consolidation, legacy comments cleanup                           |
 | 0.4.9   | Airflow visualization, selection bug fix                                     |
 | 0.4.8   | Design token audit, CSS cleanup                                              |
@@ -1865,6 +1868,87 @@ Self-hosted fonts for performance and privacy:
 - `font-display: swap` prevents FOIT (flash of invisible text)
 - woff2 format for modern browser support
 - Subset fonts if needed for CJK or extended Latin
+
+---
+
+## 20. Analytics
+
+### 20.1 Overview
+
+Privacy-focused analytics using [Umami](https://umami.is/), a self-hosted, cookieless analytics platform. Analytics track feature adoption and usage patterns without collecting personal data.
+
+### 20.2 Configuration
+
+Analytics are configured via Vite environment variables:
+
+| Variable               | Purpose                           | Default     |
+| ---------------------- | --------------------------------- | ----------- |
+| `VITE_UMAMI_ENABLED`   | Enable/disable analytics          | `false`     |
+| `VITE_UMAMI_SCRIPT_URL`| Umami script URL                  | (empty)     |
+| `VITE_UMAMI_WEBSITE_ID`| Website ID from Umami dashboard   | (empty)     |
+
+**Build-time constants** (injected via `vite.config.ts`):
+- `__UMAMI_ENABLED__` — Boolean flag
+- `__UMAMI_SCRIPT_URL__` — Script URL string
+- `__UMAMI_WEBSITE_ID__` — Website ID string
+
+### 20.3 Implementation
+
+**Core module:** `src/lib/utils/analytics.ts`
+
+```typescript
+// Initialize on app startup (main.ts)
+import { initAnalytics } from '$lib/utils/analytics';
+initAnalytics();
+
+// Track events from components
+import { analytics } from '$lib/utils/analytics';
+analytics.trackSave(deviceCount);
+analytics.trackExportPDF('both');
+```
+
+**Script injection:** `index.html` dynamically injects the Umami script when enabled, emitting `umami:loaded` custom event on load.
+
+**TypeScript support:** `@types/umami-browser` package provides type definitions.
+
+### 20.4 Events Tracked
+
+| Event                    | Properties                        | Trigger                    |
+| ------------------------ | --------------------------------- | -------------------------- |
+| `file:save`              | `device_count`                    | Successful layout save     |
+| `file:load`              | `device_count`                    | Successful layout load     |
+| `export:image`           | `format`, `view`                  | PNG/JPEG/SVG export        |
+| `export:pdf`             | `view`                            | PDF export                 |
+| `export:csv`             | —                                 | CSV export                 |
+| `device:create_custom`   | `category`                        | Custom device type created |
+| `feature:display_mode`   | `mode`                            | Display mode toggled       |
+| `feature:airflow_view`   | `enabled`                         | Airflow view toggled       |
+| `keyboard:shortcut`      | `shortcut`                        | Keyboard shortcut used     |
+
+### 20.5 Session Properties
+
+Session properties are set via `umami.identify()` on script load:
+
+| Property                   | Values                           | Purpose                    |
+| -------------------------- | -------------------------------- | -------------------------- |
+| `app_version`              | Semantic version (e.g., `0.5.7`) | Feature adoption tracking  |
+| `screen_category`          | `mobile`, `tablet`, `desktop`    | Responsive design insights |
+| `color_scheme_preference`  | `dark`, `light`, `no-preference` | Theme preference analysis  |
+
+### 20.6 Privacy Compliance
+
+| Requirement              | Implementation                                      |
+| ------------------------ | --------------------------------------------------- |
+| No cookies               | Umami is cookieless by design                       |
+| No personal data         | No user IDs, emails, or names collected             |
+| Disabled by default      | Requires `VITE_UMAMI_ENABLED=true`                  |
+| Dev-safe                 | Auto-disabled on localhost/127.0.0.1                |
+| Fail-safe                | Analytics errors never break the application        |
+| GDPR/CCPA compliant      | No consent banner required (no tracking cookies)    |
+
+### 20.7 Production Deployment
+
+The hosted app at `app.rackarr.com` uses a self-hosted Umami instance at `analytics.rackarr.com`.
 
 ---
 

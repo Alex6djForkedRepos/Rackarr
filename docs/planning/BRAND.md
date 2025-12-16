@@ -561,7 +561,7 @@ Official URLs for use throughout the application:
 | Token        | URL                                  | Usage                 |
 | ------------ | ------------------------------------ | --------------------- |
 | `GITHUB_URL` | `https://github.com/rackarr/rackarr` | Repository link, Help |
-| `DEMO_URL`   | `https://rackarr.github.io/Rackarr/` | Live demo link        |
+| `DEMO_URL`   | `https://app.rackarr.com/`           | Live demo link        |
 
 ---
 
