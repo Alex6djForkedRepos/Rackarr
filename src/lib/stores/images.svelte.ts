@@ -155,6 +155,30 @@ function createImageStore() {
 		return userImages;
 	}
 
+	/**
+	 * Remove images for devices not in the provided list
+	 * Preserves bundled images regardless of use list
+	 * Call this after layout changes to prevent orphaned user images
+	 * @returns Number of device entries removed
+	 */
+	function cleanupOrphanedImages(usedDeviceSlugs: Set<string>): number {
+		let removed = 0;
+
+		for (const [deviceId, deviceImages] of images) {
+			// Preserve bundled images (they're URL-based, not memory-heavy)
+			const hasBundled = deviceImages.front?.isBundled || deviceImages.rear?.isBundled;
+			if (hasBundled) continue;
+
+			// Remove user images not in use
+			if (!usedDeviceSlugs.has(deviceId)) {
+				images.delete(deviceId);
+				removed++;
+			}
+		}
+
+		return removed;
+	}
+
 	return {
 		// Methods
 		setDeviceImage,
@@ -167,6 +191,7 @@ function createImageStore() {
 		getImageUrl,
 		loadBundledImages,
 		getUserImages,
+		cleanupOrphanedImages,
 
 		// Computed (as getter)
 		get imageCount() {

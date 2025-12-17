@@ -440,4 +440,96 @@ describe('Image Store', () => {
 			expect(store.hasImage('1u-server', 'front')).toBe(true);
 		});
 	});
+
+	describe('cleanupOrphanedImages (Issue #46)', () => {
+		it('removes user images not in use list', () => {
+			const store = getImageStore();
+
+			// Add some user-uploaded images
+			store.setDeviceImage('used-device', 'front', createMockImageData('used.png'));
+			store.setDeviceImage('orphan-device', 'front', createMockImageData('orphan.png'));
+
+			// Only 'used-device' is in use
+			const usedSlugs = new Set(['used-device']);
+			const removed = store.cleanupOrphanedImages(usedSlugs);
+
+			expect(store.hasImage('used-device', 'front')).toBe(true);
+			expect(store.hasImage('orphan-device', 'front')).toBe(false);
+			expect(removed).toBe(1);
+		});
+
+		it('preserves bundled images even if not in use list', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			// Add a user image
+			store.setDeviceImage('user-device', 'front', createMockImageData('user.png'));
+
+			// Empty use list - nothing in use
+			const usedSlugs = new Set<string>();
+			store.cleanupOrphanedImages(usedSlugs);
+
+			// Bundled images should remain
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+			expect(store.hasImage('2u-server', 'front')).toBe(true);
+			// User image should be removed
+			expect(store.hasImage('user-device', 'front')).toBe(false);
+		});
+
+		it('returns count of removed devices', () => {
+			const store = getImageStore();
+
+			store.setDeviceImage('orphan-1', 'front', createMockImageData());
+			store.setDeviceImage('orphan-1', 'rear', createMockImageData()); // Same device, both faces
+			store.setDeviceImage('orphan-2', 'front', createMockImageData());
+			store.setDeviceImage('keep-this', 'front', createMockImageData());
+
+			const usedSlugs = new Set(['keep-this']);
+			const removed = store.cleanupOrphanedImages(usedSlugs);
+
+			// Should count devices removed, not individual images
+			expect(removed).toBe(2);
+			expect(store.hasImage('keep-this', 'front')).toBe(true);
+		});
+
+		it('does nothing when all images are in use', () => {
+			const store = getImageStore();
+
+			store.setDeviceImage('device-1', 'front', createMockImageData());
+			store.setDeviceImage('device-2', 'front', createMockImageData());
+
+			const usedSlugs = new Set(['device-1', 'device-2']);
+			const removed = store.cleanupOrphanedImages(usedSlugs);
+
+			expect(removed).toBe(0);
+			expect(store.hasImage('device-1', 'front')).toBe(true);
+			expect(store.hasImage('device-2', 'front')).toBe(true);
+		});
+
+		it('handles empty store gracefully', () => {
+			const store = getImageStore();
+
+			const usedSlugs = new Set(['some-device']);
+			const removed = store.cleanupOrphanedImages(usedSlugs);
+
+			expect(removed).toBe(0);
+		});
+
+		it('only removes user images with no bundled face', () => {
+			const store = getImageStore();
+
+			// A device with both bundled front and user-uploaded rear
+			store.setDeviceImage('mixed-device', 'front', createMockUrlImageData());
+			store.setDeviceImage('mixed-device', 'rear', createMockImageData());
+
+			// Device not in use
+			const usedSlugs = new Set<string>();
+			const removed = store.cleanupOrphanedImages(usedSlugs);
+
+			// Should keep the device since it has bundled content
+			expect(store.hasImage('mixed-device', 'front')).toBe(true);
+			// Bundled front preserved
+			expect(removed).toBe(0);
+		});
+	});
 });

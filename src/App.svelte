@@ -129,6 +129,9 @@
 	function handleReplace() {
 		showReplaceDialog = false;
 		layoutStore.resetLayout();
+		// Clean up orphaned user images (layout is now empty)
+		const usedSlugs = layoutStore.getUsedDeviceTypeSlugs();
+		imageStore.cleanupOrphanedImages(usedSlugs);
 		newRackFormOpen = true;
 	}
 
@@ -157,6 +160,9 @@
 			if (pendingSaveFirst) {
 				pendingSaveFirst = false;
 				layoutStore.resetLayout();
+				// Clean up orphaned user images (layout is now empty)
+				const usedSlugs = layoutStore.getUsedDeviceTypeSlugs();
+				imageStore.cleanupOrphanedImages(usedSlugs);
 				newRackFormOpen = true;
 			}
 		} catch (error) {

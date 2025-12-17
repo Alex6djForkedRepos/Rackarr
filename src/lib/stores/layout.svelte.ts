@@ -177,6 +177,9 @@ export function getLayoutStore() {
 		clearRackDevicesRaw,
 		restoreRackDevicesRaw,
 
+		// Utility
+		getUsedDeviceTypeSlugs,
+
 		// Recorded actions (use undo/redo)
 		addDeviceTypeRecorded,
 		updateDeviceTypeRecorded,
@@ -725,6 +728,29 @@ function restoreRackDevicesRaw(devices: PlacedDevice[]): void {
 			devices: [...devices]
 		}
 	};
+}
+
+/**
+ * Get all device type slugs currently in use
+ * Includes both defined device types and placed device references
+ * Use this for image store cleanup to identify orphaned images
+ */
+function getUsedDeviceTypeSlugs(): Set<string> {
+	// Plain Set is intentional - this is a utility function, not reactive state
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	const slugs = new Set<string>();
+
+	// Add all defined device types
+	for (const dt of layout.device_types) {
+		slugs.add(dt.slug);
+	}
+
+	// Add all placed device references (in case of orphaned references)
+	for (const device of layout.rack.devices) {
+		slugs.add(device.device_type);
+	}
+
+	return slugs;
 }
 
 // =============================================================================
