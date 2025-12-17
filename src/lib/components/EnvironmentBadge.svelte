@@ -1,7 +1,7 @@
 <!--
   EnvironmentBadge Component
   Visual indicator for non-production environments (DEV, LOCAL)
-  Features animated cylon-style gradient, respects prefers-reduced-motion
+  Features cylon-style text gradient animation, respects prefers-reduced-motion
 -->
 <script lang="ts">
 	// Build-time environment constant from vite.config.ts
@@ -32,8 +32,8 @@
 </script>
 
 {#if badgeText}
-	<span class="env-badge env-badge--animated" role="status" aria-label={ariaLabel}>
-		{badgeText}
+	<span class="env-badge" role="status" aria-label={ariaLabel}>
+		<span class="env-badge__text">{badgeText}</span>
 	</span>
 {/if}
 
@@ -42,44 +42,49 @@
 		display: inline-flex;
 		align-items: center;
 		padding: var(--space-1) var(--space-2);
-		font-family: var(--font-mono);
-		font-size: var(--font-size-xs);
-		font-weight: var(--font-weight-bold);
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		color: var(--env-badge-text);
 		background: var(--env-badge-bg);
 		border-radius: var(--radius-sm);
-		box-shadow: var(--env-badge-glow);
 		user-select: none;
 	}
 
-	/* Cylon-style animated gradient */
-	.env-badge--animated {
+	/* Cylon-style animated text gradient */
+	.env-badge__text {
+		font-family: var(--font-mono);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-bold);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		/* Gradient text effect */
 		background: linear-gradient(
 			90deg,
-			var(--env-badge-bg) 0%,
-			var(--env-badge-gradient-start) 50%,
-			var(--env-badge-bg) 100%
+			var(--env-badge-text) 0%,
+			var(--env-badge-text) 35%,
+			var(--env-badge-gradient-highlight) 50%,
+			var(--env-badge-text) 65%,
+			var(--env-badge-text) 100%
 		);
 		background-size: 200% 100%;
-		animation: cylon var(--env-badge-anim-duration) ease-in-out infinite;
+		background-clip: text;
+		-webkit-background-clip: text;
+		color: transparent;
+		animation: cylon-text var(--anim-env-cylon) ease-in-out infinite;
 	}
 
-	@keyframes cylon {
+	@keyframes cylon-text {
 		0%,
 		100% {
-			background-position: 200% 0;
+			background-position: 200% center;
 		}
 		50% {
-			background-position: 0% 0;
+			background-position: 0% center;
 		}
 	}
 
-	/* Respect reduced motion preference - static badge */
+	/* Respect reduced motion preference - static text */
 	@media (prefers-reduced-motion: reduce) {
-		.env-badge--animated {
-			background: var(--env-badge-bg);
+		.env-badge__text {
+			background: none;
+			color: var(--env-badge-text);
 			animation: none;
 		}
 	}

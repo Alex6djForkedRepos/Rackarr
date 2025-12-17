@@ -51,12 +51,13 @@ describe('EnvironmentBadge', () => {
 			expect(getByText('DEV')).toBeInTheDocument();
 		});
 
-		it('applies cylon animation class', () => {
+		it('has animated text element for cylon effect', () => {
 			vi.stubGlobal('__BUILD_ENV__', 'development');
 			const { container } = render(EnvironmentBadge);
 
-			const badge = container.querySelector('.env-badge');
-			expect(badge).toHaveClass('env-badge--animated');
+			const textElement = container.querySelector('.env-badge__text');
+			expect(textElement).toBeInTheDocument();
+			expect(textElement).toHaveTextContent('DEV');
 		});
 	});
 

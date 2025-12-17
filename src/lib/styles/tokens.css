@@ -291,12 +291,10 @@
 	--colour-error-hover: #cc4444;
 
 	/* Environment Badge (DEV/LOCAL indicator) */
-	--env-badge-bg: rgba(255, 85, 85, 0.15);
+	--env-badge-bg: rgba(255, 85, 85, 0.1);
 	--env-badge-text: var(--dracula-red);
-	--env-badge-glow: 0 0 8px rgba(255, 85, 85, 0.4);
-	--env-badge-gradient-start: #ff5555;
-	--env-badge-gradient-end: #ff79c6;
-	--env-badge-anim-duration: 1.5s;
+	--env-badge-gradient-highlight: var(--dracula-pink);
+	--anim-env-cylon: 6s;
 }
 
 /* ============================================================
@@ -438,11 +436,9 @@
 	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 
 	/* Environment Badge - darker red for light theme */
-	--env-badge-bg: rgba(203, 58, 42, 0.15);
+	--env-badge-bg: rgba(203, 58, 42, 0.1);
 	--env-badge-text: var(--alucard-red);
-	--env-badge-glow: 0 0 6px rgba(203, 58, 42, 0.3);
-	--env-badge-gradient-start: #cb3a2a;
-	--env-badge-gradient-end: #a3144d;
+	--env-badge-gradient-highlight: var(--alucard-pink);
 }
 
 /* ============================================================

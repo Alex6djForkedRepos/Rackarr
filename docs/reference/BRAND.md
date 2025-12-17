@@ -545,6 +545,77 @@ values="#BD93F9;#FF79C6;#8BE9FD;#50FA7B;#BD93F9"  /* purple → pink → cyan �
 
 ---
 
+## Environment Badge
+
+Visual indicator for non-production environments, displayed inline with the LogoLockup.
+
+### Component
+
+**File:** `src/lib/components/EnvironmentBadge.svelte`
+
+### Display States
+
+| Environment | Badge Text | Visibility |
+| ----------- | ---------- | ---------- |
+| Production  | —          | Hidden     |
+| Development | `DEV`      | Visible    |
+| Local       | `LOCAL`    | Visible    |
+
+### Cylon Animation
+
+The badge text features a "cylon-style" animated gradient sweep — a subtle red glow that moves left-to-right across the text.
+
+| Property | Value                         |
+| -------- | ----------------------------- |
+| Duration | 6s (very slow, subtle)        |
+| Colours  | Red gradient sweep on text    |
+| Target   | Text only (background static) |
+| Token    | `--anim-env-cylon`            |
+
+```css
+/* Cylon text gradient animation */
+@keyframes cylon-text {
+	0%,
+	100% {
+		background-position: 200% center;
+	}
+	50% {
+		background-position: 0% center;
+	}
+}
+
+.env-badge__text {
+	background: linear-gradient(
+		90deg,
+		var(--env-badge-text) 0%,
+		var(--env-badge-gradient-start) 50%,
+		var(--env-badge-text) 100%
+	);
+	background-size: 200% 100%;
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	animation: cylon-text var(--anim-env-cylon) ease-in-out infinite;
+}
+```
+
+### Design Tokens
+
+| Token                        | Dark Theme             | Light Theme            |
+| ---------------------------- | ---------------------- | ---------------------- |
+| `--env-badge-bg`             | `rgba(255,85,85,0.15)` | `rgba(203,58,42,0.15)` |
+| `--env-badge-text`           | `#FF5555`              | `#CB3A2A`              |
+| `--env-badge-gradient-start` | `#FF79C6`              | `#A3144D`              |
+| `--anim-env-cylon`           | `6s`                   | `6s`                   |
+
+### Accessibility
+
+- Uses `role="status"` for screen reader announcement
+- `aria-label` provides context ("Development environment" / "Local environment")
+- Animation respects `prefers-reduced-motion: reduce` (static text)
+
+---
+
 ## Voice & Tone
 
 - **Direct:** Say what it does, no marketing fluff
