@@ -50,6 +50,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          VITE_ENV: 'development'
           VITE_UMAMI_ENABLED: 'true'
           VITE_UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_DEV_WEBSITE_ID }}
           VITE_UMAMI_SCRIPT_URL: 'https://analytics.rackarr.com/script.js'
