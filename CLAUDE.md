@@ -146,6 +146,7 @@ docs/
 GitHub Issues is the source of truth for task tracking.
 
 **Querying work:**
+
 ```bash
 # Find next task
 gh issue list --label ready --milestone v0.6.0 --state open
@@ -155,11 +156,13 @@ gh issue view <number>
 ```
 
 **After completing an issue:**
+
 ```bash
 gh issue close <number> --comment "Implemented in <commit-hash>"
 ```
 
 **Issue structure provides:**
+
 - Acceptance Criteria → Requirements checklist
 - Technical Notes → Implementation guidance
 - Test Requirements → TDD test cases
@@ -256,20 +259,44 @@ npm run lint         # ESLint check
 
 ## Repository
 
-| Location  | URL                                               |
-| --------- | ------------------------------------------------- |
-| Live Demo | https://app.rackarr.com/                          |
-| Primary   | https://github.com/Rackarr/Rackarr                |
-| Issues    | https://github.com/Rackarr/Rackarr/issues         |
+| Location    | URL                                       |
+| ----------- | ----------------------------------------- |
+| Production  | https://app.rackarr.com/                  |
+| Dev/Preview | https://dev.rackarr.com/                  |
+| Primary     | https://github.com/Rackarr/Rackarr        |
+| Issues      | https://github.com/Rackarr/Rackarr/issues |
 
 ## Deployment
 
-GitHub Pages deployment is automated via GitHub Actions on push to `main`.
+Two environments with different deployment triggers:
 
-**Manual deploy:** Push to main triggers deployment:
+| Environment | URL             | Trigger        | Infrastructure |
+| ----------- | --------------- | -------------- | -------------- |
+| **Dev**     | dev.rackarr.com | Push to `main` | GitHub Pages   |
+| **Prod**    | app.rackarr.com | Git tag `v*`   | VPS (Docker)   |
+
+### Dev Deployment
+
+Automatically deploys on every push to `main` (after lint/tests pass):
 
 ```bash
-git push origin main
+git push origin main  # Triggers: lint → test → build → deploy to GitHub Pages
 ```
 
-**Analytics:** Umami (self-hosted at `analytics.rackarr.com`) - privacy-focused, no cookies. Configure via `VITE_UMAMI_*` env vars. Analytics utility at `src/lib/utils/analytics.ts`.
+### Production Deployment
+
+Deploys when a version tag is pushed:
+
+```bash
+npm version patch     # Creates v0.5.9 tag
+git push && git push --tags  # Triggers: Docker build → push to ghcr.io → VPS pulls and runs
+```
+
+### Workflow
+
+1. Develop locally (`npm run dev`)
+2. Push to `main` → auto-deploys to dev.rackarr.com
+3. Test on dev environment
+4. Tag release → auto-deploys to app.rackarr.com
+
+**Analytics:** Umami (self-hosted at `analytics.rackarr.com`) - privacy-focused, no cookies. Separate tracking for dev and prod environments. Configure via `VITE_UMAMI_*` env vars. Analytics utility at `src/lib/utils/analytics.ts`.

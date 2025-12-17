@@ -2,9 +2,34 @@
 
 This document describes the testing patterns, conventions, and best practices for the Rackarr project.
 
+## Environments
+
+| Environment | URL                     | Purpose                                  |
+| ----------- | ----------------------- | ---------------------------------------- |
+| **Local**   | `localhost:5173`        | Development with HMR (`npm run dev`)     |
+| **Dev**     | https://dev.rackarr.com | Preview production builds before release |
+| **Prod**    | https://app.rackarr.com | Live production environment              |
+
+### Dev Environment
+
+The dev environment auto-deploys on every push to `main`:
+
+```
+Push to main → Lint → Test → Build → Deploy to GitHub Pages
+```
+
+Use it to:
+
+- Test production builds in a real environment
+- Share preview links with stakeholders
+- Catch build-time issues before releasing
+
+**Note:** Dev deployment only succeeds if lint and tests pass.
+
 ## Philosophy
 
 We follow the **Testing Trophy** approach:
+
 - **E2E tests** (few) - Critical user journeys only
 - **Integration tests** (most) - Component behavior with stores
 - **Unit tests** (some) - Pure functions and utilities
@@ -55,17 +80,17 @@ e2e/                          # Playwright E2E tests
 
 ```typescript
 it('adds device to rack when placed', () => {
-  // Arrange
-  const store = getLayoutStore();
-  const deviceType = createTestDeviceType({ u_height: 2 });
+	// Arrange
+	const store = getLayoutStore();
+	const deviceType = createTestDeviceType({ u_height: 2 });
 
-  // Act
-  store.addDeviceTypeRecorded(deviceType);
-  store.placeDeviceRecorded(deviceType.slug, 10);
+	// Act
+	store.addDeviceTypeRecorded(deviceType);
+	store.placeDeviceRecorded(deviceType.slug, 10);
 
-  // Assert
-  expect(store.rack.devices).toHaveLength(1);
-  expect(store.rack.devices[0]?.position).toBe(10);
+	// Assert
+	expect(store.rack.devices).toHaveLength(1);
+	expect(store.rack.devices[0]?.position).toBe(10);
 });
 ```
 
@@ -84,6 +109,7 @@ const deviceType = { slug: 'test', u_height: 2, ... };
 ```
 
 Available factories:
+
 - `createTestRack(overrides?)` - Creates a test Rack
 - `createTestDeviceType(overrides?)` - Creates a test DeviceType
 - `createTestDevice(overrides?)` - Creates a test PlacedDevice
@@ -101,12 +127,12 @@ import userEvent from '@testing-library/user-event';
 import MyComponent from '$lib/components/MyComponent.svelte';
 
 it('updates state when button clicked', async () => {
-  const user = userEvent.setup();
-  render(MyComponent, { props: { initialCount: 0 } });
+	const user = userEvent.setup();
+	render(MyComponent, { props: { initialCount: 0 } });
 
-  await user.click(screen.getByRole('button', { name: 'Increment' }));
+	await user.click(screen.getByRole('button', { name: 'Increment' }));
 
-  expect(screen.getByText('Count: 1')).toBeInTheDocument();
+	expect(screen.getByText('Count: 1')).toBeInTheDocument();
 });
 ```
 
@@ -116,14 +142,14 @@ Commands should have symmetrical execute/undo:
 
 ```typescript
 it('can be undone after execution', () => {
-  const store = createMockStore();
-  const command = createAddDeviceTypeCommand(deviceType, store);
+	const store = createMockStore();
+	const command = createAddDeviceTypeCommand(deviceType, store);
 
-  command.execute();
-  expect(store.addDeviceTypeRaw).toHaveBeenCalledWith(deviceType);
+	command.execute();
+	expect(store.addDeviceTypeRaw).toHaveBeenCalledWith(deviceType);
 
-  command.undo();
-  expect(store.removeDeviceTypeRaw).toHaveBeenCalledWith(deviceType.slug);
+	command.undo();
+	expect(store.removeDeviceTypeRaw).toHaveBeenCalledWith(deviceType.slug);
 });
 ```
 
@@ -135,14 +161,14 @@ For tests requiring browser APIs:
 import { setupBrowserMocks, createMockFile } from './mocks/browser';
 
 describe('Image Upload', () => {
-  beforeEach(() => {
-    setupBrowserMocks();
-  });
+	beforeEach(() => {
+		setupBrowserMocks();
+	});
 
-  it('handles file upload', async () => {
-    const file = createMockFile('test.png', 'image/png');
-    // ... test file handling
-  });
+	it('handles file upload', async () => {
+		const file = createMockFile('test.png', 'image/png');
+		// ... test file handling
+	});
 });
 ```
 
@@ -161,6 +187,7 @@ await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 ```
 
 Available data-testid attributes:
+
 - Toolbar: `btn-new-rack`, `btn-save`, `btn-load-layout`, `btn-export`, `btn-undo`, `btn-redo`, `btn-delete`, `btn-reset-view`, `btn-help`, `btn-toggle-theme`, `btn-toggle-display-mode`, `btn-toggle-airflow`, `btn-hamburger-menu`
 - DevicePalette: `search-devices`, `btn-import-devices`, `btn-add-device`
 
@@ -170,22 +197,22 @@ Available data-testid attributes:
 import { test, expect } from '@playwright/test';
 
 test.describe('Feature', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Common setup
-  });
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/');
+		// Common setup
+	});
 
-  test('user can complete workflow', async ({ page }) => {
-    // Arrange
-    await page.click('[data-testid="btn-new-rack"]');
+	test('user can complete workflow', async ({ page }) => {
+		// Arrange
+		await page.click('[data-testid="btn-new-rack"]');
 
-    // Act
-    await page.fill('[data-testid="input-rack-name"]', 'Test Rack');
-    await page.click('[data-testid="btn-create-rack"]');
+		// Act
+		await page.fill('[data-testid="input-rack-name"]', 'Test Rack');
+		await page.click('[data-testid="btn-create-rack"]');
 
-    // Assert
-    await expect(page.locator('.rack-name')).toHaveText('Test Rack');
-  });
+		// Assert
+		await expect(page.locator('.rack-name')).toHaveText('Test Rack');
+	});
 });
 ```
 
@@ -201,6 +228,7 @@ Lines: 75%
 ```
 
 Run coverage report:
+
 ```bash
 npm run test:coverage
 ```

@@ -14,14 +14,14 @@ Rackarr is a browser-based rack layout designer for homelabbers. It runs entirel
 
 ## Technology Stack
 
-| Component | Technology |
-|-----------|------------|
+| Component | Technology                                            |
+| --------- | ----------------------------------------------------- |
 | Framework | Svelte 5 with runes (`$state`, `$derived`, `$effect`) |
-| Language | TypeScript (strict mode) |
-| Rendering | SVG for rack visualization |
-| Build | Vite |
-| Testing | Vitest + @testing-library/svelte + Playwright |
-| Styling | CSS custom properties (design tokens) |
+| Language  | TypeScript (strict mode)                              |
+| Rendering | SVG for rack visualization                            |
+| Build     | Vite                                                  |
+| Testing   | Vitest + @testing-library/svelte + Playwright         |
+| Styling   | CSS custom properties (design tokens)                 |
 
 ## Project Structure
 
@@ -56,42 +56,43 @@ docs/                   # Documentation (you are here)
 
 ### Modifying Device Behavior
 
-| What | Where |
-|------|-------|
-| Device types | `src/lib/types/device.ts` |
-| Placement logic | `src/lib/stores/layout.svelte.ts` |
-| Collision detection | `src/lib/utils/collision.ts` |
-| Rendering | `src/lib/components/RackDevice.svelte` |
+| What                | Where                                  |
+| ------------------- | -------------------------------------- |
+| Device types        | `src/lib/types/device.ts`              |
+| Placement logic     | `src/lib/stores/layout.svelte.ts`      |
+| Collision detection | `src/lib/utils/collision.ts`           |
+| Rendering           | `src/lib/components/RackDevice.svelte` |
 
 ### Working with the Canvas
 
-| What | Where |
-|------|-------|
-| Pan/zoom state | `src/lib/stores/canvas.svelte.ts` |
-| SVG rendering | `src/lib/components/Canvas.svelte` |
-| Coordinate transforms | `src/lib/utils/coordinates.ts` |
+| What                  | Where                              |
+| --------------------- | ---------------------------------- |
+| Pan/zoom state        | `src/lib/stores/canvas.svelte.ts`  |
+| SVG rendering         | `src/lib/components/Canvas.svelte` |
+| Coordinate transforms | `src/lib/utils/coordinates.ts`     |
 
 ### Export/Import
 
-| What | Where |
-|------|-------|
+| What                          | Where                      |
+| ----------------------------- | -------------------------- |
 | Archive format (.rackarr.zip) | `src/lib/utils/archive.ts` |
-| Image export (PNG/JPEG/SVG) | `src/lib/utils/export.ts` |
-| YAML serialization | `src/lib/utils/yaml.ts` |
+| Image export (PNG/JPEG/SVG)   | `src/lib/utils/export.ts`  |
+| YAML serialization            | `src/lib/utils/yaml.ts`    |
 
 ### Styling and Theming
 
-| What | Where |
-|------|-------|
-| Design tokens | `src/lib/styles/tokens.css` |
+| What            | Where                         |
+| --------------- | ----------------------------- |
+| Design tokens   | `src/lib/styles/tokens.css`   |
 | Theme switching | `src/lib/stores/ui.svelte.ts` |
-| Brand colors | `docs/reference/BRAND.md` |
+| Brand colors    | `docs/reference/BRAND.md`     |
 
 ## Key Design Decisions
 
 ### Single-Rack Mode
 
 Rackarr intentionally supports only one rack per layout. This simplifies:
+
 - State management (no rack selection/switching)
 - Collision detection (single coordinate space)
 - Export workflows (one rack = one image)
@@ -102,6 +103,7 @@ Multi-rack support is explicitly out of scope.
 ### Svelte 5 Runes (Not Stores)
 
 All state uses Svelte 5 runes:
+
 - `$state()` for reactive state
 - `$derived()` for computed values
 - `$effect()` for side effects
@@ -110,17 +112,16 @@ All state uses Svelte 5 runes:
 
 ```svelte
 <!-- Correct -->
-let count = $state(0);
-let doubled = $derived(count * 2);
+let count = $state(0); let doubled = $derived(count * 2);
 
 <!-- Wrong -->
-import { writable } from 'svelte/store';
-const count = writable(0);
+import {writable} from 'svelte/store'; const count = writable(0);
 ```
 
 ### Command Pattern for Undo/Redo
 
 All user actions that modify state go through the command pattern:
+
 - Commands in `src/lib/stores/commands/`
 - History stack in `src/lib/stores/history.svelte.ts`
 - Enables `Ctrl+Z` / `Ctrl+Shift+Z` undo/redo
@@ -128,6 +129,7 @@ All user actions that modify state go through the command pattern:
 ### NetBox-Compatible Data Model
 
 Field names follow NetBox conventions (snake_case):
+
 - `u_height` (not `uHeight`)
 - `device_type` (not `deviceType`)
 - `is_full_depth` (not `isFullDepth`)
@@ -138,16 +140,57 @@ This enables future NetBox import/export compatibility.
 
 No legacy support or migration code. Features are implemented as if they're the first and only implementation. This keeps the codebase clean and focused.
 
+## Deployment Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     GitHub Repository                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   Push to main ─────────────────────────────────────────────│
+│         │                                                    │
+│         ▼                                                    │
+│   ┌─────────────┐     ┌─────────────┐     ┌─────────────┐   │
+│   │    Lint     │────▶│    Test     │────▶│    Build    │   │
+│   └─────────────┘     └─────────────┘     └─────────────┘   │
+│                                                  │           │
+│                                                  ▼           │
+│                                        ┌─────────────────┐   │
+│                                        │  GitHub Pages   │   │
+│                                        │ dev.rackarr.com │   │
+│                                        └─────────────────┘   │
+│                                                              │
+│   Git tag v* ───────────────────────────────────────────────│
+│         │                                                    │
+│         ▼                                                    │
+│   ┌─────────────┐     ┌─────────────┐     ┌─────────────┐   │
+│   │Docker Build │────▶│  Push to    │────▶│  VPS Pull   │   │
+│   │             │     │   ghcr.io   │     │  & Deploy   │   │
+│   └─────────────┘     └─────────────┘     └─────────────┘   │
+│                                                  │           │
+│                                                  ▼           │
+│                                        ┌─────────────────┐   │
+│                                        │   VPS (Docker)  │   │
+│                                        │ app.rackarr.com │   │
+│                                        └─────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Environment | URL             | Trigger        | Use Case         |
+| ----------- | --------------- | -------------- | ---------------- |
+| Dev         | dev.rackarr.com | Push to `main` | Preview, testing |
+| Prod        | app.rackarr.com | Git tag `v*`   | Live users       |
+
 ## Documentation Map
 
-| Document | Purpose |
-|----------|---------|
-| `docs/reference/SPEC.md` | Authoritative technical specification |
-| `docs/reference/BRAND.md` | Design system quick reference |
-| `docs/reference/GITHUB-WORKFLOW.md` | GitHub Issues workflow |
-| `docs/guides/TESTING.md` | Testing patterns and commands |
-| `docs/guides/ACCESSIBILITY.md` | A11y compliance checklist |
-| `docs/planning/ROADMAP.md` | Version planning and vision |
+| Document                            | Purpose                               |
+| ----------------------------------- | ------------------------------------- |
+| `docs/reference/SPEC.md`            | Authoritative technical specification |
+| `docs/reference/BRAND.md`           | Design system quick reference         |
+| `docs/reference/GITHUB-WORKFLOW.md` | GitHub Issues workflow                |
+| `docs/guides/TESTING.md`            | Testing patterns and commands         |
+| `docs/guides/ACCESSIBILITY.md`      | A11y compliance checklist             |
+| `docs/planning/ROADMAP.md`          | Version planning and vision           |
 
 ## See Also
 
