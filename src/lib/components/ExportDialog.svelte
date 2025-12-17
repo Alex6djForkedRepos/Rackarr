@@ -78,12 +78,14 @@
 	// Preview SVG state
 	let previewSvgString = $state<string | null>(null);
 	let previewDimensions = $state<{ width: number; height: number } | null>(null);
+	let previewError = $state<string | null>(null);
 
 	// Generate preview when options change (for non-CSV formats)
 	$effect(() => {
 		if (!open || isCSV || racks.length === 0) {
 			previewSvgString = null;
 			previewDimensions = null;
+			previewError = null;
 			return;
 		}
 
@@ -106,9 +108,13 @@
 
 			previewDimensions = { width, height };
 			previewSvgString = svg.outerHTML;
-		} catch {
+			previewError = null;
+		} catch (error) {
+			// Log detailed error for debugging
+			console.error('Export preview generation failed:', error);
 			previewSvgString = null;
 			previewDimensions = null;
+			previewError = 'Preview generation failed';
 		}
 	});
 
@@ -212,6 +218,13 @@
 				</div>
 			{:else if racks.length === 0}
 				<div class="preview-placeholder">No rack to preview</div>
+			{:else if previewError}
+				<!-- Show error when preview generation fails -->
+				<div class="preview-error" role="alert">
+					<span class="preview-error__icon" aria-hidden="true">⚠</span>
+					<span class="preview-error__message">{previewError}</span>
+					<span class="preview-error__hint">Try changing export options</span>
+				</div>
 			{:else if previewSvgString && previewDimensions}
 				<Shimmer loading={!previewSvgString}>
 					<div
@@ -462,5 +475,38 @@
 	.btn-primary:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	/* Preview error state */
+	.preview-error {
+		max-width: 200px;
+		min-height: 100px;
+		border: 1px solid var(--colour-error);
+		border-radius: var(--radius-sm);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		padding: var(--space-4);
+		background: var(--colour-surface);
+	}
+
+	.preview-error__icon {
+		font-size: var(--font-size-xl);
+		color: var(--colour-error);
+	}
+
+	.preview-error__message {
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		color: var(--colour-error);
+		text-align: center;
+	}
+
+	.preview-error__hint {
+		font-size: var(--font-size-xs);
+		color: var(--colour-text-muted);
+		text-align: center;
 	}
 </style>

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import ExportDialog from '$lib/components/ExportDialog.svelte';
 import type { Rack, DeviceType } from '$lib/types';
+import * as exportUtils from '$lib/utils/export';
 
 describe('ExportDialog', () => {
 	const mockDeviceTypes: DeviceType[] = [
@@ -274,6 +275,48 @@ describe('ExportDialog', () => {
 
 			const exportButton = screen.getByRole('button', { name: /^export$/i });
 			expect(exportButton).not.toBeDisabled();
+		});
+	});
+
+	describe('Preview error handling', () => {
+		it('displays error message when preview generation fails', async () => {
+			// Mock generateExportSVG to throw an error
+			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(exportUtils, 'generateExportSVG').mockImplementation(() => {
+				throw new Error('SVG generation failed');
+			});
+
+			render(ExportDialog, {
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
+			});
+
+			// Wait for the error to appear
+			await waitFor(() => {
+				expect(screen.getByText(/preview generation failed/i)).toBeInTheDocument();
+			});
+
+			// Verify error was logged to console
+			expect(consoleSpy).toHaveBeenCalled();
+
+			consoleSpy.mockRestore();
+			vi.restoreAllMocks();
+		});
+
+		it('shows retry hint when preview fails', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(exportUtils, 'generateExportSVG').mockImplementation(() => {
+				throw new Error('Test error');
+			});
+
+			render(ExportDialog, {
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
+			});
+
+			await waitFor(() => {
+				expect(screen.getByText(/try changing export options/i)).toBeInTheDocument();
+			});
+
+			vi.restoreAllMocks();
 		});
 	});
 });
