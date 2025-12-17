@@ -1,7 +1,25 @@
-# Issue Development Workflow v2
+# Issue Development Workflow v3
 
 Pick up the next ready issue, assess it, and either complete it or document blockers.
-Designed for autonomous operation with subagent delegation.
+Designed for autonomous operation with subagent delegation and memory-assisted context.
+
+---
+
+## Memory Integration
+
+This workflow uses the `mem-search` skill to leverage past work context:
+
+| Phase | Memory Use | Benefit |
+|-------|------------|---------|
+| Pre-flight | Get recent context | Skip re-reading docs if recent work covers it |
+| Assessment | Search for prior work on issue | Avoid repeating failed approaches |
+| Planning | Find past architectural decisions | Maintain consistency |
+| Error Recovery | Search for similar past bugs | Apply known solutions faster |
+| Completion | Document key learnings | Build knowledge base for future |
+
+**When to use memory vs. fresh exploration:**
+- **Memory first:** Decisions, patterns, past attempts, known gotchas
+- **Fresh exploration:** Current file contents, test results, git state
 
 ---
 
@@ -31,7 +49,22 @@ You have **explicit permission** to perform the following WITHOUT asking:
 
 Launch these operations **in parallel** using the Task tool:
 
-### 1a. Context Loading (Task: Explore agent, background)
+### 1a. Context Loading (Memory-First Approach)
+
+**Step 1: Search Memory** (use mem-search skill)
+```
+mcp__plugin_claude-mem_claude-mem-search__get_recent_context:
+  project: "Rackarr"
+  limit: 30
+```
+
+This provides:
+- Recent architectural decisions
+- Patterns from past implementations
+- Known gotchas and solutions
+
+**Step 2: Fill Gaps** (only if memory lacks coverage)
+If memory doesn't cover core architecture, use Explore agent:
 ```
 Prompt: "Read docs/reference/SPEC.md and docs/ARCHITECTURE.md.
 Summarize: (1) key architectural patterns, (2) file organization,
@@ -71,6 +104,33 @@ From the fetched issues, pick the first one. Read full details:
 gh issue view <number> --json number,title,body,labels,comments
 ```
 
+### 2a-1. Historical Context Check (mem-search skill)
+
+**Before proceeding**, search memory for past work on this issue:
+
+```
+mcp__plugin_claude-mem_claude-mem-search__search:
+  query: "#<number> OR <keywords from title>"
+  project: "Rackarr"
+  limit: 10
+```
+
+Also search for related patterns:
+```
+mcp__plugin_claude-mem_claude-mem-search__search:
+  concepts: "<feature area from issue>"
+  type: "decision,bugfix"
+  limit: 10
+```
+
+This reveals:
+- **Prior attempts:** WIP branches, partial implementations
+- **Design decisions:** Why things were built a certain way
+- **Known patterns:** What worked/failed in similar areas
+- **Blockers encountered:** Issues to watch for
+
+**If prior work exists:** Review it before planning. Don't repeat failed approaches.
+
 ### 2b. Determine Complexity
 
 **Simple Issue** (proceed directly to implementation):
@@ -86,16 +146,28 @@ gh issue view <number> --json number,title,body,labels,comments
 
 ### 2c. For Complex Issues: Use Plan Agent
 
-Launch Task with `subagent_type: Plan`:
+**First:** If not already done, search memory for architectural decisions in this area:
+```
+mcp__plugin_claude-mem_claude-mem-search__search:
+  concepts: "<feature area>"
+  type: "decision"
+  project: "Rackarr"
+  limit: 5
+```
+
+**Then:** Launch Task with `subagent_type: Plan`, including memory context:
 ```
 Prompt: "Design implementation for Issue #<number>: <title>
 
 <paste issue body>
 
+Relevant past decisions from this project:
+<paste memory search results if any>
+
 Consider:
 1. Which files need changes
 2. What tests to write (TDD)
-3. Any architectural decisions
+3. Any architectural decisions (check if past decisions constrain this)
 4. Risk areas
 
 Output a numbered implementation plan."
@@ -271,10 +343,18 @@ gh issue list -R Rackarr/Rackarr --state open --label ready --json number | jq '
 
 **Attempt 1:** Read test output carefully, fix obvious issues.
 
-**Attempt 2:**
-- Re-read the test file and implementation
-- Check for Svelte 5 reactivity issues (see Quick Reference)
-- Check for async timing issues
+**Attempt 2:** Search memory for similar past failures:
+```
+mcp__plugin_claude-mem_claude-mem-search__search:
+  query: "<error message keywords>"
+  type: "bugfix"
+  project: "Rackarr"
+  limit: 5
+```
+
+Check if we've solved this pattern before. Also check:
+- Svelte 5 reactivity issues (see Quick Reference)
+- Async timing issues
 
 **Attempt 3:** Launch Task with Plan agent:
 ```
@@ -283,6 +363,9 @@ Prompt: "Tests are failing after 2 fix attempts.
 Test output: <paste>
 
 Implementation: <paste relevant code>
+
+Related past fixes from memory:
+<paste memory search results if any>
 
 Analyze the mismatch and suggest a fix."
 ```
@@ -390,6 +473,36 @@ screen.getByTestId('btn-save');
 // File location: src/tests/<Name>.test.ts
 ```
 
+### Memory Search (mem-search skill)
+
+```
+# Recent context for current project
+mcp__plugin_claude-mem_claude-mem-search__get_recent_context:
+  project: "Rackarr"
+  limit: 30
+
+# Search by query (full-text)
+mcp__plugin_claude-mem_claude-mem-search__search:
+  query: "error handling archive"
+  project: "Rackarr"
+
+# Search by type (decision, bugfix, feature, refactor, discovery)
+mcp__plugin_claude-mem_claude-mem-search__search:
+  type: "decision"
+  project: "Rackarr"
+
+# Search by concepts (feature areas)
+mcp__plugin_claude-mem_claude-mem-search__search:
+  concepts: "archive,zip,export"
+  project: "Rackarr"
+
+# Timeline around a specific observation
+mcp__plugin_claude-mem_claude-mem-search__get_context_timeline:
+  anchor: <observation_id>
+  depth_before: 10
+  depth_after: 10
+```
+
 ### Type-Specific Checklists
 
 **bug:**
@@ -429,7 +542,14 @@ After each issue (completed or blocked):
 **Files Changed:**
 - `file1.ts`: <change summary>
 - `file2.svelte`: <change summary>
+
+**Key Learnings:** (for future memory)
+- <patterns discovered>
+- <non-obvious decisions made and why>
+- <gotchas encountered>
 ```
+
+Note: Key learnings are automatically captured by claude-mem and will be available in future sessions via memory search.
 
 After session ends:
 
