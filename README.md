@@ -4,6 +4,10 @@
 [![Version](https://img.shields.io/badge/version-0.5.8-blue.svg)](https://github.com/Rackarr/Rackarr/releases)
 [![Demo](https://img.shields.io/badge/demo-app.rackarr.com-green.svg)](https://app.rackarr.com/)
 
+[![Deploy to Dev](https://github.com/Rackarr/Rackarr/actions/workflows/deploy-dev.yml/badge.svg)](https://github.com/Rackarr/Rackarr/actions/workflows/deploy-dev.yml)
+[![Docker Build](https://github.com/Rackarr/Rackarr/actions/workflows/docker.yml/badge.svg)](https://github.com/Rackarr/Rackarr/actions/workflows/docker.yml)
+[![Deploy to Prod](https://github.com/Rackarr/Rackarr/actions/workflows/deploy-vps.yml/badge.svg)](https://github.com/Rackarr/Rackarr/actions/workflows/deploy-vps.yml)
+
 **Rack Layout Designer for Homelabbers**
 
 A browser-based visual tool for planning and documenting server rack layouts. Design your homelab rack configurations with an intuitive drag-and-drop interface, then export them for documentation.
@@ -155,13 +159,13 @@ VITE_UMAMI_WEBSITE_ID=your-website-id
 
 ### Events Tracked
 
-| Event | Purpose |
-|-------|---------|
-| File save/load | Usage patterns |
-| Export (image/PDF/CSV) | Feature adoption |
-| Custom device creation | Workflow insights |
-| Display mode toggle | UI preferences |
-| Keyboard shortcuts | Power user metrics |
+| Event                  | Purpose            |
+| ---------------------- | ------------------ |
+| File save/load         | Usage patterns     |
+| Export (image/PDF/CSV) | Feature adoption   |
+| Custom device creation | Workflow insights  |
+| Display mode toggle    | UI preferences     |
+| Keyboard shortcuts     | Power user metrics |
 
 ## License
 
