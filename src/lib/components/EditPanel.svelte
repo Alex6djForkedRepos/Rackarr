@@ -11,7 +11,7 @@
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getCategoryDisplayName } from '$lib/utils/deviceFilters';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
-	import type { Rack, DeviceType, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
+	import type { Rack, DeviceType, PlacedDevice, DeviceFace } from '$lib/types';
 
 	// Synthetic rack ID for single-rack mode
 	const RACK_ID = 'rack-0';
@@ -180,23 +180,6 @@
 	function handleClose() {
 		uiStore.closeRightDrawer();
 		selectionStore.clearSelection();
-	}
-
-	// Airflow options for dropdown
-	const AIRFLOW_OPTIONS: { value: Airflow; label: string }[] = [
-		{ value: 'passive', label: 'Passive (no active cooling)' },
-		{ value: 'front-to-rear', label: 'Front to Rear' },
-		{ value: 'rear-to-front', label: 'Rear to Front' },
-		{ value: 'side-to-rear', label: 'Side to Rear' }
-	];
-
-	// Update device airflow
-	function handleAirflowChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		const newAirflow = target.value as Airflow;
-		if (selectedDeviceInfo) {
-			layoutStore.updateDeviceType(selectedDeviceInfo.device.slug, { airflow: newAirflow });
-		}
 	}
 </script>
 
@@ -386,21 +369,6 @@
 					</label>
 				</div>
 			</fieldset>
-
-			<!-- Airflow selector -->
-			<div class="form-group">
-				<label for="device-airflow">Airflow Direction</label>
-				<select
-					id="device-airflow"
-					class="select-field"
-					value={selectedDeviceInfo.device.airflow ?? 'passive'}
-					onchange={handleAirflowChange}
-				>
-					{#each AIRFLOW_OPTIONS as option (option.value)}
-						<option value={option.value}>{option.label}</option>
-					{/each}
-				</select>
-			</div>
 
 			<!-- Power device properties -->
 			{#if selectedDeviceInfo.device.rackarr.category === 'power' && (selectedDeviceInfo.device.outlet_count || selectedDeviceInfo.device.va_rating)}

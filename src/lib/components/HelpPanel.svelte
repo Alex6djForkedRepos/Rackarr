@@ -55,7 +55,6 @@
 			shortcuts: [
 				{ key: 'Escape', action: 'Clear selection / Close dialog' },
 				{ key: 'I', action: 'Toggle display mode' },
-				{ key: 'A', action: 'Toggle airflow' },
 				{ key: 'F', action: 'Fit all (zoom to fit)' }
 			]
 		},
