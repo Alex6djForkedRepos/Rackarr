@@ -522,9 +522,11 @@
 	$effect(() => {
 		if (viewportStore.isMobile && selectionStore.isDeviceSelected) {
 			const deviceIndex = selectionStore.selectedDeviceIndex;
+			console.log('[Mobile] Device selected:', { deviceIndex, hasRack: !!layoutStore.rack });
 			if (deviceIndex !== null && layoutStore.rack) {
 				selectedDeviceForSheet = deviceIndex;
 				bottomSheetOpen = true;
+				console.log('[Mobile] Opening bottom sheet and auto-zooming to device', deviceIndex);
 
 				// Auto-zoom to device on mobile
 				canvasStore.zoomToDevice(layoutStore.rack, deviceIndex, layoutStore.device_types);
@@ -532,6 +534,7 @@
 		} else if (!selectionStore.isDeviceSelected) {
 			// When device deselected, close sheet and fit all
 			if (viewportStore.isMobile && bottomSheetOpen) {
+				console.log('[Mobile] Device deselected, closing bottom sheet and fitting all');
 				bottomSheetOpen = false;
 				selectedDeviceForSheet = null;
 				if (layoutStore.rack) {

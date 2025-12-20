@@ -3,7 +3,6 @@
   Renders a device within a rack at the specified U position
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { DeviceType, DisplayMode, RackView } from '$lib/types';
 	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
 	import CategoryIcon from './CategoryIcon.svelte';
@@ -131,12 +130,14 @@
 
 	// Long-press handler for mobile (triggers selection + details)
 	function handleLongPress() {
+		console.log('[RackDevice] Long-press triggered:', { slug: device.slug, position });
 		onselect?.(new CustomEvent('select', { detail: { slug: device.slug, position } }));
 	}
 
-	// Set up long-press gesture on mobile
-	onMount(() => {
+	// Set up long-press gesture on mobile (reactive to viewport changes)
+	$effect(() => {
 		if (viewportStore.isMobile && dragHandleElement) {
+			console.log('[RackDevice] Setting up long-press for device:', device.slug, 'isMobile:', viewportStore.isMobile);
 			const cleanup = useLongPress(dragHandleElement, handleLongPress);
 			return cleanup;
 		}
