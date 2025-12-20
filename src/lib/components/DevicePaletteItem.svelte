@@ -76,7 +76,7 @@
 		<CategoryIcon category={device.category} size={16} />
 	</span>
 	<span class="device-name">
-		{#each highlightedSegments as segment}
+		{#each highlightedSegments as segment, i (i)}
 			{#if segment.isMatch}
 				<strong>{segment.text}</strong>
 			{:else}

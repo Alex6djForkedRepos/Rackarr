@@ -10,8 +10,7 @@
 	import {
 		searchDevices,
 		groupDevicesByCategory,
-		getCategoryDisplayName,
-		getFirstMatch
+		getCategoryDisplayName
 	} from '$lib/utils/deviceFilters';
 	import { debounce } from '$lib/utils/debounce';
 	import { truncateWithEllipsis } from '$lib/utils/searchHighlight';
