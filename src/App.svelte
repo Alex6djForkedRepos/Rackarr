@@ -21,8 +21,9 @@
 	import HelpPanel from '$lib/components/HelpPanel.svelte';
 	import BottomSheet from '$lib/components/BottomSheet.svelte';
 	import DeviceDetails from '$lib/components/DeviceDetails.svelte';
-	import { getShareParam, clearShareParam, decodeLayout } from '$lib/utils/share';
-	import { getLayoutStore } from '$lib/stores/layout.svelte';
+import { getShareParam, clearShareParam, decodeLayout } from '$lib/utils/share';
+import { saveSession, loadSession, clearSession } from '$lib/utils/session-storage';
+import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
@@ -111,7 +112,7 @@
 	// Also handles loading shared layouts from URL params
 	// Uses onMount to run once on initial load, not reactively
 	onMount(() => {
-		// Check for shared layout in URL
+		// Priority 1: Check for shared layout in URL (highest priority)
 		const shareParam = getShareParam();
 		if (shareParam) {
 			const sharedLayout = decodeLayout(shareParam);
@@ -125,13 +126,28 @@
 				requestAnimationFrame(() => {
 					canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 				});
-				return; // Don't show new rack dialog
+				return; // Don't check autosave or show new rack dialog
 			} else {
 				clearShareParam();
 				toastStore.showToast('Invalid share link', 'error');
 			}
 		}
 
+		// Priority 2: Check for autosaved session (if no share link)
+		const autosaved = loadSession();
+		if (autosaved) {
+			layoutStore.loadLayout(autosaved);
+			// Mark as dirty since this is an autosaved session (not explicitly saved)
+			layoutStore.markDirty();
+			// Don't show new rack dialog - user has work in progress
+			// Reset view to center the loaded rack after DOM updates
+			requestAnimationFrame(() => {
+				canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
+			});
+			return;
+		}
+
+		// Priority 3: No share link or autosave, show new rack dialog if empty
 		if (layoutStore.rackCount === 0) {
 			newRackFormOpen = true;
 		}
@@ -168,6 +184,8 @@
 		// Clean up orphaned user images (layout is now empty)
 		const usedSlugs = layoutStore.getUsedDeviceTypeSlugs();
 		imageStore.cleanupOrphanedImages(usedSlugs);
+		// Clear autosaved session when explicitly creating new rack
+		clearSession();
 		newRackFormOpen = true;
 	}
 
@@ -186,6 +204,8 @@
 			// Save as folder archive (.rackarr.zip)
 			await downloadArchive(layoutStore.layout, images);
 			layoutStore.markClean();
+			// Clear autosaved session when explicitly saving
+			clearSession();
 			toastStore.showToast(`Saved ${filename}`, 'success', 3000);
 
 			// Track save event
@@ -236,6 +256,8 @@
 
 			layoutStore.loadLayout(layout);
 			layoutStore.markClean();
+			// Clear autosaved session when explicitly loading
+			clearSession();
 			selectionStore.clearSelection();
 
 			// Reset view to center the loaded rack after DOM updates
@@ -550,6 +572,28 @@
 		selectedDeviceForSheet = null;
 		selectionStore.clearSelection();
 	}
+
+	// Auto-save layout to localStorage with debouncing
+	let saveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		// Watch layout changes (triggered when layout.rack or any property changes)
+		// Access the layout to track it
+		const currentLayout = layoutStore.layout;
+
+		// Only save if there's a rack to save
+		if (layoutStore.hasRack) {
+			// Clear existing timer
+			if (saveDebounceTimer) {
+				clearTimeout(saveDebounceTimer);
+			}
+
+			// Debounce saves (1000ms)
+			saveDebounceTimer = setTimeout(() => {
+				saveSession(currentLayout);
+				saveDebounceTimer = null;
+			}, 1000);
+		}
+	});
 </script>
 
 <svelte:window
