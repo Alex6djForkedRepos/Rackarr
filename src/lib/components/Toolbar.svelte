@@ -407,7 +407,7 @@
 		box-shadow: 0 0 0 2px var(--colour-focus-ring);
 	}
 
-	/* Hamburger icon hidden by default */
+	/* Hamburger icon next to logo */
 	.hamburger-icon {
 		display: none;
 		align-items: center;
@@ -483,7 +483,7 @@
 		}
 	}
 
-	/* Responsive: Hamburger mode - hide center toolbar, show hamburger icon */
+	/* Responsive: Hamburger mode - hide center toolbar */
 	@media (max-width: 1024px) {
 		.toolbar-center {
 			display: none;
@@ -499,7 +499,7 @@
 		}
 	}
 
-	/* Hamburger mode button styles (applied via JS class) */
+	/* Hamburger mode button styles (Lockin logo + text + hamburger icon) */
 	.toolbar-brand.hamburger-mode {
 		cursor: pointer;
 		padding: var(--space-2);
