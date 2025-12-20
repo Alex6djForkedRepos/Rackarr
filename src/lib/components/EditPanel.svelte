@@ -489,9 +489,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
-		padding: var(--space-3);
-		background: var(--colour-surface);
-		border-radius: var(--radius-sm);
 	}
 
 	.info-row {
@@ -521,8 +518,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
-		padding-bottom: var(--space-3);
-		border-bottom: 1px solid var(--colour-border);
+		padding-bottom: var(--space-4);
 	}
 
 	.device-name {
@@ -534,8 +530,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1-5);
-		padding: var(--space-3) 0;
-		border-bottom: 1px solid var(--colour-border);
 	}
 
 	.display-name-display {
@@ -603,17 +597,14 @@
 
 	.notes-text {
 		font-size: var(--font-size-base);
+		color: var(--colour-text-muted);
 		margin: 0;
-		padding: var(--space-3);
-		background: var(--colour-surface);
-		border-radius: var(--radius-sm);
 		white-space: pre-wrap;
+		line-height: 1.5;
 	}
 
 	.actions {
-		margin-top: auto;
-		padding-top: var(--space-4);
-		border-top: 1px solid var(--colour-border);
+		margin-top: var(--space-6);
 	}
 
 	.btn-danger {
