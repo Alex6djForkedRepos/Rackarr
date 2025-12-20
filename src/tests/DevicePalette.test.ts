@@ -72,8 +72,13 @@ describe('DevicePalette Component', () => {
 		// Wait for debounce (150ms)
 		await waitFor(
 			() => {
-				expect(screen.getByText('Server 1')).toBeInTheDocument();
-				expect(screen.queryByText('Switch 1')).not.toBeInTheDocument();
+				// Text may be split by highlighting, use flexible matcher
+				expect(screen.getByText((content, element) => 
+					element?.textContent === 'Server 1'
+				)).toBeInTheDocument();
+				expect(screen.queryByText((content, element) => 
+					element?.textContent === 'Switch 1'
+				)).not.toBeInTheDocument();
 			},
 			{ timeout: 300 }
 		);
@@ -360,8 +365,13 @@ describe('DevicePalette Exclusive Accordion', () => {
 			// Wait for debounce (150ms)
 			await waitFor(
 				() => {
-					expect(screen.getByText('24-Port Switch')).toBeInTheDocument();
-					expect(screen.queryByText('1U Server')).not.toBeInTheDocument();
+					// Text may be split by highlighting, use flexible matcher
+					expect(screen.getByText((content, element) => 
+						element?.textContent === '24-Port Switch'
+					)).toBeInTheDocument();
+					expect(screen.queryByText((content, element) => 
+						element?.textContent === '1U Server'
+					)).not.toBeInTheDocument();
 				},
 				{ timeout: 300 }
 			);
