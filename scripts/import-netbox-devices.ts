@@ -9,12 +9,14 @@
  *   npx tsx scripts/import-netbox-devices.ts --vendor Ubiquiti --slug ubiquiti-usw-pro-24
  *   npx tsx scripts/import-netbox-devices.ts --vendor Ubiquiti --all
  *   npx tsx scripts/import-netbox-devices.ts --vendor Ubiquiti --list
+ *   npx tsx scripts/import-netbox-devices.ts --list-vendors
  *
  * Options:
  *   --vendor <name>   Vendor name (case-sensitive, matches NetBox folder name)
  *   --slug <slug>     Import a specific device by slug
  *   --all             Import all devices from the vendor
  *   --list            List available devices without importing
+ *   --list-vendors    List all available vendors
  *   --dry-run         Show what would be imported without making changes
  *   --images-only     Only download images, don't update TypeScript files
  */
@@ -57,6 +59,7 @@ interface ImportOptions {
 	slug?: string;
 	all?: boolean;
 	list?: boolean;
+	listVendors?: boolean;
 	dryRun?: boolean;
 	imagesOnly?: boolean;
 }
@@ -78,6 +81,9 @@ function parseArgs(): ImportOptions {
 				break;
 			case '--list':
 				options.list = true;
+				break;
+			case '--list-vendors':
+				options.listVendors = true;
 				break;
 			case '--dry-run':
 				options.dryRun = true;
@@ -106,6 +112,7 @@ Options:
   --slug <slug>     Import a specific device by slug
   --all             Import all rack-mountable devices from vendor
   --list            List available devices without importing
+  --list-vendors    List all available vendors
   --dry-run         Show what would be imported without changes
   --images-only     Only download images, skip TypeScript updates
   --help            Show this help message
@@ -119,6 +126,9 @@ Examples:
 
   # Import all Dell PowerEdge servers
   npx tsx scripts/import-netbox-devices.ts --vendor Dell --all
+
+  # List all available vendors
+  npx tsx scripts/import-netbox-devices.ts --list-vendors
 `);
 }
 
@@ -170,6 +180,12 @@ async function downloadImage(url: string, destPath: string): Promise<boolean> {
 	} catch {
 		return false;
 	}
+}
+
+async function listVendors(): Promise<string[]> {
+	const url = `${NETBOX_API_BASE}/device-types`;
+	const entries = await fetchJson<Array<{ name: string; type: string }>>(url);
+	return entries.filter((e) => e.type === 'dir').map((e) => e.name);
 }
 
 async function listVendorDevices(vendor: string): Promise<string[]> {
@@ -319,6 +335,17 @@ async function importDevice(
 
 async function main(): Promise<void> {
 	const options = parseArgs();
+
+	// Handle --list-vendors before requiring --vendor
+	if (options.listVendors) {
+		console.log(`\n🔌 NetBox Device Import`);
+		console.log(`========================`);
+		console.log(`\nFetching vendor list...`);
+		const vendors = await listVendors();
+		console.log(`\nFound ${vendors.length} vendor(s):\n`);
+		vendors.forEach((v) => console.log(`  ${v}`));
+		return;
+	}
 
 	if (!options.vendor) {
 		console.error('Error: --vendor is required');
