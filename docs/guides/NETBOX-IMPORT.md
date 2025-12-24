@@ -4,6 +4,22 @@ This guide explains how to import devices from the [NetBox community devicetype-
 
 ## Quick Start
 
+### Complete Import Workflow
+
+```bash
+# 1. Import devices (downloads YAML + images automatically)
+npx tsx scripts/import-netbox-devices.ts --vendor HPE --all
+
+# 2. Process images (convert to optimized WebP)
+npm run process-images
+
+# 3. Generate bundled images manifest (register images for bundling)
+npm run generate-bundled-images
+
+# 4. Verify build works
+npm run build
+```
+
 ### Using the Import Script
 
 ```bash
@@ -132,18 +148,43 @@ This:
 - Converts to WebP format
 - Outputs to `src/lib/assets/device-images/`
 
-### Step 6: Update bundledImages.ts
+### Step 6: Generate bundledImages.ts
 
-Add imports and manifest entries:
+Run the bundled images generator to register new images:
 
-```typescript
-// At top of file
-import uswPro24Front from '$lib/assets/device-images/ubiquiti/ubiquiti-usw-pro-24.front.webp';
-import uswPro24Rear from '$lib/assets/device-images/ubiquiti/ubiquiti-usw-pro-24.rear.webp';
-
-// In BUNDLED_IMAGES object
-'ubiquiti-usw-pro-24': { front: uswPro24Front, rear: uswPro24Rear },
+```bash
+npm run generate-bundled-images
 ```
+
+This:
+
+- Scans `src/lib/assets/device-images/` for vendor subdirectories
+- Parses image paths to extract slug and face (front/rear)
+- Groups images by device slug
+- Auto-generates ES module imports and manifest entries
+- Preserves the starter library (manually maintained generic devices)
+
+**Output example:**
+
+```
+🖼️  Bundled Images Generator
+============================
+
+Found 366 device images
+Parsed 366 valid images
+Grouped into 206 device entries
+
+By vendor:
+  apc: 29 devices
+  dell: 21 devices
+  hpe: 12 devices
+  ubiquiti: 48 devices
+  ...
+
+✅ Generated: src/lib/data/bundledImages.ts
+```
+
+> **Note:** The generator automatically creates proper import statements and manifest entries. You no longer need to manually edit `bundledImages.ts` for brand pack images.
 
 ### Step 7: Add to Brand Pack
 
@@ -192,8 +233,8 @@ Before committing imported devices:
 - [ ] `is_full_depth` is set correctly
 - [ ] Category is appropriate for device type
 - [ ] Front/rear images downloaded (if available)
-- [ ] Images processed to WebP
-- [ ] `bundledImages.ts` updated with new imports
+- [ ] Images processed to WebP (`npm run process-images`)
+- [ ] `bundledImages.ts` regenerated (`npm run generate-bundled-images`)
 - [ ] Brand pack file updated
 - [ ] Build succeeds (`npm run build`)
 - [ ] Tests pass (`npm run test:run`)
