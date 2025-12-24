@@ -96,6 +96,36 @@ import us16XgFront from '$lib/assets/device-images/ubiquiti/ubiquiti-unifi-switc
 import uspPduProFront from '$lib/assets/device-images/ubiquiti/ubiquiti-usp-pdu-pro.front.webp';
 import uspPduProRear from '$lib/assets/device-images/ubiquiti/ubiquiti-usp-pdu-pro.rear.webp';
 
+// ============================================
+// HPE Brand Pack Images
+// ============================================
+
+// ProLiant DL Series
+import hpeDl20Gen11Front from '$lib/assets/device-images/hpe/hpe-proliant-dl20-gen11.front.webp';
+import hpeDl20Gen11Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl20-gen11.rear.webp';
+import hpeDl360Gen11Front from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen11.front.webp';
+import hpeDl360Gen11Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen11.rear.webp';
+import hpeDl360Gen10Front from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen10.front.webp';
+import hpeDl360Gen10Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen10.rear.webp';
+import hpeDl360Gen9Front from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen9.front.webp';
+import hpeDl360Gen9Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl360-gen9.rear.webp';
+import hpeDl380Gen11Front from '$lib/assets/device-images/hpe/hpe-proliant-dl380-gen11.front.webp';
+import hpeDl380Gen11Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl380-gen11.rear.webp';
+import hpeDl380Gen10Front from '$lib/assets/device-images/hpe/hpe-proliant-dl380-gen10.front.webp';
+import hpeDl380Gen10Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl380-gen10.rear.webp';
+import hpeDl380pGen8Front from '$lib/assets/device-images/hpe/hpe-proliant-dl380p-gen8.front.webp';
+import hpeDl380pGen8Rear from '$lib/assets/device-images/hpe/hpe-proliant-dl380p-gen8.rear.webp';
+
+// Aruba Switches
+import hpeAruba1930_48gFront from '$lib/assets/device-images/hpe/hpe-aruba-1930-48g.front.webp';
+import hpeAruba1930_48gRear from '$lib/assets/device-images/hpe/hpe-aruba-1930-48g.rear.webp';
+import hpeAruba2530_24gFront from '$lib/assets/device-images/hpe/hpe-aruba-2530-24g.front.webp';
+import hpeAruba2530_48gFront from '$lib/assets/device-images/hpe/hpe-aruba-2530-48g.front.webp';
+import hpeAruba6000_24gFront from '$lib/assets/device-images/hpe/hpe-aruba-6000-24g-4sfp.front.webp';
+import hpeAruba6000_24gRear from '$lib/assets/device-images/hpe/hpe-aruba-6000-24g-4sfp.rear.webp';
+import hpeAruba6000_48gFront from '$lib/assets/device-images/hpe/hpe-aruba-6000-48g-4sfp.front.webp';
+import hpeAruba6000_48gRear from '$lib/assets/device-images/hpe/hpe-aruba-6000-48g-4sfp.rear.webp';
+
 /**
  * Bundled image data structure
  */
@@ -181,7 +211,27 @@ const BUNDLED_IMAGES: Record<string, BundledImageSet> = {
 	'ubiquiti-unifi-switch-16-xg': { front: us16XgFront },
 
 	// Power
-	'ubiquiti-usp-pdu-pro': { front: uspPduProFront, rear: uspPduProRear }
+	'ubiquiti-usp-pdu-pro': { front: uspPduProFront, rear: uspPduProRear },
+
+	// ============================================
+	// HPE Brand Pack
+	// ============================================
+
+	// ProLiant DL Series
+	'hpe-proliant-dl20-gen11': { front: hpeDl20Gen11Front, rear: hpeDl20Gen11Rear },
+	'hpe-proliant-dl360-gen11': { front: hpeDl360Gen11Front, rear: hpeDl360Gen11Rear },
+	'hpe-proliant-dl360-gen10': { front: hpeDl360Gen10Front, rear: hpeDl360Gen10Rear },
+	'hpe-proliant-dl360-gen9': { front: hpeDl360Gen9Front, rear: hpeDl360Gen9Rear },
+	'hpe-proliant-dl380-gen11': { front: hpeDl380Gen11Front, rear: hpeDl380Gen11Rear },
+	'hpe-proliant-dl380-gen10': { front: hpeDl380Gen10Front, rear: hpeDl380Gen10Rear },
+	'hpe-proliant-dl380p-gen8': { front: hpeDl380pGen8Front, rear: hpeDl380pGen8Rear },
+
+	// Aruba Switches
+	'hpe-aruba-1930-48g': { front: hpeAruba1930_48gFront, rear: hpeAruba1930_48gRear },
+	'hpe-aruba-2530-24g': { front: hpeAruba2530_24gFront },
+	'hpe-aruba-2530-48g': { front: hpeAruba2530_48gFront },
+	'hpe-aruba-6000-24g-4sfp': { front: hpeAruba6000_24gFront, rear: hpeAruba6000_24gRear },
+	'hpe-aruba-6000-48g-4sfp': { front: hpeAruba6000_48gFront, rear: hpeAruba6000_48gRear }
 };
 
 /**
