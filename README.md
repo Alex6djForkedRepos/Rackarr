@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="assets/rackarr-lockup-staggered-light.svg#gh-light-mode-only" alt="Rackarr" width="420">
-  <img src="assets/rackarr-lockup-staggered-dark.svg#gh-dark-mode-only" alt="Rackarr" width="420">
+  <a href="https://app.rackarr.com"><img src="assets/rackarr-lockup-staggered-dark.svg#gh-dark-mode-only" alt="Rackarr" width="420"></a>
 </p>
 
 <p align="center">
