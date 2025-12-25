@@ -6,6 +6,7 @@
 import type { DeviceType } from '$lib/types';
 import { ubiquitiDevices } from './ubiquiti';
 import { mikrotikDevices } from './mikrotik';
+import { tplinkDevices } from './tp-link';
 import { synologyDevices } from './synology';
 import { apcDevices } from './apc';
 import { dellDevices } from './dell';
@@ -15,6 +16,7 @@ import { hpeDevices } from './hpe';
 export {
 	ubiquitiDevices,
 	mikrotikDevices,
+	tplinkDevices,
 	synologyDevices,
 	apcDevices,
 	dellDevices,
@@ -55,6 +57,13 @@ export function getBrandPacks(): BrandSection[] {
 			defaultExpanded: false,
 			icon: 'mikrotik'
 		},
+		{
+			id: 'tp-link',
+			title: 'TP-Link',
+			devices: tplinkDevices,
+			defaultExpanded: false,
+			icon: 'tplink'
+		},
 		// Storage
 		{
 			id: 'synology',
@@ -63,12 +72,13 @@ export function getBrandPacks(): BrandSection[] {
 			defaultExpanded: false,
 			icon: 'synology'
 		},
-		// Power (APC not in simple-icons, will use Lucide Zap fallback)
+		// Power (APC is owned by Schneider Electric)
 		{
 			id: 'apc',
 			title: 'APC',
 			devices: apcDevices,
-			defaultExpanded: false
+			defaultExpanded: false,
+			icon: 'schneiderelectric'
 		},
 		// Servers
 		{
@@ -104,6 +114,8 @@ export function getBrandDevices(brandId: string): DeviceType[] {
 			return ubiquitiDevices;
 		case 'mikrotik':
 			return mikrotikDevices;
+		case 'tp-link':
+			return tplinkDevices;
 		case 'synology':
 			return synologyDevices;
 		case 'apc':
@@ -128,6 +140,7 @@ export function findBrandDevice(slug: string): DeviceType | undefined {
 	const allDevices = [
 		...ubiquitiDevices,
 		...mikrotikDevices,
+		...tplinkDevices,
 		...synologyDevices,
 		...apcDevices,
 		...dellDevices,
@@ -150,6 +163,7 @@ export function getBrandSlugs(): Set<string> {
 		const allDevices = [
 			...ubiquitiDevices,
 			...mikrotikDevices,
+			...tplinkDevices,
 			...synologyDevices,
 			...apcDevices,
 			...dellDevices,
