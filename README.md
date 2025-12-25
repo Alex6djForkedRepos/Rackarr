@@ -13,27 +13,28 @@
   <strong>Visual rack layout designer for homelabbers</strong>
 </p>
 
+// insert hero images here
+
 ---
 
-## What Is This
+## What _Is_ This
 
 Every other rack planner is either expensive, complicated, or requires you to create an account just to move a rectangle around. We wanted something simple. You get in, you drag your stuff, you export it, you're done. That's the whole thing.
 
 It ends with "arr" because it makes rhyming easier.
 
-## What It Does
+## What It Do
 
 - **Drag and drop devices** into your rack like a normal person
 - **Real device images** so it actually looks like your gear, not sad grey boxes
 - **Export to PNG, PDF, SVG** for your documentation or for printing and staring at
 - **Runs in your browser** with no account, no server, no nonsense
-- **Self-host it** because of course you want to self-host it
 
 ## Get Started
 
 **Use it right now:** [app.rackarr.com](https://app.rackarr.com)
 
-**Run it yourself:**
+**Selfhost with that boxed whale thing:**
 
 ```bash
 docker run -d -p 8080:80 ghcr.io/rackarr/rackarr:latest
