@@ -47,8 +47,8 @@
 	onmouseleave={() => (hovering = false)}
 	role="presentation"
 >
-	<!-- Hidden SVG for gradient definitions -->
-	<svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+	<!-- Hidden SVG for gradient definitions (1x1 to avoid browser image serialization errors) -->
+	<svg width="1" height="1" style="position: absolute; visibility: hidden;" aria-hidden="true">
 		<defs>
 			<!-- Idle gradient: very slow rotating purple tones (30s cycle) -->
 			<linearGradient id="lockup-idle" x1="0%" y1="0%" x2="100%" y2="100%">
