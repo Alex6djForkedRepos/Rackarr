@@ -7,6 +7,7 @@
 	import Dialog from './Dialog.svelte';
 	import LogoLockup from './LogoLockup.svelte';
 	import { getToastStore } from '$lib/stores/toast.svelte';
+	import { formatShortcut } from '$lib/utils/platform';
 
 	interface Props {
 		open: boolean;
@@ -69,11 +70,11 @@
 		{
 			name: 'File',
 			shortcuts: [
-				{ key: 'Ctrl/Cmd + S', action: 'Save layout' },
-				{ key: 'Ctrl/Cmd + O', action: 'Load layout' },
-				{ key: 'Ctrl/Cmd + E', action: 'Export image' },
-				{ key: 'Ctrl/Cmd + Z', action: 'Undo' },
-				{ key: 'Ctrl/Cmd + Shift + Z', action: 'Redo' }
+				{ key: formatShortcut('mod', 'S'), action: 'Save layout' },
+				{ key: formatShortcut('mod', 'O'), action: 'Load layout' },
+				{ key: formatShortcut('mod', 'E'), action: 'Export image' },
+				{ key: formatShortcut('mod', 'Z'), action: 'Undo' },
+				{ key: formatShortcut('mod', 'shift', 'Z'), action: 'Redo' }
 			]
 		}
 	];

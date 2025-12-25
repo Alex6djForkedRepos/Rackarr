@@ -1,7 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import HelpPanel from '$lib/components/HelpPanel.svelte';
 import { VERSION } from '$lib/version';
+
+// Helper to mock platform
+function mockPlatform(userAgent: string) {
+	vi.stubGlobal('navigator', { userAgent });
+}
 
 describe('HelpPanel', () => {
 	describe('Visibility', () => {
@@ -49,11 +54,36 @@ describe('HelpPanel', () => {
 			expect(screen.getByText('Delete')).toBeInTheDocument();
 		});
 
-		it('shows Ctrl/Cmd shortcuts', () => {
-			render(HelpPanel, { props: { open: true } });
+		describe('on macOS', () => {
+			beforeEach(() => {
+				mockPlatform('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
+			});
 
-			// Should show save shortcut (Ctrl/Cmd + S)
-			expect(screen.getByText('Ctrl/Cmd + S')).toBeInTheDocument();
+			afterEach(() => {
+				vi.unstubAllGlobals();
+			});
+
+			it('shows Cmd modifier', () => {
+				render(HelpPanel, { props: { open: true } });
+				expect(screen.getByText('Cmd + S')).toBeInTheDocument();
+				expect(screen.getByText('Cmd + Shift + Z')).toBeInTheDocument();
+			});
+		});
+
+		describe('on Windows/Linux', () => {
+			beforeEach(() => {
+				mockPlatform('Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+			});
+
+			afterEach(() => {
+				vi.unstubAllGlobals();
+			});
+
+			it('shows Ctrl modifier', () => {
+				render(HelpPanel, { props: { open: true } });
+				expect(screen.getByText('Ctrl + S')).toBeInTheDocument();
+				expect(screen.getByText('Ctrl + Shift + Z')).toBeInTheDocument();
+			});
 		});
 	});
 
