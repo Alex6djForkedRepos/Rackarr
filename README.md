@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Visual rack layout designer for homelabbers</strong>
+  <strong>Drag and drop rack visualizer</strong>
 </p>
 
 // insert hero images here
@@ -19,22 +19,22 @@
 
 ## What _Is_ This
 
-Every other rack planner is either expensive, complicated, or requires you to create an account just to move a rectangle around. We wanted something simple. You get in, you drag your stuff, you export it, you're done. That's the whole thing.
+Plan your rack layout. Drag your devices in, move them around, export it. There's no account. It runs in your browser. You can close the tab whenever you want. I'm not going to send you emails about it.
 
-It ends with "arr" because it makes rhyming easier.
+The name ends with "arr" because it makes rhyming easier.
 
-## What It Do
+## What It _Do_
 
 - **Drag and drop devices** into your rack like a normal person
 - **Real device images** so it actually looks like your gear, not sad grey boxes
 - **Export to PNG, PDF, SVG** for your documentation or for printing and staring at
-- **Runs in your browser** with no account, no server, no nonsense
+- **QR code sharing** - your layout lives in a URL, scan it and it just shows up
 
 ## Get Started
 
 **Use it right now:** [app.rackarr.com](https://app.rackarr.com)
 
-**Selfhost with that boxed whale thing:**
+**Selfhost with that box whale thing:**
 
 ```bash
 docker run -d -p 8080:80 ghcr.io/rackarr/rackarr:latest
@@ -66,7 +66,7 @@ Serve the `dist/` folder however you like. It's just files.
 
 ## Built With Claude
 
-This project was built using AI-assisted development with Claude. The human did the thinking and the deciding and the "no, not like that" parts. The AI did a lot of typing. Commits with substantial AI contributions are marked with `Co-authored-by` tags because we're not going to pretend otherwise.
+This project was built using AI-assisted development with Claude. I told it what to build and then said "no, not like that" a lot. The AI did a lot of typing. Commits with substantial AI contributions are marked with `Co-authored-by` tags because we're not going to pretend otherwise.
 
 ## Acknowledgements
 
