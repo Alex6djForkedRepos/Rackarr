@@ -60,8 +60,8 @@ Serve the `dist/` folder however you like. It's just files.
 
 ## Documentation
 
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [Technical Specification](docs/planning/SPEC.md)
+- [Architecture Overview](docs/reference/ARCHITECTURE.md)
+- [Technical Specification](docs/reference/SPEC.md)
 - [Contributing Guide](CONTRIBUTING.md)
 
 ## Built With Claude
